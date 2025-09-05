@@ -1,0 +1,148 @@
+/* Full-screen background */
+.home-container {
+  width: 100%;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+/* Overlay for readability */
+.home-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Header with logo left 25%, nav right 75% */
+.home-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  z-index: 10;
+}
+
+.home-logo {
+  width: 25%;
+  max-width: 150px;
+  height: auto;
+  background: transparent;
+}
+
+.home-nav {
+  width: 75%;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.5rem;
+  font-weight: 600;
+}
+
+.home-nav a {
+  color: #ffffff;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.home-nav a:hover {
+  color: #01d28e;
+}
+
+/* Hero content stacked naturally below header */
+.home-hero {
+  position: relative; /* remove absolute centering */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* stack from top naturally */
+  padding: 15% 1rem 0 1rem; /* push hero content down from top */
+  z-index: 5;
+  text-align: center;
+}
+
+.home-hero h1 {
+  color: white;
+  font-size: 4rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.home-hero p {
+  color: white;
+  font-size: 1.25rem;
+  max-width: 700px;
+  line-height: 1.6;
+  margin-bottom: 2rem; /* space for play button */
+}
+
+/* Play button container*/
+.home-play {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* center horizontally */
+  gap: 1rem;
+  cursor: pointer;
+  margin-top: 1.5rem; /* space below paragraph */
+  z-index: 6;
+}
+
+.home-play-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #01d28e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.home-play-button:hover {
+  background-color: #01d28e;
+}
+
+.home-play-button svg {
+  width: 24px;
+  height: 24px;
+  fill: white;
+}
+
+.home-play-text {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .home-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .home-nav {
+    width: auto;
+    justify-content: center;
+  }
+
+  .home-hero h1 {
+    font-size: 2.5rem;
+  }
+
+  .home-hero p {
+    font-size: 1rem;
+  }
+
+  .home-play {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .home-play-text {
+    font-size: 1rem;
+  }
+}
