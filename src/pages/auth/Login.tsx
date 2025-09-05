@@ -1,6 +1,32 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { loginUser } from "../../services/auth"; // your axios login API
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault(); // 🚀 prevent page refresh
+    setError("");
+
+    try {
+      const res = await loginUser({ email, password });
+      console.log("Login successful:", res);
+
+      // Save token or user data in localStorage
+      localStorage.setItem("token", res.token);
+
+      // Redirect to dashboard/home
+      navigate("/dashboard");
+    } catch (err: any) {
+      console.error("Login failed:", err);
+      setError(err.response?.data?.message || "Login failed");
+    }
+  };
+
   return (
     <div className="d-flex align-items-center justify-content-center min-vh-100 bg-light">
       <div
@@ -15,7 +41,7 @@ export default function Login() {
               Please enter your details to sign in.
             </p>
 
-            <form className="d-flex flex-column gap-3">
+            <form className="d-flex flex-column gap-3" onSubmit={handleLogin}>
               {/* Email */}
               <div>
                 <label
@@ -29,6 +55,9 @@ export default function Login() {
                   id="email"
                   className="form-control"
                   placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                   style={{ fontSize: "0.9rem", padding: "0.55rem 0.75rem" }}
                 />
               </div>
@@ -46,6 +75,9 @@ export default function Login() {
                   id="password"
                   className="form-control"
                   placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                   style={{ fontSize: "0.9rem", padding: "0.55rem 0.75rem" }}
                 />
               </div>
@@ -59,6 +91,11 @@ export default function Login() {
                   Forgot password?
                 </a>
               </div>
+
+              {/* Error message */}
+              {error && (
+                <div className="alert alert-danger py-2 small">{error}</div>
+              )}
 
               {/* Submit Button */}
               <button
