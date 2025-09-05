@@ -1,6 +1,9 @@
 import "./Home.css";
 import logo from "../../assets/logo.png";
 import backgroundImage from "../../assets/bg_1.jpg";
+import pickupIcon from "../../assets/smart-transportation.png";
+import bestdealIcon from "../../assets/communication.png";
+import carrentIcon from "../../assets/car-rent.png";
 
 export default function Home() {
   return (
@@ -41,8 +44,9 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Booking Form */}
+      {/* Booking Section */}
       <div className="booking-section">
+        {/* Form */}
         <div className="booking-box">
           <h2>Zip your Trip</h2>
 
@@ -77,20 +81,25 @@ export default function Home() {
           <button className="search-btn">Search</button>
         </div>
 
+        {/* Info */}
         <div className="info-box">
           <h2>Better Way to Rent Your Perfect Cars</h2>
           <div className="info-steps">
             <div>
-              <span>📍</span>
-              <p>Choose Your Pickup Location</p>
+              <img
+                src={pickupIcon}
+                alt="Pickup Location"
+                className="info-icon"
+              />
+              <h5>Choose Your Pickup Location</h5>
             </div>
             <div>
-              <span>🤝</span>
-              <p>Select the Best Deal</p>
+              <img src={bestdealIcon} alt="Best Deal" className="info-icon" />
+              <h5>Select the Best Deal</h5>
             </div>
             <div>
-              <span>🚗</span>
-              <p>Reserve Your Rental Car</p>
+              <img src={carrentIcon} alt="Reserve Car" className="info-icon" />
+              <h5>Reserve Your Rental Car</h5>
             </div>
           </div>
           <button className="reserve-btn">Reserve Your Perfect Car</button>

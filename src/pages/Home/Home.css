@@ -1,20 +1,24 @@
 /* ===========================
    Global Layout
 =========================== */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
-/* Full-screen background */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
 .home-container {
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   background-size: cover;
   background-position: center;
   position: relative;
-  font-family: Arial, sans-serif;
   color: #fff;
   overflow-x: hidden;
 }
 
-/* Overlay for readability */
 .home-overlay {
   position: absolute;
   inset: 0;
@@ -40,12 +44,10 @@
 .home-logo {
   width: 150px;
   height: auto;
-  background: transparent;
 }
 
 .home-nav {
   display: flex;
-  justify-content: flex-end;
   gap: 1.5rem;
   font-weight: 600;
 }
@@ -68,23 +70,23 @@
   z-index: 5;
   max-width: 800px;
   margin: 0 auto;
-  padding: 15% 1rem 2rem 1rem;
+  padding: 15% 1rem 2rem;
   text-align: center;
 }
 
 .home-hero h1 {
-  color: white;
   font-size: 3rem;
   font-weight: bold;
   margin-bottom: 1rem;
+  color: #fff;
 }
 
 .home-hero p {
-  color: white;
   font-size: 1.25rem;
   max-width: 700px;
+  margin: 0 auto 2rem;
   line-height: 1.6;
-  margin: 0 auto 2rem auto;
+  color: #fff;
 }
 
 /* ===========================
@@ -108,8 +110,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: background-color 0.2s ease-in-out;
   border: none;
+  transition: background 0.2s ease-in-out;
 }
 
 .home-play-button:hover {
@@ -119,13 +121,13 @@
 .home-play-button svg {
   width: 24px;
   height: 24px;
-  fill: white;
+  fill: #fff;
 }
 
 .home-play-text {
-  color: white;
   font-size: 1.2rem;
   font-weight: 600;
+  color: #fff;
 }
 
 /* ===========================
@@ -137,36 +139,43 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  margin: 50px auto;
   gap: 30px;
-  max-width: 1100px;
   flex-wrap: wrap;
+
+  width: 100%;
+  min-height: 70vh;
+
+  background: #fff;
+  padding: 60px 40px;
+  margin-top: 120px; /* ✅ prevents overlap with play button */
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.16);
 }
 
-/* Booking Box - White Card */
+/* Booking Box */
 .booking-box {
-  background: #ffffff;
-  color: #333;
+  background: #1089ff;
+  color: #fff;
   padding: 40px;
-  border-radius: 12px;
+  border-radius: 5px;
   width: 380px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+
   position: relative;
-  z-index: 10;
+  top: -220px; /* lifts it above booking section */
+  z-index: 20;
+  text-align: left;
 }
 
 .booking-box h2 {
   margin-bottom: 20px;
   font-size: 1.7rem;
   font-weight: 700;
-  color: #007bff;
 }
 
 .booking-box label {
   display: block;
   margin-top: 12px;
   font-size: 0.95rem;
-  color: #333;
 }
 
 .booking-box input[type="text"],
@@ -175,78 +184,66 @@
   width: 100%;
   padding: 10px;
   margin-top: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid #ddd;
   border-radius: 6px;
-  outline: none;
-  background: #f9f9f9;
+  background: #fff;
+  color: #333;
   font-size: 0.95rem;
 }
 
-.booking-box input:focus {
-  border-color: #007bff;
-  background: #fff;
-}
-
-.date-time {
-  display: flex;
-  gap: 15px;
-  margin-top: 10px;
-}
-
-.date-time div {
-  flex: 1;
-}
-
 .toggles {
-  margin: 15px 0;
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.toggles label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 0.9rem;
-  color: #333;
-}
-
-/* Search Button */
 .search-btn {
-  background: #007bff;
-  color: white;
+  margin-top: 20px;
+  background: #01d28e;
+  color: #fff;
   padding: 12px;
   border: none;
   width: 100%;
   border-radius: 6px;
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  margin-top: 20px;
   transition: background 0.2s ease-in-out;
 }
 
 .search-btn:hover {
-  background: #0056b3;
+  background: #00b36b;
 }
 
-/* Info Box - White Card */
+/* Info Box */
 .info-box {
   background: #fff;
   color: #333;
-  padding: 30px;
-  border-radius: 12px;
-  width: 400px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  padding: 30px 35px;
+  margin: 30px 35px;
+  border-radius: 5px;
+  width: 800px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
   text-align: center;
+
+  position: relative;
+  top: -150px;
+  left: -70px; /* lifted above background */
+  z-index: 15;
 }
 
 .info-box h2 {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   margin-bottom: 20px;
-  color: #333;
+  font-weight: 700;
 }
 
 .info-steps {
   display: flex;
   justify-content: space-between;
-  margin: 20px 0;
+  margin: 2rem 0;
+  gap: 15px;
 }
 
 .info-steps div {
@@ -254,44 +251,49 @@
   flex: 1;
 }
 
-.info-steps span {
-  font-size: 2rem;
-  display: block;
-  margin-bottom: 8px;
+.info-icon {
+  margin-top: 3rem;
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 10px;
 }
 
-/* Reserve Button */
 .reserve-btn {
   background: #007bff;
-  color: white;
+  color: #fff;
   padding: 12px 25px;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 
 .reserve-btn:hover {
   background: #0056b3;
+  transform: translateY(-2px);
 }
 
 /* ===========================
    Responsive
 =========================== */
 @media (max-width: 992px) {
-  .home-hero h1 {
-    font-size: 2.5rem;
-  }
-  .home-hero p {
-    font-size: 1rem;
-  }
   .booking-section {
     flex-direction: column;
     align-items: center;
+    padding-top: 100px;
+    height: auto;
   }
-  .booking-box,
+
+  .booking-box {
+    top: 0;
+  }
+
   .info-box {
+    top: 0;
+    margin-top: 20px;
     width: 100%;
     max-width: 500px;
   }
@@ -300,17 +302,18 @@
 @media (max-width: 600px) {
   .home-header {
     flex-direction: column;
-    align-items: center;
     gap: 1rem;
   }
-  .home-nav {
-    justify-content: center;
-  }
+
   .home-play {
     flex-direction: column;
-    gap: 0.5rem;
   }
+
   .home-play-text {
     font-size: 1rem;
+  }
+
+  .info-steps {
+    flex-direction: column;
   }
 }
