@@ -1,3 +1,7 @@
+/* ===========================
+   Global Layout
+=========================== */
+
 /* Full-screen background */
 .home-container {
   width: 100%;
@@ -5,16 +9,22 @@
   background-size: cover;
   background-position: center;
   position: relative;
+  font-family: Arial, sans-serif;
+  color: #fff;
+  overflow-x: hidden;
 }
 
 /* Overlay for readability */
 .home-overlay {
   position: absolute;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 1;
 }
 
-/* Header with logo left 25%, nav right 75% */
+/* ===========================
+   Header
+=========================== */
 .home-header {
   position: absolute;
   top: 0;
@@ -23,19 +33,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.5rem 2rem;
+  padding: 1.5rem 3rem;
   z-index: 10;
 }
 
 .home-logo {
-  width: 25%;
-  max-width: 150px;
+  width: 150px;
   height: auto;
   background: transparent;
 }
 
 .home-nav {
-  width: 75%;
   display: flex;
   justify-content: flex-end;
   gap: 1.5rem;
@@ -45,28 +53,28 @@
 .home-nav a {
   color: #ffffff;
   text-decoration: none;
-  transition: color 0.2s;
+  transition: color 0.2s ease-in-out;
 }
 
 .home-nav a:hover {
   color: #01d28e;
 }
 
-/* Hero content stacked naturally below header */
+/* ===========================
+   Hero Section
+=========================== */
 .home-hero {
-  position: relative; /* remove absolute centering */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start; /* stack from top naturally */
-  padding: 15% 1rem 0 1rem; /* push hero content down from top */
+  position: relative;
   z-index: 5;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 15% 1rem 2rem 1rem;
   text-align: center;
 }
 
 .home-hero h1 {
   color: white;
-  font-size: 4rem;
+  font-size: 3rem;
   font-weight: bold;
   margin-bottom: 1rem;
 }
@@ -76,17 +84,19 @@
   font-size: 1.25rem;
   max-width: 700px;
   line-height: 1.6;
-  margin-bottom: 2rem; /* space for play button */
+  margin: 0 auto 2rem auto;
 }
 
-/* Play button container*/
+/* ===========================
+   Play Button
+=========================== */
 .home-play {
   display: flex;
   align-items: center;
-  justify-content: center; /* center horizontally */
+  justify-content: center;
   gap: 1rem;
   cursor: pointer;
-  margin-top: 1.5rem; /* space below paragraph */
+  margin-top: 1.5rem;
   z-index: 6;
 }
 
@@ -98,11 +108,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease-in-out;
+  border: none;
 }
 
 .home-play-button:hover {
-  background-color: #01d28e;
+  background-color: #00b36b;
 }
 
 .home-play-button svg {
@@ -113,35 +124,192 @@
 
 .home-play-text {
   color: white;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 600;
 }
-/* Responsive adjustments */
-@media (max-width: 768px) {
+
+/* ===========================
+   Booking Section
+=========================== */
+.booking-section {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 50px auto;
+  gap: 30px;
+  max-width: 1100px;
+  flex-wrap: wrap;
+}
+
+/* Booking Box - White Card */
+.booking-box {
+  background: #ffffff;
+  color: #333;
+  padding: 40px;
+  border-radius: 12px;
+  width: 380px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 10;
+}
+
+.booking-box h2 {
+  margin-bottom: 20px;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #007bff;
+}
+
+.booking-box label {
+  display: block;
+  margin-top: 12px;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.booking-box input[type="text"],
+.booking-box input[type="date"],
+.booking-box input[type="time"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  background: #f9f9f9;
+  font-size: 0.95rem;
+}
+
+.booking-box input:focus {
+  border-color: #007bff;
+  background: #fff;
+}
+
+.date-time {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.date-time div {
+  flex: 1;
+}
+
+.toggles {
+  margin: 15px 0;
+}
+
+.toggles label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+/* Search Button */
+.search-btn {
+  background: #007bff;
+  color: white;
+  padding: 12px;
+  border: none;
+  width: 100%;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background 0.2s ease-in-out;
+}
+
+.search-btn:hover {
+  background: #0056b3;
+}
+
+/* Info Box - White Card */
+.info-box {
+  background: #fff;
+  color: #333;
+  padding: 30px;
+  border-radius: 12px;
+  width: 400px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.info-box h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.info-steps {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+}
+
+.info-steps div {
+  text-align: center;
+  flex: 1;
+}
+
+.info-steps span {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* Reserve Button */
+.reserve-btn {
+  background: #007bff;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.reserve-btn:hover {
+  background: #0056b3;
+}
+
+/* ===========================
+   Responsive
+=========================== */
+@media (max-width: 992px) {
+  .home-hero h1 {
+    font-size: 2.5rem;
+  }
+  .home-hero p {
+    font-size: 1rem;
+  }
+  .booking-section {
+    flex-direction: column;
+    align-items: center;
+  }
+  .booking-box,
+  .info-box {
+    width: 100%;
+    max-width: 500px;
+  }
+}
+
+@media (max-width: 600px) {
   .home-header {
     flex-direction: column;
     align-items: center;
     gap: 1rem;
   }
-
   .home-nav {
-    width: auto;
     justify-content: center;
   }
-
-  .home-hero h1 {
-    font-size: 2.5rem;
-  }
-
-  .home-hero p {
-    font-size: 1rem;
-  }
-
   .home-play {
     flex-direction: column;
     gap: 0.5rem;
   }
-
   .home-play-text {
     font-size: 1rem;
   }
