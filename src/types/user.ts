@@ -15,6 +15,7 @@ export interface UserLogin {
 export interface AuthResponse {
   token: string;
   user: {
+    avatar: any;
     id?: string;
     first_name?: string;
     last_name?: string;
@@ -22,4 +23,10 @@ export interface AuthResponse {
     phone?: string;
     role: "guest" | "host";
   };
+}
+
+export interface User {
+  name: string;
+  avatar?: string; // optional profile picture
+  token: string; // JWT or any authentication token
 }

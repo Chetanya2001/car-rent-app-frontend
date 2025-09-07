@@ -1,52 +1,73 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "../../services/auth"; // your axios login API
+import { useNavigate } from "react-router-dom";
+import { loginUser } from "../../../services/auth";
+import "./Login.css";
+import type { User } from "../../../types/user";
+interface LoginProps {
+  onClose: () => void;
+  onSwitch: () => void;
+  onLoginSuccess: (userData: User) => void; // 👈 new prop for switching to Register
+}
 
-export default function Login() {
+export default function Login({
+  onClose,
+  onSwitch,
+  onLoginSuccess,
+}: LoginProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); // 🚀 prevent page refresh
+    e.preventDefault();
     setError("");
 
     try {
       const res = await loginUser({ email, password });
-      console.log("Login successful:", res);
+      console.log("API response:", res); // 👈 debug
 
-      // Save token or user data in localStorage
       localStorage.setItem("token", res.token);
 
-      // Redirect to dashboard/home
-      navigate("/dashboard");
+      // 👇 Use default name and avatar since user info is missing
+      const userData = {
+        name: email, // or "User"
+        avatar: undefined, // will use defaultAvatar in Navbar
+        token: res.token,
+      };
+      localStorage.setItem("user", JSON.stringify(userData));
+      onLoginSuccess(userData);
+
+      navigate("/");
+      onClose();
     } catch (err: any) {
-      console.error("Login failed:", err);
+      console.log("Login error:", err); // 👈 debug
       setError(err.response?.data?.message || "Login failed");
     }
   };
-
   return (
-    <div className="d-flex align-items-center justify-content-center min-vh-100 bg-light">
+    <div className="login-overlay" onClick={onClose}>
       <div
-        className="card shadow-lg border-0 rounded-4 overflow-hidden"
-        style={{ maxWidth: "900px", width: "100%" }}
+        className="login-dialog card shadow-lg border-0 rounded-4 overflow-hidden"
+        onClick={(e) => e.stopPropagation()} // prevent close when clicking inside
       >
+        <button
+          onClick={onClose}
+          className="btn-close position-absolute top-0 end-0 m-3"
+        />
         <div className="row g-0">
           {/* Left side: Form */}
-          <div className="col-md-6 p-5 d-flex flex-column justify-content-center">
+          <div className="col-md-6 p-4 d-flex flex-column justify-content-center">
             <h2 className="fw-bold mb-2">Welcome back</h2>
-            <p className="text-muted mb-4" style={{ fontSize: "0.9rem" }}>
+            <p className="text-muted mb-4 small">
               Please enter your details to sign in.
             </p>
 
             <form className="d-flex flex-column gap-3" onSubmit={handleLogin}>
-              {/* Email */}
               <div>
                 <label
                   htmlFor="email"
-                  className="form-label fw-semibold small text-uppercase text-secondary mb-1"
+                  className="form-label small text-uppercase text-secondary mb-1 fw-semibold"
                 >
                   Email
                 </label>
@@ -58,15 +79,13 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  style={{ fontSize: "0.9rem", padding: "0.55rem 0.75rem" }}
                 />
               </div>
 
-              {/* Password */}
               <div>
                 <label
                   htmlFor="password"
-                  className="form-label fw-semibold small text-uppercase text-secondary mb-1"
+                  className="form-label small text-uppercase text-secondary mb-1 fw-semibold"
                 >
                   Password
                 </label>
@@ -78,43 +97,26 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  style={{ fontSize: "0.9rem", padding: "0.55rem 0.75rem" }}
                 />
               </div>
 
-              {/* Forgot password */}
-              <div className="d-flex justify-content-end">
-                <a
-                  href="#"
-                  className="text-decoration-none fw-medium text-primary small"
-                >
-                  Forgot password?
-                </a>
-              </div>
-
-              {/* Error message */}
               {error && (
                 <div className="alert alert-danger py-2 small">{error}</div>
               )}
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                className="btn btn-primary w-100 shadow-sm"
-                style={{ fontSize: "0.95rem", padding: "0.6rem 1rem" }}
-              >
+              <button type="submit" className="btn btn-primary w-100">
                 Sign in
               </button>
 
-              {/* Register link */}
-              <p className="text-center text-muted mt-2 mb-0">
+              <p className="text-center text-muted mt-2 mb-0 small">
                 Don’t have an account?{" "}
-                <Link
-                  to="/register"
-                  className="fw-semibold text-decoration-none text-primary"
+                <button
+                  type="button"
+                  onClick={onSwitch}
+                  className="btn btn-link p-0 fw-semibold text-decoration-none"
                 >
-                  Register for free
-                </Link>
+                  Click To Register
+                </button>
               </p>
             </form>
           </div>
@@ -126,11 +128,9 @@ export default function Login() {
               alt="Car background"
               className="w-100 h-100 object-fit-cover"
             />
-            <div className="position-absolute bottom-0 end-0 m-4 p-3 bg-dark bg-opacity-50 text-white rounded-3 shadow-sm">
-              <p className="mb-0 fst-italic small">
-                “We've been using ZipDrive to get our trips organized and it's
-                been a lifesaver.”
-              </p>
+            <div className="position-absolute bottom-0 end-0 m-3 p-2 bg-dark bg-opacity-50 text-white rounded-3 small fst-italic">
+              “We've been using ZipDrive to get our trips organized and it's
+              been a lifesaver.”
             </div>
           </div>
         </div>

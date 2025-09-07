@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import "./Home.css";
 import logo from "../../assets/logo.png";
 import backgroundImage from "../../assets/bg_1.jpg";
@@ -10,24 +11,40 @@ import Testimonials from "../../components/Testimonials/Testimonial";
 import Stats from "../../components/Stats/Stats";
 import Footer from "../../components/Footer/Footer";
 import Navbar from "../../components/Navbar/Navbar";
+import Login from "../auth/Login/Login";
+import Register from "../auth/Register/Register";
+import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
 
 export default function Home() {
   const [showNavbar, setShowNavbar] = useState(false);
+  const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
+    null
+  );
+  const [user, setUser] = useState<{ name: string; avatar?: string } | null>(
+    null
+  );
 
   useEffect(() => {
+    // Show/hide navbar on scroll
     const header = document.querySelector(".home-header") as HTMLElement;
-
     const handleScroll = () => {
       if (header) {
         const headerBottom = header.offsetTop + header.offsetHeight;
         setShowNavbar(window.scrollY > headerBottom);
       }
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    // 👇 Load user from localStorage if token exists
+    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+    if (storedUser && token) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
   return (
     <div
       className="home-container"
@@ -41,8 +58,45 @@ export default function Home() {
           <a href="#about">Cars</a>
           <a href="#services">Community</a>
           <a href="#contact">Support</a>
+          {!user && (
+            <a
+              href="#login"
+              className="login-link"
+              onClick={(e) => {
+                e.preventDefault();
+                setActiveModal("login");
+              }}
+            >
+              Login
+            </a>
+          )}
         </nav>
       </header>
+
+      {/* ✅ Modal Handling */}
+      {activeModal && (
+        <ModalWrapper onClose={() => setActiveModal(null)}>
+          {activeModal === "login" ? (
+            <Login
+              onClose={() => setActiveModal(null)}
+              onSwitch={() => setActiveModal("register")}
+              onLoginSuccess={(userData) => {
+                setUser(userData); // save logged in user
+                setActiveModal(null); // close modal
+              }}
+            />
+          ) : (
+            <Register
+              onClose={() => setActiveModal(null)}
+              onSwitch={() => setActiveModal("login")}
+              onRegisterSuccess={(userData) => {
+                setUser(userData); // save registered user
+                setActiveModal(null); // close modal
+              }}
+            />
+          )}
+        </ModalWrapper>
+      )}
 
       {/* ✅ Navbar (only appears after scrolling past header) */}
       {showNavbar && <Navbar />}

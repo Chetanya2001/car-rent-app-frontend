@@ -17,32 +17,34 @@
    Header
 =========================== */
 .home-header {
+  width: 100%;
+  padding: 20px 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem 3rem;
-  z-index: 10;
+  z-index: 100;
 }
 
 .home-logo {
-  width: 150px;
-  height: auto;
+  height: 50px;
+  object-fit: contain;
 }
 
 .home-nav {
   display: flex;
-  gap: 1.5rem;
-  font-weight: 600;
+  gap: 20px;
+  align-items: center; /* ✅ keeps all links aligned */
 }
 
 .home-nav a {
-  color: #ffffff;
+  color: #fff;
   text-decoration: none;
-  transition: color 0.2s ease-in-out;
+  font-weight: 500;
+  padding: 8px 0; /* ✅ balances vertical alignment with button */
+  transition: color 0.3s ease-in-out;
 }
 
 .home-nav a:hover {
@@ -89,6 +91,26 @@
   max-width: 700px;
   margin: 0 auto 2rem;
   line-height: 1.6;
+}
+
+/* Login button */
+.login-btn-custom {
+  background-color: transparent; /* transparent body */
+  color: #ffffff; /* white text */
+  border: 2px solid #ffffff; /* white border */
+  font-weight: 700; /* bold text */
+  font-family: "Poppins", sans-serif;
+  letter-spacing: 1px; /* optional for wide look */
+  text-transform: uppercase; /* optional all caps */
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-btn-custom:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* slight hover effect */
+  transform: scale(1.05);
 }
 
 /* ===========================
