@@ -38,10 +38,10 @@
   gap: 0.5rem;
 }
 
-.user-profile {
+.user-profile-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
 }
 
 .profile-avatar {
@@ -49,7 +49,60 @@
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  border: 2px solid #10d28e;
 }
+
+.profile-avatar:hover {
+  transform: scale(1.05);
+}
+
+/* Dropdown menu */
+.profile-menu-outside {
+  position: absolute;
+  top: 55px; /* connected below avatar */
+  right: 0;
+  width: 200px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  padding: 8px 0;
+  list-style: none;
+  z-index: 999;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+/* Triangle on top-right of dropdown */
+.profile-menu-outside::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: 15px; /* aligns with avatar */
+  border-width: 0 8px 8px 8px;
+  border-style: solid;
+  border-color: transparent transparent #fff transparent;
+}
+
+/* Dropdown items */
+.profile-menu-outside li {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* space between icon and text */
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  font-weight: 500;
+  color: #333;
+}
+
+.profile-menu-outside li:hover {
+  background-color: #f7f7f7;
+  color: #000;
+}
+
+/* Buttons */
 .scroll-navbar-login button {
   background-color: #10d28e;
   color: #ffffff;
@@ -63,4 +116,16 @@
 
 .scroll-navbar-login button:hover {
   background-color: #0bb67a; /* slightly darker green on hover */
+}
+
+/* Smooth fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

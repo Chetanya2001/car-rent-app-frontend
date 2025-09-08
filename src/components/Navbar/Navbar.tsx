@@ -5,33 +5,100 @@ import "./Navbar.css";
 import Login from "../../pages/auth/Login/Login";
 import Register from "../../pages/auth/Register/Register";
 import ModalWrapper from "../ModalWrapper/ModalWrapper";
+import { Link } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCar,
+  faCalendarAlt,
+  faCreditCard,
+  faBell,
+  faLifeRing,
+  faDoorOpen,
+  faPlus,
+} from "@fortawesome/free-solid-svg-icons";
 import type { User } from "../../types/user";
+
+interface TokenPayload {
+  role: "host" | "guest";
+}
+
+const hostMenu = [
+  "Add a car",
+  "My cars",
+  "My bookings",
+  "My Payments",
+  "Notifications",
+  "Support",
+  "Logout",
+];
+
+const guestMenu = [
+  "Book a car",
+  "My bookings",
+  "My payments",
+  "Notifications",
+  "Support",
+  "Logout",
+];
+
+// Icon map
+const iconMap: Record<string, any> = {
+  "Add a car": faPlus, // show plus icon
+  "My cars": faCar,
+  "My bookings": faCalendarAlt,
+  "My Payments": faCreditCard,
+  Notifications: faBell,
+  Support: faLifeRing,
+  Logout: faDoorOpen,
+  "Book a car": faCar,
+};
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
+  const [role, setRole] = useState<"host" | "guest" | null>(null);
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null
   );
+  const [showMenu, setShowMenu] = useState(false);
 
-  // ✅ Load user from localStorage on mount
+  // Load user & role on mount
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const token = localStorage.getItem("token");
+    if (storedUser) setUser(JSON.parse(storedUser));
+    if (token) {
+      try {
+        const decoded = jwtDecode<TokenPayload>(token);
+        setRole(decoded.role);
+      } catch {}
     }
   }, []);
 
   const handleLogout = () => {
-    setUser(null);
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setUser(null);
+    setRole(null);
+    setShowMenu(false);
   };
 
-  // ✅ Called after successful login/register
   const handleUserLogin = (userData: User) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
+
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode<TokenPayload>(token);
+        setRole(decoded.role);
+      } catch {}
+    }
+
     setActiveModal(null);
   };
+
+  const menuItems = role === "host" ? hostMenu : guestMenu;
 
   return (
     <>
@@ -42,10 +109,10 @@ export default function Navbar() {
 
         <ul className="scroll-navbar-links">
           <li>
-            <a href="#home">Home</a>
+            <Link to="/">Home</Link>
           </li>
           <li>
-            <a href="#about">Cars</a>
+            <Link to="/cars">Cars</Link>
           </li>
           <li>
             <a href="#services">Community</a>
@@ -64,35 +131,54 @@ export default function Navbar() {
               Login
             </button>
           ) : (
-            <div className="user-profile">
+            <div className="user-profile-wrapper">
               <img
                 src={user.avatar || defaultAvatar}
                 alt="Profile"
                 className="profile-avatar"
+                onClick={() => setShowMenu((prev) => !prev)}
               />
-              <span className="profile-name">{user.name}</span>
-              <button className="btn btn-link ms-2" onClick={handleLogout}>
-                Logout
-              </button>
+              {showMenu && (
+                <ul className="profile-menu">
+                  {menuItems.map((item, idx) =>
+                    item === "Logout" ? (
+                      <li key={idx} onClick={handleLogout}>
+                        <FontAwesomeIcon
+                          icon={iconMap[item]}
+                          className="menu-icon"
+                        />
+                        {item}
+                      </li>
+                    ) : (
+                      <li key={idx}>
+                        <FontAwesomeIcon
+                          icon={iconMap[item]}
+                          className="menu-icon"
+                        />
+                        {item}
+                      </li>
+                    )
+                  )}
+                </ul>
+              )}
             </div>
           )}
         </div>
       </nav>
 
-      {/* Modal Wrapper */}
       {activeModal && (
         <ModalWrapper onClose={() => setActiveModal(null)}>
           {activeModal === "login" ? (
             <Login
               onClose={() => setActiveModal(null)}
               onSwitch={() => setActiveModal("register")}
-              onLoginSuccess={handleUserLogin} // ✅ must call this
+              onLoginSuccess={handleUserLogin}
             />
           ) : (
             <Register
               onClose={() => setActiveModal(null)}
               onSwitch={() => setActiveModal("login")}
-              onRegisterSuccess={handleUserLogin} // ✅ must call this
+              onRegisterSuccess={handleUserLogin}
             />
           )}
         </ModalWrapper>

@@ -18,14 +18,16 @@
 =========================== */
 .home-header {
   width: 100%;
-  padding: 20px 60px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: absolute;
+  padding: 16px 32px;
+  position: fixed;
   top: 0;
   left: 0;
-  z-index: 100;
+  z-index: 1000;
+  background-color: transparent; /* transparent background */
+  backdrop-filter: blur(8px); /* optional: blur behind the header */
 }
 
 .home-logo {
@@ -40,7 +42,7 @@
 }
 
 .home-nav a {
-  color: #fff;
+  color: #10d28e;
   text-decoration: none;
   font-weight: 500;
   padding: 8px 0; /* ✅ balances vertical alignment with button */
@@ -84,6 +86,9 @@
   font-size: 3rem;
   font-weight: bold;
   margin-bottom: 1rem;
+}
+.profile-menu .menu-icon {
+  margin-right: 3rem; /* space between icon and text */
 }
 
 .home-hero p {
@@ -595,6 +600,57 @@
 .testimonial-dots .dot.active,
 .testimonial-dots .dot:hover {
   background: #2ecc71; /* green accent */
+}
+.home-profile-wrapper {
+  position: relative;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.profile-avatar:hover {
+  transform: scale(1.05);
+}
+
+/* ---------- Dropdown Menu ---------- */
+.profile-menu {
+  position: absolute;
+  top: 50px; /* below the avatar */
+  right: 0;
+  width: 220px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  list-style: none;
+  padding: 8px 0;
+  z-index: 1001;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.profile-menu li {
+  padding: 12px 20px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #333;
+  transition: background 0.15s ease;
+}
+
+.profile-menu li:hover {
+  background-color: #f7f7f7;
+  color: #000;
 }
 
 /* ===========================

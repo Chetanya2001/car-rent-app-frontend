@@ -1,6 +1,6 @@
 import axios from "axios";
 import type { UserRegister, UserLogin, AuthResponse } from "../types/user";
-
+import { jwtDecode } from "jwt-decode";
 const API_URL = "http://localhost:5000/api/users";
 
 export const registerUser = async (
@@ -32,5 +32,22 @@ export const loginUser = async (data: UserLogin): Promise<AuthResponse> => {
       err.response?.data || err.message
     );
     throw err.response?.data || new Error("Login failed");
+  }
+};
+
+interface TokenPayload {
+  role: "host" | "guest";
+  // other fields like userId, name, etc.
+}
+
+export const getUserRole = (): "host" | "guest" | null => {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+
+  try {
+    const decoded = jwtDecode<TokenPayload>(token);
+    return decoded.role;
+  } catch {
+    return null;
   }
 };
