@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import type { Car } from "../../types/Cars";
 import Navbar from "../../components/Navbar/Navbar";
-import { getCars } from "../../api/carService";
+import { getCars } from "../../services/carService";
 
 const Cars: React.FC = () => {
   const [cars, setCars] = useState<Car[]>([]);

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
-
 import "./Home.css";
 import logo from "../../assets/logo.png";
 import backgroundImage from "../../assets/bg_1.jpg";
@@ -15,7 +14,7 @@ import Footer from "../../components/Footer/Footer";
 import Login from "../auth/Login/Login";
 import Register from "../auth/Register/Register";
 import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -33,6 +32,7 @@ type TokenPayload = {
 };
 
 export default function Home() {
+  const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null
   );
@@ -140,6 +140,14 @@ export default function Home() {
                         />
                         {item}
                       </li>
+                    ) : item === "Add a Car" ? (
+                      <li key={idx} onClick={() => navigate("/add-car")}>
+                        <FontAwesomeIcon
+                          icon={iconMap[item]}
+                          className="menu-icon"
+                        />
+                        {item}
+                      </li>
                     ) : (
                       <li key={idx}>
                         <FontAwesomeIcon
@@ -167,6 +175,17 @@ export default function Home() {
               onLoginSuccess={(userData) => {
                 setUser(userData);
                 setActiveModal(null);
+
+                // ✅ also update role from token or userData
+                const token = localStorage.getItem("token");
+                if (token) {
+                  try {
+                    const decoded = jwtDecode<TokenPayload>(token);
+                    setRole(decoded.role);
+                  } catch (err) {
+                    console.error("Invalid token after login");
+                  }
+                }
               }}
             />
           ) : (
@@ -176,6 +195,16 @@ export default function Home() {
               onRegisterSuccess={(userData) => {
                 setUser(userData);
                 setActiveModal(null);
+
+                const token = localStorage.getItem("token");
+                if (token) {
+                  try {
+                    const decoded = jwtDecode<TokenPayload>(token);
+                    setRole(decoded.role);
+                  } catch (err) {
+                    console.error("Invalid token after register");
+                  }
+                }
               }}
             />
           )}

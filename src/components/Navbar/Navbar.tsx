@@ -5,7 +5,7 @@ import "./Navbar.css";
 import Login from "../../pages/auth/Login/Login";
 import Register from "../../pages/auth/Register/Register";
 import ModalWrapper from "../ModalWrapper/ModalWrapper";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -42,9 +42,8 @@ const guestMenu = [
   "Logout",
 ];
 
-// Icon map
 const iconMap: Record<string, any> = {
-  "Add a car": faPlus, // show plus icon
+  "Add a car": faPlus,
   "My cars": faCar,
   "My bookings": faCalendarAlt,
   "My Payments": faCreditCard,
@@ -55,6 +54,7 @@ const iconMap: Record<string, any> = {
 };
 
 export default function Navbar() {
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<"host" | "guest" | null>(null);
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
@@ -62,7 +62,6 @@ export default function Navbar() {
   );
   const [showMenu, setShowMenu] = useState(false);
 
-  // Load user & role on mount
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -81,12 +80,12 @@ export default function Navbar() {
     setUser(null);
     setRole(null);
     setShowMenu(false);
+    navigate("/"); // Redirect to home page after logout
   };
 
   const handleUserLogin = (userData: User) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
-
     const token = localStorage.getItem("token");
     if (token) {
       try {
@@ -94,7 +93,6 @@ export default function Navbar() {
         setRole(decoded.role);
       } catch {}
     }
-
     setActiveModal(null);
   };
 
@@ -149,6 +147,14 @@ export default function Navbar() {
                         />
                         {item}
                       </li>
+                    ) : item === "Add a car" ? (
+                      <li key={idx} onClick={() => navigate("/add-car")}>
+                        <FontAwesomeIcon
+                          icon={iconMap[item]}
+                          className="menu-icon"
+                        />
+                        {item}
+                      </li>
                     ) : (
                       <li key={idx}>
                         <FontAwesomeIcon
@@ -166,6 +172,7 @@ export default function Navbar() {
         </div>
       </nav>
 
+      {/* Login/Register Modal */}
       {activeModal && (
         <ModalWrapper onClose={() => setActiveModal(null)}>
           {activeModal === "login" ? (
