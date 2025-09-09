@@ -1,8 +1,9 @@
 import { useState } from "react";
 import type { CarFormData } from "../../types/Cars";
+import { addCar } from "../../services/carService";
 
 interface Props {
-  onNext: (data: Partial<CarFormData>) => void;
+  onNext: (data: Partial<CarFormData>, carId: string) => void;
   defaultValues: CarFormData;
 }
 
@@ -100,12 +101,34 @@ const carData: { [key: string]: string[] } = {
 export default function Step1CarDetails({ onNext, defaultValues }: Props) {
   const [make, setMake] = useState(defaultValues.make || "");
   const [model, setModel] = useState(defaultValues.model || "");
-  const [yearOfMake, setYearOfMake] = useState(defaultValues.yearOfMake || "");
+  const [year, setYear] = useState<number | undefined>(defaultValues.year);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Handle make change and reset model
   const handleMakeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setMake(e.target.value);
     setModel(""); // Reset model when make changes
+  };
+
+  const handleSubmit = async () => {
+    if (!make || !model || !year) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await addCar({ make, model, year });
+      console.log("🚗 Car saved:", result);
+
+      // assume backend returns { car_id: "123" }
+      onNext({ make, model, year }, result.car_id);
+    } catch (err: any) {
+      console.error("❌ Error saving car:", err.message || err);
+      setError("Failed to save car");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -151,20 +174,24 @@ export default function Step1CarDetails({ onNext, defaultValues }: Props) {
       </label>
       <input
         type="number"
-        value={yearOfMake}
-        onChange={(e) => setYearOfMake(e.target.value)}
+        value={year ?? ""}
+        onChange={(e) =>
+          setYear(e.target.value ? Number(e.target.value) : undefined)
+        }
         placeholder="Enter year (e.g., 2023)"
         min="1900"
         max="2025"
         className="w-full border p-2 rounded mb-4 bg-white border-gray-300 focus:ring-2 focus:ring-blue-500"
       />
 
+      {error && <p className="text-red-600 mb-2">{error}</p>}
+
       <button
-        onClick={() => onNext({ make, model, yearOfMake })}
+        onClick={handleSubmit}
         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors disabled:bg-gray-400"
-        disabled={!make || !model || !yearOfMake}
+        disabled={!make || !model || !year || loading}
       >
-        Next Step →
+        {loading ? "Saving..." : "Next Step →"}
       </button>
     </div>
   );

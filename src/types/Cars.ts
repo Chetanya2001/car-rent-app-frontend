@@ -9,7 +9,7 @@ export interface Car {
 export interface CarFormData {
   make?: string;
   model?: string;
-  yearOfMake?: string;
+  year?: number;
   ownerName?: string;
   registrationNo?: string;
   cityOfRegistration?: string;
@@ -43,4 +43,9 @@ export interface CarFormData {
   hourlyRent?: number;
   availableFrom?: string;
   availableTill?: string;
+}
+export interface AddCarApiResponse {
+  make: string;
+  model: string;
+  year: number;
 }
