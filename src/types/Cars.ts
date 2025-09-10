@@ -14,11 +14,12 @@ export interface CarFormData {
   registrationNo?: string;
   cityOfRegistration?: string;
   rcValidTill?: string;
-  rcFile?: File;
-  insuranceCompany?: string;
-  insuranceIdv?: number;
-  insuranceValidTill?: string;
-  insuranceFile?: File;
+  rcFrontFile?: File;
+  rcBackFile?: File;
+  insurance_company?: string;
+  insurance_idv_value?: number;
+  insurance_valid_till?: string;
+  insurance_image?: File;
   fastTag?: boolean;
   airconditions?: boolean;
   seater?: number;
@@ -40,12 +41,30 @@ export interface CarFormData {
   remote_central_locking?: boolean;
   climate_control?: boolean;
   images?: File[];
-  hourlyRent?: number;
-  availableFrom?: string;
-  availableTill?: string;
+  expectedHourlyRent?: number;
+  availabilityFrom?: string;
+  availabilityTill?: string;
 }
 export interface AddCarApiResponse {
   make: string;
   model: string;
   year: number;
+}
+export interface CarFeatures {
+  car_id: number;
+  airconditions: boolean;
+  child_seat: boolean;
+  gps: boolean;
+  luggage: boolean;
+  music: boolean;
+  seat_belt: boolean;
+  sleeping_bed: boolean;
+  water: boolean;
+  bluetooth: boolean;
+  onboard_computer: boolean;
+  audio_input: boolean;
+  long_term_trips: boolean;
+  car_kit: boolean;
+  remote_central_locking: boolean;
+  climate_control: boolean;
 }

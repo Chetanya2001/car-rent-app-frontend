@@ -8,16 +8,7 @@ const AppRoutes = () => (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/cars" element={<Cars />} />
-      <Route
-        path="/add-car"
-        element={
-          <CarWizard
-            onClose={function (): void {
-              throw new Error("Function not implemented.");
-            }}
-          />
-        }
-      />
+      <Route path="/add-car" element={<CarWizard />} />
       {/* other routes */}
     </Routes>
   </BrowserRouter>

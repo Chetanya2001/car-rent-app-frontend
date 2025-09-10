@@ -1,16 +1,19 @@
 import { useState } from "react";
 import type { CarFormData } from "../../types/Cars";
+import { uploadRC } from "../../services/carService";
 
 interface Props {
   onNext: (data: Partial<CarFormData>) => void;
   onBack: () => void;
   defaultValues: CarFormData;
+  carId: number; // ✅ make sure you pass this down from the wizard (step1 response)
 }
 
 export default function Step2Registration({
   onNext,
   onBack,
   defaultValues,
+  carId,
 }: Props) {
   const [ownerName, setOwnerName] = useState(defaultValues.ownerName || "");
   const [registrationNo, setRegistrationNo] = useState(
@@ -22,7 +25,52 @@ export default function Step2Registration({
   const [rcValidTill, setRcValidTill] = useState(
     defaultValues.rcValidTill || ""
   );
-  const [rcFile, setRcFile] = useState<File | undefined>(defaultValues.rcFile);
+  const [rcFrontFile, setRcFrontFile] = useState<File | undefined>(
+    defaultValues.rcFrontFile
+  );
+  const [rcBackFile, setRcBackFile] = useState<File | undefined>(
+    defaultValues.rcBackFile
+  );
+  const [loading, setLoading] = useState(false);
+
+  const handleNext = async () => {
+    if (!rcFrontFile || !rcBackFile) {
+      alert("Please upload both RC front and back images.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // ✅ Call backend API
+      const response = await uploadRC({
+        car_id: carId,
+        owner_name: ownerName,
+        rc_number: registrationNo,
+        rc_valid_till: rcValidTill,
+        city_of_registration: cityOfRegistration,
+        rc_image_front: rcFrontFile,
+        rc_image_back: rcBackFile,
+      });
+
+      console.log("✅ RC Upload Response:", response);
+
+      // ✅ Pass data forward in wizard
+      onNext({
+        ownerName,
+        registrationNo,
+        cityOfRegistration,
+        rcValidTill,
+        rcFrontFile,
+        rcBackFile,
+      });
+    } catch (err) {
+      console.error("❌ Error uploading RC:", err);
+      alert("Failed to upload RC details. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -62,10 +110,17 @@ export default function Step2Registration({
         className="w-full border p-2 rounded mb-4"
       />
 
-      <label className="block mb-2">Upload RC</label>
+      <label className="block mb-2">Upload RC Front</label>
       <input
         type="file"
-        onChange={(e) => setRcFile(e.target.files?.[0])}
+        onChange={(e) => setRcFrontFile(e.target.files?.[0])}
+        className="w-full border p-2 rounded mb-4"
+      />
+
+      <label className="block mb-2">Upload RC Back</label>
+      <input
+        type="file"
+        onChange={(e) => setRcBackFile(e.target.files?.[0])}
         className="w-full border p-2 rounded mb-4"
       />
 
@@ -78,18 +133,11 @@ export default function Step2Registration({
         </button>
         &nbsp;&nbsp;&nbsp;
         <button
-          onClick={() =>
-            onNext({
-              ownerName,
-              registrationNo,
-              cityOfRegistration,
-              rcValidTill,
-              rcFile,
-            })
-          }
+          onClick={handleNext}
           className="bg-blue-600 text-white px-4 py-2 rounded"
+          disabled={loading}
         >
-          Next Step →
+          {loading ? "Uploading..." : "Next Step →"}
         </button>
       </div>
     </div>

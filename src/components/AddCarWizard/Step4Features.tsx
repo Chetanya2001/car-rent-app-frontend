@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { addCarFeatures } from "../../services/carFeatures"; // ✅ Import API call
 import type { CarFormData } from "../../types/Cars";
 import "./Step4Features.css";
 
@@ -6,12 +7,14 @@ interface Props {
   onNext: (data: Partial<CarFormData>) => void;
   onBack: () => void;
   defaultValues: CarFormData;
+  carId: number; // ✅ carId passed from wizard
 }
 
 export default function Step4Features({
   onNext,
   onBack,
   defaultValues,
+  carId,
 }: Props) {
   const [fastTag, setFastTag] = useState(defaultValues.fastTag ?? false);
   const [airconditions, setAirconditions] = useState(
@@ -95,10 +98,68 @@ export default function Step4Features({
     },
   ];
 
-  // Split features into two columns (roughly equal)
+  // Split features into two columns
   const midPoint = Math.ceil(features.length / 2);
   const leftColumn = features.slice(0, midPoint);
   const rightColumn = features.slice(midPoint);
+
+  const handleNext = async () => {
+    try {
+      // Data for the backend CarFeatures model
+      const carFeaturesData = {
+        car_id: carId,
+        airconditions,
+        child_seat: childSeat,
+        gps,
+        luggage,
+        music,
+        seat_belt: seatBelt,
+        sleeping_bed: sleepingBed,
+        water,
+        bluetooth,
+        onboard_computer: onboardComputer,
+        audio_input: audioInput,
+        long_term_trips: longTermTrips,
+        car_kit: carKit,
+        remote_central_locking: remoteCentralLocking,
+        climate_control: climateControl,
+      };
+
+      // Call backend API to save CarFeatures
+      await addCarFeatures(carFeaturesData);
+
+      // Data for the wizard (includes all fields)
+      const featureData = {
+        car_id: carId,
+        fastTag,
+        airconditions,
+        seater,
+        fuelType,
+        gps,
+        geofencing,
+        antiTheft,
+        child_seat: childSeat,
+        luggage,
+        music,
+        seat_belt: seatBelt,
+        sleeping_bed: sleepingBed,
+        water,
+        bluetooth,
+        onboard_computer: onboardComputer,
+        audio_input: audioInput,
+        long_term_trips: longTermTrips,
+        car_kit: carKit,
+        remote_central_locking: remoteCentralLocking,
+        climate_control: climateControl,
+      };
+
+      // Pass all data to the next step in the wizard
+      onNext(featureData);
+    } catch (error) {
+      console.error("❌ Error saving features:", error);
+      alert("Failed to save car features. Please try again.");
+    }
+  };
 
   return (
     <div className="p-4">
@@ -162,30 +223,7 @@ export default function Step4Features({
         </button>
         &nbsp;&nbsp;&nbsp;
         <button
-          onClick={() =>
-            onNext({
-              fastTag,
-              airconditions,
-              seater,
-              fuelType,
-              gps,
-              geofencing,
-              antiTheft,
-              child_seat: childSeat,
-              luggage,
-              music,
-              seat_belt: seatBelt,
-              sleeping_bed: sleepingBed,
-              water,
-              bluetooth,
-              onboard_computer: onboardComputer,
-              audio_input: audioInput,
-              long_term_trips: longTermTrips,
-              car_kit: carKit,
-              remote_central_locking: remoteCentralLocking,
-              climate_control: climateControl,
-            })
-          }
+          onClick={handleNext}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
           Next Step →

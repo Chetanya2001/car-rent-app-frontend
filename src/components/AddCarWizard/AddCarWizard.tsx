@@ -8,6 +8,8 @@ import Step6Availability from "./Step6Availability";
 import Navbar from "../Navbar/Navbar";
 import "./AddCarWizard.css";
 import type { CarFormData } from "../../types/Cars";
+import { addCar } from "../../services/carService"; // ✅ Make sure you have this API service
+
 interface AddCarWizardProps {
   onClose?: () => void; // optional since Navbar may handle navigation
 }
@@ -24,10 +26,33 @@ const steps = [
 export default function AddCarWizard({ onClose }: AddCarWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<CarFormData>({});
+  const [carId, setCarId] = useState<number | null>(null);
 
-  const handleNext = (data: Partial<CarFormData>) => {
-    setFormData((prev) => ({ ...prev, ...data }));
-    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+  const handleNext = async (data: Partial<CarFormData>) => {
+    if (currentStep === 0) {
+      try {
+        // ✅ Call backend to create car (Step 1 only)
+        const response = await addCar({
+          make: data.make!,
+          model: data.model!,
+          year: data.year!,
+        });
+
+        console.log("✅ Car created with ID:", response.car_id);
+        setCarId(response.car_id);
+
+        // Save formData & move to Step 2
+        setFormData((prev) => ({ ...prev, ...data }));
+        setCurrentStep(1);
+      } catch (err) {
+        console.error("❌ Error creating car:", err);
+        alert("Failed to create car. Please try again.");
+      }
+    } else {
+      // ✅ For Steps 2–6 just merge data
+      setFormData((prev) => ({ ...prev, ...data }));
+      setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+    }
   };
 
   const handleBack = () => {
@@ -35,8 +60,8 @@ export default function AddCarWizard({ onClose }: AddCarWizardProps) {
   };
 
   const handleSubmit = () => {
-    console.log("Final Data:", formData);
-    alert("Car Added Successfully ✅");
+    console.log("Final Data:", { carId, ...formData });
+    alert(`Car Added Successfully ✅ (Car ID: ${carId})`);
     if (onClose) onClose();
   };
 
@@ -44,8 +69,6 @@ export default function AddCarWizard({ onClose }: AddCarWizardProps) {
     <>
       <Navbar />
       <div className="add-car-wizard">
-        {/* ✅ Navbar */}
-
         <div className="wizard-card">
           {/* Progress Bar */}
           <div className="progress-container">
@@ -72,6 +95,7 @@ export default function AddCarWizard({ onClose }: AddCarWizardProps) {
               onNext={handleNext}
               onBack={handleBack}
               defaultValues={formData}
+              carId={carId!} // ✅ Pass saved carId
             />
           )}
           {currentStep === 2 && (
@@ -79,6 +103,7 @@ export default function AddCarWizard({ onClose }: AddCarWizardProps) {
               onNext={handleNext}
               onBack={handleBack}
               defaultValues={formData}
+              carId={carId!}
             />
           )}
           {currentStep === 3 && (
@@ -86,6 +111,7 @@ export default function AddCarWizard({ onClose }: AddCarWizardProps) {
               onNext={handleNext}
               onBack={handleBack}
               defaultValues={formData}
+              carId={carId!}
             />
           )}
           {currentStep === 4 && (
@@ -93,13 +119,19 @@ export default function AddCarWizard({ onClose }: AddCarWizardProps) {
               onNext={handleNext}
               onBack={handleBack}
               defaultValues={formData}
+              carId={carId!}
             />
           )}
           {currentStep === 5 && (
             <Step6Availability
-              onNext={handleSubmit}
+              onNext={async (data) => {
+                // Step6 will call this only after availability API succeeds
+                await handleNext(data); // merge into formData if needed
+                handleSubmit(); // finalize wizard
+              }}
               onBack={handleBack}
               defaultValues={formData}
+              carId={carId!}
             />
           )}
         </div>

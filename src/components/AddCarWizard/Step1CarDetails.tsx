@@ -1,9 +1,8 @@
 import { useState } from "react";
 import type { CarFormData } from "../../types/Cars";
-import { addCar } from "../../services/carService";
 
 interface Props {
-  onNext: (data: Partial<CarFormData>, carId: string) => void;
+  onNext: (data: Partial<CarFormData>) => void;
   defaultValues: CarFormData;
 }
 
@@ -102,33 +101,15 @@ export default function Step1CarDetails({ onNext, defaultValues }: Props) {
   const [make, setMake] = useState(defaultValues.make || "");
   const [model, setModel] = useState(defaultValues.model || "");
   const [year, setYear] = useState<number | undefined>(defaultValues.year);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  // Handle make change and reset model
   const handleMakeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setMake(e.target.value);
     setModel(""); // Reset model when make changes
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!make || !model || !year) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const result = await addCar({ make, model, year });
-      console.log("🚗 Car saved:", result);
-
-      // assume backend returns { car_id: "123" }
-      onNext({ make, model, year }, result.car_id);
-    } catch (err: any) {
-      console.error("❌ Error saving car:", err.message || err);
-      setError("Failed to save car");
-    } finally {
-      setLoading(false);
-    }
+    onNext({ make, model, year }); // ✅ just pass data upward
   };
 
   return (
@@ -184,14 +165,13 @@ export default function Step1CarDetails({ onNext, defaultValues }: Props) {
         className="w-full border p-2 rounded mb-4 bg-white border-gray-300 focus:ring-2 focus:ring-blue-500"
       />
 
-      {error && <p className="text-red-600 mb-2">{error}</p>}
-
       <button
+        type="button"
         onClick={handleSubmit}
         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors disabled:bg-gray-400"
-        disabled={!make || !model || !year || loading}
+        disabled={!make || !model || !year}
       >
-        {loading ? "Saving..." : "Next Step →"}
+        Next Step →
       </button>
     </div>
   );

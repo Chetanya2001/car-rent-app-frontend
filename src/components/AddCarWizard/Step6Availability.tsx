@@ -1,30 +1,65 @@
 import React, { useState } from "react";
-
 import type { CarFormData } from "../../types/Cars";
+import { uploadAvailability } from "../../services/carService"; // ✅ use service
 
 export interface AvailabilityProps {
-  onNext: (data: AvailabilityData) => void;
+  onNext: (data: Partial<CarFormData>) => void;
   onBack: () => void;
   defaultValues: CarFormData;
+  carId: number; // ✅ passed from parent wizard
 }
 
-export interface AvailabilityData {
-  expectedHourlyRent: number;
-  availabilityFrom: string;
-  availabilityTill: string;
-}
-
-const AvailabilityStep: React.FC<AvailabilityProps> = ({ onNext, onBack }) => {
-  const [expectedHourlyRent, setExpectedHourlyRent] = useState<number>(0);
-  const [availabilityFrom, setAvailabilityFrom] = useState<string>("");
-  const [availabilityTill, setAvailabilityTill] = useState<string>("");
-
-  const handleNext = () => {
+const AvailabilityStep: React.FC<AvailabilityProps> = ({
+  onNext,
+  onBack,
+  defaultValues,
+  carId,
+}) => {
+  const [expectedHourlyRent, setExpectedHourlyRent] = useState<number>(
+    defaultValues?.expectedHourlyRent || 0
+  );
+  const [availabilityFrom, setAvailabilityFrom] = useState<string>(
+    defaultValues?.availabilityFrom || ""
+  );
+  const [availabilityTill, setAvailabilityTill] = useState<string>(
+    defaultValues?.availabilityTill || ""
+  );
+  const [submitting, setSubmitting] = useState(false);
+  const handleNext = async () => {
     if (!expectedHourlyRent || !availabilityFrom || !availabilityTill) {
       alert("Please fill all fields before proceeding.");
       return;
     }
-    onNext({ expectedHourlyRent, availabilityFrom, availabilityTill });
+
+    setSubmitting(true);
+    try {
+      const result = await uploadAvailability({
+        car_id: carId,
+        price_per_hour: expectedHourlyRent,
+        available_from: availabilityFrom,
+        available_till: availabilityTill,
+      });
+
+      console.log("✅ Availability API result:", result);
+
+      const savedCar = result.data; // 👈 because service already returns .data
+
+      // Pass the updated car back into the wizard
+      onNext({
+        expectedHourlyRent,
+        availabilityFrom,
+        availabilityTill,
+        ...savedCar,
+      });
+    } catch (err: any) {
+      console.error(
+        "❌ Error saving availability:",
+        err.response?.data || err.message
+      );
+      alert(err.response?.data?.message || "Error saving availability");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -59,15 +94,15 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({ onNext, onBack }) => {
           onChange={(e) => setAvailabilityTill(e.target.value)}
         />
       </div>
-      <br></br>
+      <br />
 
       <div className="form-actions">
-        <button className="back-btn" onClick={onBack}>
+        <button className="back-btn" onClick={onBack} disabled={submitting}>
           ⬅ Back
         </button>
         &nbsp;&nbsp;&nbsp;
-        <button className="next-btn" onClick={handleNext}>
-          Submit ✅
+        <button className="next-btn" onClick={handleNext} disabled={submitting}>
+          {submitting ? "Submitting..." : "Submit ✅"}
         </button>
       </div>
     </div>
