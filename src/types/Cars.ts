@@ -1,9 +1,12 @@
 export interface Car {
+  photos: boolean;
   id: number;
   name: string;
   brand: string;
+  make: string;
+  model: string;
   year: number;
-  price: number;
+  price_per_hour: number;
   image: string | null;
 }
 export interface CarFormData {

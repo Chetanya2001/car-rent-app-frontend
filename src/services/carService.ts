@@ -147,3 +147,24 @@ export const uploadAvailability = async (availabilityData: {
 
   return response.data;
 };
+
+export const searchCars = async (searchData: {
+  city: string;
+  pickup_datetime: string;
+  dropoff_datetime: string;
+}) => {
+  const token = localStorage.getItem("token");
+
+  console.log("📤 Sending Search Data:", searchData);
+
+  const response = await axios.post(`${API_URL}/search`, searchData, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  console.log("🔎 Search Cars Response:", response.data);
+
+  return response.data;
+};

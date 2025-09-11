@@ -27,6 +27,8 @@ import {
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 
+import { searchCars } from "../../services/carService"; // ✅ Import API
+
 type TokenPayload = {
   role: "host" | "guest";
 };
@@ -42,6 +44,16 @@ export default function Home() {
   const [role, setRole] = useState<"host" | "guest" | null>(null);
   const [showMenu, setShowMenu] = useState(false);
 
+  // Booking form state
+  const [city, setCity] = useState("");
+  const [pickupDate, setPickupDate] = useState("");
+  const [pickupTime, setPickupTime] = useState("");
+  const [dropDate, setDropDate] = useState("");
+  const [dropTime, setDropTime] = useState("");
+  const [insureTrip, setInsureTrip] = useState(false);
+  const [driverRequired, setDriverRequired] = useState(false);
+  const [differentDrop, setDifferentDrop] = useState(false);
+
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
@@ -50,6 +62,27 @@ export default function Home() {
     setShowMenu(false);
   };
 
+  const handleSearch = async () => {
+    if (!city || !pickupDate || !dropDate) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    try {
+      // Call searchCars with query params
+      const data = await searchCars({
+        city,
+        pickup_datetime: pickupDate,
+        dropoff_datetime: dropDate,
+      });
+
+      // Navigate to /cars page and pass results via state
+      navigate("/searched-cars", { state: { cars: data.cars } });
+    } catch (err) {
+      console.error("❌ Error searching cars:", err);
+      alert("Failed to fetch cars. Try again.");
+    }
+  };
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -107,7 +140,6 @@ export default function Home() {
           <Link to="/cars">Cars</Link>
           <a href="#services">Community</a>
           <a href="#contact">Support</a>
-
           {!user ? (
             <a
               href="#login"
@@ -137,7 +169,7 @@ export default function Home() {
                         <FontAwesomeIcon
                           icon={iconMap[item]}
                           className="menu-icon"
-                        />
+                        />{" "}
                         {item}
                       </li>
                     ) : item === "Add a Car" ? (
@@ -145,7 +177,7 @@ export default function Home() {
                         <FontAwesomeIcon
                           icon={iconMap[item]}
                           className="menu-icon"
-                        />
+                        />{" "}
                         {item}
                       </li>
                     ) : (
@@ -153,7 +185,7 @@ export default function Home() {
                         <FontAwesomeIcon
                           icon={iconMap[item]}
                           className="menu-icon"
-                        />
+                        />{" "}
                         {item}
                       </li>
                     )
@@ -165,7 +197,7 @@ export default function Home() {
         </nav>
       </header>
 
-      {/* Modal Handling */}
+      {/* Modal */}
       {activeModal && (
         <ModalWrapper onClose={() => setActiveModal(null)}>
           {activeModal === "login" ? (
@@ -175,8 +207,6 @@ export default function Home() {
               onLoginSuccess={(userData) => {
                 setUser(userData);
                 setActiveModal(null);
-
-                // ✅ also update role from token or userData
                 const token = localStorage.getItem("token");
                 if (token) {
                   try {
@@ -195,7 +225,6 @@ export default function Home() {
               onRegisterSuccess={(userData) => {
                 setUser(userData);
                 setActiveModal(null);
-
                 const token = localStorage.getItem("token");
                 if (token) {
                   try {
@@ -211,7 +240,7 @@ export default function Home() {
         </ModalWrapper>
       )}
 
-      {/* Hero Section */}
+      {/* Hero */}
       <div className="hero-wrapper">
         <div className="home-overlay"></div>
         <div className="home-hero">
@@ -231,36 +260,85 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Booking Section */}
+      {/* Booking */}
       <div className="booking-section">
         <div className="booking-box">
           <h2>Zip your Trip</h2>
           <label>Pick-up Location</label>
-          <input type="text" placeholder="City, Airport, Station, etc" />
+          <input
+            type="text"
+            placeholder="City, Airport, Station, etc"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+          />
           <div className="date-time">
             <div>
               <label>Pick-up Date</label>
-              <input type="date" />
-              <input type="time" />
+              <input
+                type="date"
+                value={pickupDate}
+                onChange={(e) => setPickupDate(e.target.value)}
+              />
+              <input
+                type="time"
+                value={pickupTime}
+                onChange={(e) => setPickupTime(e.target.value)}
+              />
             </div>
             <div>
               <label>Drop-off Date</label>
-              <input type="date" />
-              <input type="time" />
+              <input
+                type="date"
+                value={dropDate}
+                onChange={(e) => setDropDate(e.target.value)}
+              />
+              <input
+                type="time"
+                value={dropTime}
+                onChange={(e) => setDropTime(e.target.value)}
+              />
             </div>
           </div>
+
           <div className="toggles">
-            <label>
-              Insure Trip: <input type="checkbox" />
+            <label className="switch-label">
+              Insure Trip
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={insureTrip}
+                  onChange={() => setInsureTrip(!insureTrip)}
+                />
+                <span className="slider round"></span>
+              </label>
             </label>
-            <label>
-              Driver Required: <input type="checkbox" />
+            <label className="switch-label">
+              Driver Required
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={driverRequired}
+                  onChange={() => setDriverRequired(!driverRequired)}
+                />
+                <span className="slider round"></span>
+              </label>
             </label>
-            <label>
-              Different Drop-off Location: <input type="checkbox" />
+            <label className="switch-label">
+              Different Drop-off Location
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={differentDrop}
+                  onChange={() => setDifferentDrop(!differentDrop)}
+                />
+                <span className="slider round"></span>
+              </label>
             </label>
           </div>
-          <button className="search-btn">Search</button>
+
+          <button className="search-btn" onClick={handleSearch}>
+            Search
+          </button>
         </div>
 
         <div className="info-box">
@@ -287,7 +365,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* About Section */}
+      {/* About */}
       <section className="about-section" id="about">
         <div className="about-left"></div>
         <div className="about-right">
@@ -305,7 +383,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Why Section */}
+      {/* Why */}
       <section className="why-section" id="why">
         <h4>WHY ZIPDRIVE ?</h4>
         <h2>Cos we deliver not just a car but our promise !</h2>
@@ -343,7 +421,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Host Section */}
+      {/* Host */}
       <section
         className="host-section"
         style={{ backgroundImage: `url(${aboutImage})` }}

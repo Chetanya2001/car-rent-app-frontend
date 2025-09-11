@@ -1,0 +1,86 @@
+/* page wrapper */
+.searched-cars-page {
+  padding: 2rem;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* no cars message */
+.no-cars {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-top: 3rem;
+  color: #555;
+}
+
+/* car list grid */
+.car-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  justify-items: center;
+}
+
+/* individual car card */
+.car-card {
+  width: 100%;
+  max-width: 320px;
+  background-color: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.car-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* image wrapper */
+.car-image-wrapper {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.car-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* make image fully cover card */
+  display: block;
+}
+
+/* placeholder for missing images */
+.car-placeholder {
+  width: 100%;
+  height: 200px;
+  background-color: #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+/* car info */
+.car-info {
+  padding: 1rem;
+}
+
+.car-info h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.2rem;
+}
+
+.car-info p {
+  margin: 0.2rem 0;
+  color: #555;
+}
+
+.car-price {
+  font-weight: bold;
+  color: #2a9d8f;
+  font-size: 1.1rem;
+}

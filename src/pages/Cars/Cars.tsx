@@ -43,7 +43,7 @@ const Cars: React.FC = () => {
                     {car.brand}, {car.year}
                   </p>
                   <p className="fw-bold text-primary">
-                    INR {car.price} <small>/hour</small>
+                    INR {car.price_per_hour} <small>/hour</small>
                   </p>
                   <div className="mt-auto d-flex justify-content-between">
                     <button className="btn btn-primary">Book now</button>
