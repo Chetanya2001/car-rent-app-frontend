@@ -11,7 +11,6 @@ const Cars: React.FC = () => {
     const fetchCars = async () => {
       try {
         const data = await getCars();
-        console.log("📦 Cars in state:", data); // 👈 log here too
         setCars(data);
       } catch (error) {
         console.error("❌ Error fetching cars:", error);
@@ -24,30 +23,36 @@ const Cars: React.FC = () => {
     <>
       <Navbar />
       <div className="container py-5">
-        <h2 className="text-center mb-4">Available Cars</h2>
-        <div className="row">
+        <h2 className="text-center mb-4 fw-bold">Available Cars</h2>
+        <div className="row g-4">
           {cars.map((car) => (
-            <div key={car.id} className="col-md-4 mb-4">
+            <div key={car.id} className="col-sm-6 col-md-4">
               <div className="card shadow-sm h-100">
-                <img
-                  src={car.image ?? ""}
-                  className="card-img-top"
-                  alt={car.name}
-                  onError={(_e) => {
-                    console.error("🖼️ Image not loading:", car.image);
-                  }}
-                />
+                <div className="card-img-container">
+                  <img
+                    src={car.image ?? ""}
+                    className="card-img-top"
+                    alt={car.name}
+                    onError={() =>
+                      console.error("🖼️ Image not loading:", car.image)
+                    }
+                  />
+                </div>
                 <div className="card-body d-flex flex-column">
                   <h5 className="card-title">{car.name}</h5>
                   <p className="card-text text-muted">
                     {car.brand}, {car.year}
                   </p>
-                  <p className="fw-bold text-primary">
+                  <p className="fw-bold text-primary mb-3">
                     INR {car.price_per_hour} <small>/hour</small>
                   </p>
-                  <div className="mt-auto d-flex justify-content-between">
-                    <button className="btn btn-primary">Book now</button>
-                    <button className="btn btn-success">Details</button>
+                  <div className="mt-auto d-flex gap-2">
+                    <button className="btn btn-primary flex-fill">
+                      Book now
+                    </button>
+                    <button className="btn btn-success flex-fill">
+                      Details
+                    </button>
                   </div>
                 </div>
               </div>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { CarFormData } from "../../types/Cars";
 import { uploadImages } from "../../services/carService";
-
+import "./Step5Images.css";
 interface Props {
   onNext: (data: Partial<CarFormData>) => void;
   onBack: () => void;
@@ -53,7 +53,26 @@ export default function Step5Images({
         onChange={(e) => handleFileChange(e.target.files)}
         className="w-full border p-2 rounded mb-4"
       />
-
+      {/* ✅ Preview Section */}
+      {images.length > 0 && (
+        <div className="image-preview-container">
+          {images.map((file, idx) => (
+            <div key={idx} className="image-thumb-wrapper">
+              <img
+                src={URL.createObjectURL(file)}
+                alt={`preview-${idx}`}
+                className="image-thumb"
+                onLoad={(e) => {
+                  console.log(
+                    `Image ${idx} size: ${e.currentTarget.width}x${e.currentTarget.height}px`
+                  );
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+      &nbsp;&nbsp;
       <div className="flex justify-between mt-6">
         <button
           onClick={onBack}

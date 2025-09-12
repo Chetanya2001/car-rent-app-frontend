@@ -168,3 +168,30 @@ export const searchCars = async (searchData: {
 
   return response.data;
 };
+export const getHostCars = async () => {
+  try {
+    // Get JWT token from localStorage
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      throw new Error("No auth token found. Please login first.");
+    }
+
+    // Make POST request to backend
+    const response = await axios.post(
+      "http://localhost:5000/api/cars/my-host-cars",
+      {}, // POST body can be empty if backend only uses token
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Backend expects this
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data; // Expecting: { cars: [...] }
+  } catch (err: any) {
+    console.error("❌ getHostCars error:", err.response?.data || err.message);
+    throw err;
+  }
+};

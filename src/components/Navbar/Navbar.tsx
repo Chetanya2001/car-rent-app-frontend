@@ -23,10 +23,11 @@ interface TokenPayload {
   role: "host" | "guest";
 }
 
+// Updated menu items with consistent capitalization
 const hostMenu = [
-  "Add a car",
-  "My cars",
-  "My bookings",
+  "Add a Car",
+  "My Cars",
+  "My Bookings",
   "My Payments",
   "Notifications",
   "Support",
@@ -34,23 +35,23 @@ const hostMenu = [
 ];
 
 const guestMenu = [
-  "Book a car",
-  "My bookings",
-  "My payments",
+  "Book a Car",
+  "My Bookings",
+  "My Payments",
   "Notifications",
   "Support",
   "Logout",
 ];
 
 const iconMap: Record<string, any> = {
-  "Add a car": faPlus,
-  "My cars": faCar,
-  "My bookings": faCalendarAlt,
+  "Add a Car": faPlus,
+  "My Cars": faCar,
+  "My Bookings": faCalendarAlt,
   "My Payments": faCreditCard,
   Notifications: faBell,
   Support: faLifeRing,
   Logout: faDoorOpen,
-  "Book a car": faCar,
+  "Book a Car": faCar,
 };
 
 export default function Navbar() {
@@ -62,6 +63,7 @@ export default function Navbar() {
   );
   const [showMenu, setShowMenu] = useState(false);
 
+  // Load user and role from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -70,7 +72,9 @@ export default function Navbar() {
       try {
         const decoded = jwtDecode<TokenPayload>(token);
         setRole(decoded.role);
-      } catch {}
+      } catch (err) {
+        console.error("Invalid token", err);
+      }
     }
   }, []);
 
@@ -91,12 +95,46 @@ export default function Navbar() {
       try {
         const decoded = jwtDecode<TokenPayload>(token);
         setRole(decoded.role);
-      } catch {}
+      } catch (err) {
+        console.error("Invalid token after login", err);
+      }
     }
     setActiveModal(null);
   };
 
   const menuItems = role === "host" ? hostMenu : guestMenu;
+
+  const handleMenuClick = (item: string) => {
+    switch (item) {
+      case "Add a Car":
+        navigate("/add-car");
+        break;
+      case "My Cars":
+        navigate("/my-cars");
+        break;
+      case "Logout":
+        handleLogout();
+        break;
+      case "Book a Car":
+        navigate("/cars");
+        break;
+      case "My Bookings":
+        navigate("/my-bookings");
+        break;
+      case "My Payments":
+        navigate("/my-payments");
+        break;
+      case "Notifications":
+        navigate("/notifications");
+        break;
+      case "Support":
+        navigate("/support");
+        break;
+      default:
+        break;
+    }
+    setShowMenu(false); // close menu after click
+  };
 
   return (
     <>
@@ -138,33 +176,15 @@ export default function Navbar() {
               />
               {showMenu && (
                 <ul className="profile-menu">
-                  {menuItems.map((item, idx) =>
-                    item === "Logout" ? (
-                      <li key={idx} onClick={handleLogout}>
-                        <FontAwesomeIcon
-                          icon={iconMap[item]}
-                          className="menu-icon"
-                        />
-                        {item}
-                      </li>
-                    ) : item === "Add a car" ? (
-                      <li key={idx} onClick={() => navigate("/add-car")}>
-                        <FontAwesomeIcon
-                          icon={iconMap[item]}
-                          className="menu-icon"
-                        />
-                        {item}
-                      </li>
-                    ) : (
-                      <li key={idx}>
-                        <FontAwesomeIcon
-                          icon={iconMap[item]}
-                          className="menu-icon"
-                        />
-                        {item}
-                      </li>
-                    )
-                  )}
+                  {menuItems.map((item, idx) => (
+                    <li key={idx} onClick={() => handleMenuClick(item)}>
+                      <FontAwesomeIcon
+                        icon={iconMap[item]}
+                        className="menu-icon"
+                      />{" "}
+                      {item}
+                    </li>
+                  ))}
                 </ul>
               )}
             </div>

@@ -1,0 +1,35 @@
+.image-preview-container {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(80px, 1fr)
+  ); /* bigger cells */
+  gap: 6px;
+  width: 100%;
+  max-width: 500px;
+  height: 250px; /* fixed height */
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fafafa;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.image-thumb-wrapper {
+  width: 80px;
+  height: 80px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-thumb {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* ✅ show whole image without zooming */
+  display: block;
+}

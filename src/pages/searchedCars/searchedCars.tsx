@@ -1,15 +1,14 @@
 import { useLocation } from "react-router-dom";
 import "./searchedCars.css";
-import Navbar from "../../components/Navbar/Navbar"; // make sure you have a Navbar component
+import Navbar from "../../components/Navbar/Navbar";
 
-// Interface according to API
 interface Car {
   id: number;
   make: string;
   model: string;
   year: number;
   price_per_hour: number;
-  photos: string[]; // array of image URLs
+  photos: string[];
 }
 
 export default function SearchedCars() {
@@ -18,7 +17,7 @@ export default function SearchedCars() {
 
   return (
     <>
-      <Navbar /> {/* Navbar on top */}
+      <Navbar />
       <div className="searched-cars-page">
         {cars.length === 0 ? (
           <p className="no-cars">No cars found for the selected dates.</p>
@@ -46,6 +45,11 @@ export default function SearchedCars() {
                   </h3>
                   <p>Year: {car.year}</p>
                   <p className="car-price">₹{car.price_per_hour} / hour</p>
+                </div>
+                {/* ✅ Action buttons */}
+                <div className="car-actions">
+                  <button className="btn-book">Book now</button>
+                  <button className="btn-details">Details</button>
                 </div>
               </div>
             ))}

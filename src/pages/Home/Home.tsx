@@ -95,6 +95,15 @@ export default function Home() {
         console.error("Invalid token");
       }
     }
+
+    // ✅ set default current time for pickup & drop
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const currentTime = `${hours}:${minutes}`;
+
+    setPickupTime(currentTime);
+    setDropTime(currentTime);
   }, []);
 
   const hostMenu = [
@@ -163,24 +172,44 @@ export default function Home() {
               />
               {showMenu && (
                 <ul className="profile-menu">
-                  {menuItems.map((item, idx) =>
-                    item === "Logout" ? (
-                      <li key={idx} onClick={handleLogout}>
-                        <FontAwesomeIcon
-                          icon={iconMap[item]}
-                          className="menu-icon"
-                        />{" "}
-                        {item}
-                      </li>
-                    ) : item === "Add a Car" ? (
-                      <li key={idx} onClick={() => navigate("/add-car")}>
-                        <FontAwesomeIcon
-                          icon={iconMap[item]}
-                          className="menu-icon"
-                        />{" "}
-                        {item}
-                      </li>
-                    ) : (
+                  {menuItems.map((item, idx) => {
+                    if (item === "Logout") {
+                      return (
+                        <li key={idx} onClick={handleLogout}>
+                          <FontAwesomeIcon
+                            icon={iconMap[item]}
+                            className="menu-icon"
+                          />{" "}
+                          {item}
+                        </li>
+                      );
+                    }
+
+                    if (item === "Add a Car") {
+                      return (
+                        <li key={idx} onClick={() => navigate("/add-car")}>
+                          <FontAwesomeIcon
+                            icon={iconMap[item]}
+                            className="menu-icon"
+                          />{" "}
+                          {item}
+                        </li>
+                      );
+                    }
+
+                    if (item === "My Cars") {
+                      return (
+                        <li key={idx} onClick={() => navigate("/my-cars")}>
+                          <FontAwesomeIcon
+                            icon={iconMap[item]}
+                            className="menu-icon"
+                          />{" "}
+                          {item}
+                        </li>
+                      );
+                    }
+
+                    return (
                       <li key={idx}>
                         <FontAwesomeIcon
                           icon={iconMap[item]}
@@ -188,8 +217,8 @@ export default function Home() {
                         />{" "}
                         {item}
                       </li>
-                    )
-                  )}
+                    );
+                  })}
                 </ul>
               )}
             </div>

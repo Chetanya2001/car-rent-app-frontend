@@ -1,14 +1,36 @@
+// src/types/Cars.ts
+
 export interface Car {
-  photos: boolean;
   id: number;
-  name: string;
-  brand: string;
+  name?: string; // if backend sends it
+  brand?: string; // if backend sends it
   make: string;
   model: string;
   year: number;
-  price_per_hour: number;
-  image: string | null;
+  price_per_hour: number | null;
+  kms_driven?: number;
+  available_from?: string | null;
+  available_till?: string | null;
+  image?: string | null; // single thumbnail if provided
+  photos?: string[]; // ✅ array of images
+
+  documents?: {
+    car_id: number;
+    rc_image_front: string | null;
+    rc_image_back: string | null;
+    owner_name: string;
+    insurance_company: string;
+    insurance_idv_value: string | number;
+    insurance_image: string | null;
+    rc_number: string;
+    rc_valid_till: string;
+    city_of_registration: string;
+    fastag_image: string | null;
+    trip_start_balance: string | null;
+    trip_end_balance: string | null;
+  };
 }
+
 export interface CarFormData {
   make?: string;
   model?: string;

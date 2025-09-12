@@ -1,0 +1,97 @@
+/* Page wrapper */
+.my-cars-page {
+  padding: 2rem;
+  background-color: #f9fafb;
+  min-height: 100vh;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Title */
+.my-cars-page h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Cars grid */
+.cars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Each car card */
+.car-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.car-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Car image */
+.car-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  background-color: #e5e7eb;
+}
+
+.car-img.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+/* Car info */
+.car-info {
+  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.car-info h3 {
+  font-size: 1.25rem;
+  margin: 0;
+  color: #111827;
+}
+
+.car-info p {
+  font-size: 0.95rem;
+  margin: 0;
+  color: #374151;
+}
+
+/* Price highlight */
+.car-info p:nth-of-type(2) {
+  font-weight: 600;
+  color: #2563eb;
+}
+
+/* Responsive tweaks */
+@media (max-width: 640px) {
+  .my-cars-page {
+    padding: 1rem;
+  }
+
+  .cars-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .car-img {
+    height: 160px;
+  }
+}
