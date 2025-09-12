@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getHostCars } from "../../services/carService";
 import type { Car } from "../../types/Cars";
 import Navbar from "../../components/Navbar/Navbar";
@@ -6,6 +7,7 @@ import "./myCars.css";
 
 export default function MyCars() {
   const [cars, setCars] = useState<Car[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCars = async () => {
@@ -26,6 +28,11 @@ export default function MyCars() {
 
     fetchCars();
   }, []);
+
+  const handleUpdate = (carId: number) => {
+    // Navigate to update page with carId as param
+    navigate(`/update-car/${carId}`);
+  };
 
   return (
     <>
@@ -71,6 +78,16 @@ export default function MyCars() {
                   )}
                   <p>RC Number: {car.documents?.rc_number}</p>
                   <p>Owner: {car.documents?.owner_name}</p>
+                </div>
+
+                {/* Update Button */}
+                <div className="car-actions">
+                  <button
+                    className="update-btn"
+                    onClick={() => handleUpdate(car.id)}
+                  >
+                    Update
+                  </button>
                 </div>
               </div>
             );
