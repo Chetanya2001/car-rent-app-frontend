@@ -7,7 +7,7 @@ import pickupIcon from "../../assets/smart-transportation.png";
 import bestdealIcon from "../../assets/communication.png";
 import carrentIcon from "../../assets/car-rent.png";
 import aboutImage from "../../assets/bg_3.jpg";
-import defaultAvatar from "../../assets/ankit.jfif";
+import defaultAvatar from "../../assets/user.png";
 import Testimonials from "../../components/Testimonials/Testimonial";
 import Stats from "../../components/Stats/Stats";
 import Footer from "../../components/Footer/Footer";
@@ -168,7 +168,9 @@ export default function Home() {
               <img
                 src={user.avatar || defaultAvatar}
                 alt="Profile"
-                className="profile-avatar"
+                className={`profile-avatar ${
+                  !user.avatar ? "default-avatar" : ""
+                }`}
               />
               {showMenu && (
                 <ul className="profile-menu">

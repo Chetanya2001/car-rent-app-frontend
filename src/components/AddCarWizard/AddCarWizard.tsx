@@ -36,6 +36,7 @@ export default function AddCarWizard({ onClose }: AddCarWizardProps) {
           make: data.make!,
           model: data.model!,
           year: data.year!,
+          description: data.description!, // ✅ include description
         });
 
         console.log("✅ Car created with ID:", response.car_id);

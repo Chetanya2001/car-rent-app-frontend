@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import logo from "../../assets/logo.png";
-import defaultAvatar from "../../assets/amit.jpeg";
+import defaultAvatar from "../../assets/user.png";
 import "./Navbar.css";
 import Login from "../../pages/auth/Login/Login";
 import Register from "../../pages/auth/Register/Register";

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { CarFormData } from "../../types/Cars";
+import "./Step1CarDetails.css";
 
 interface Props {
   onNext: (data: Partial<CarFormData>) => void;
@@ -101,6 +102,9 @@ export default function Step1CarDetails({ onNext, defaultValues }: Props) {
   const [make, setMake] = useState(defaultValues.make || "");
   const [model, setModel] = useState(defaultValues.model || "");
   const [year, setYear] = useState<number | undefined>(defaultValues.year);
+  const [description, setDescription] = useState(
+    defaultValues.description || ""
+  );
 
   const handleMakeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setMake(e.target.value);
@@ -108,8 +112,9 @@ export default function Step1CarDetails({ onNext, defaultValues }: Props) {
   };
 
   const handleSubmit = () => {
-    if (!make || !model || !year) return;
-    onNext({ make, model, year }); // ✅ just pass data upward
+    if (!make || !model || !year || !description) return;
+    console.log("Submitting Step 1 Data:", { make, model, year, description });
+    onNext({ make, model, year, description }); // ✅ include description
   };
 
   return (
@@ -165,11 +170,22 @@ export default function Step1CarDetails({ onNext, defaultValues }: Props) {
         className="w-full border p-2 rounded mb-4 bg-white border-gray-300 focus:ring-2 focus:ring-blue-500"
       />
 
+      <label className="block mb-2 text-lg font-medium text-gray-700">
+        Description
+      </label>
+      <textarea
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="Enter car description (condition, color, features, etc.)"
+        className="w-full border p-2 rounded mb-4 bg-white border-gray-300 focus:ring-2 focus:ring-blue-500"
+        rows={3}
+      />
+
       <button
         type="button"
         onClick={handleSubmit}
         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors disabled:bg-gray-400"
-        disabled={!make || !model || !year}
+        disabled={!make || !model || !year || !description}
       >
         Next Step →
       </button>

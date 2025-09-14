@@ -35,6 +35,7 @@ export interface CarFormData {
   make?: string;
   model?: string;
   year?: number;
+  description?: string;
   ownerName?: string;
   registrationNo?: string;
   cityOfRegistration?: string;

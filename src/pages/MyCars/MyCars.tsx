@@ -30,8 +30,11 @@ export default function MyCars() {
   }, []);
 
   const handleUpdate = (carId: number) => {
-    // Navigate to update page with carId as param
     navigate(`/update-car/${carId}`);
+  };
+
+  const handleDetails = (carId: number) => {
+    navigate(`/car-details/${carId}`);
   };
 
   return (
@@ -80,8 +83,14 @@ export default function MyCars() {
                   <p>Owner: {car.documents?.owner_name}</p>
                 </div>
 
-                {/* Update Button */}
+                {/* Action Buttons */}
                 <div className="car-actions">
+                  <button
+                    className="details-btn"
+                    onClick={() => handleDetails(car.id)}
+                  >
+                    Details
+                  </button>
                   <button
                     className="update-btn"
                     onClick={() => handleUpdate(car.id)}

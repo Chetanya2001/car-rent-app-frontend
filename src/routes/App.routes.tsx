@@ -4,6 +4,7 @@ import Cars from "../pages/Cars/Cars";
 import CarWizard from "../components/AddCarWizard/AddCarWizard";
 import SearchedCars from "../pages/searchedCars/searchedCars";
 import MyCars from "../pages/MyCars/MyCars";
+import CarDetails from "../pages/CarDetails/CarDetails";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -13,6 +14,7 @@ const AppRoutes = () => (
       <Route path="/add-car" element={<CarWizard />} />
       <Route path="/searched-cars" element={<SearchedCars />} />
       <Route path="/my-cars" element={<MyCars />} />
+      <Route path="/car-details/:id" element={<CarDetails />} />
       {/* other routes */}
     </Routes>
   </BrowserRouter>

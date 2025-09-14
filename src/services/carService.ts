@@ -13,9 +13,10 @@ export const addCar = async (carData: {
   make: string;
   model: string;
   year: number;
+  description: string;
 }) => {
   const token = localStorage.getItem("token");
-
+  console.log("📤 Sending Car Data:", carData);
   const response = await axios.post(`${API_URL}/addCar`, carData, {
     headers: {
       "Content-Type": "application/json",
@@ -194,4 +195,9 @@ export const getHostCars = async () => {
     console.error("❌ getHostCars error:", err.response?.data || err.message);
     throw err;
   }
+};
+
+export const getCarById = async (id: number): Promise<Car> => {
+  const response = await axios.get(`/api/cars/${id}`);
+  return response.data;
 };

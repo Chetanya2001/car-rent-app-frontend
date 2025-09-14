@@ -709,6 +709,20 @@ input:checked + .slider:before {
   background-color: #f7f7f7;
   color: #000;
 }
+.profile-avatar {
+  width: 40px; /* adjust as needed */
+  height: 40px;
+  border-radius: 50%; /* makes it round */
+  object-fit: cover;
+  cursor: pointer;
+}
+
+/* When it's the default avatar */
+.default-avatar {
+  border: 2px dashed #aaa; /* dashed border to show it's a placeholder */
+  padding: 2px;
+  background-color: #f0f0f0;
+}
 
 /* ===========================
    Responsive
