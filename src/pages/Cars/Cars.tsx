@@ -3,9 +3,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import type { Car } from "../../types/Cars";
 import Navbar from "../../components/Navbar/Navbar";
 import { getCars } from "../../services/carService";
+import { useNavigate } from "react-router-dom";
 
 const Cars: React.FC = () => {
   const [cars, setCars] = useState<Car[]>([]);
+  const navigate = useNavigate(); // hook to navigate programmatically
 
   useEffect(() => {
     const fetchCars = async () => {
@@ -18,6 +20,10 @@ const Cars: React.FC = () => {
     };
     fetchCars();
   }, []);
+
+  const handleDetailsClick = (id: number) => {
+    navigate(`/car-details/${id}`); // navigate to car details page with id
+  };
 
   return (
     <>
@@ -50,7 +56,10 @@ const Cars: React.FC = () => {
                     <button className="btn btn-primary flex-fill">
                       Book now
                     </button>
-                    <button className="btn btn-success flex-fill">
+                    <button
+                      className="btn btn-success flex-fill"
+                      onClick={() => handleDetailsClick(car.id)}
+                    >
                       Details
                     </button>
                   </div>

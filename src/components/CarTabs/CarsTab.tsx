@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { CarDetails } from "../../types/CarDetails";
+import type { CarDetailsType } from "../../types/CarDetails";
 
 interface Feature {
   name: string;
@@ -7,7 +7,7 @@ interface Feature {
 }
 
 interface Props {
-  car: CarDetails;
+  car: CarDetailsType;
 }
 
 const CarTabs: React.FC<Props> = ({ car }) => {

@@ -1,10 +1,12 @@
 import axios from "axios";
-import type { CarDetails } from "../types/CarDetails";
+import type { CarDetailsType } from "../types/CarDetails";
 
 const API_URL = "http://localhost:5000/api/car-details/getCarDetails";
 
 // 📌 Get Car Details by ID (car_id in body)
-export const getCarDetails = async (car_id: number): Promise<CarDetails> => {
+export const getCarDetails = async (
+  car_id: number
+): Promise<CarDetailsType> => {
   try {
     const token = localStorage.getItem("token");
 
@@ -21,7 +23,7 @@ export const getCarDetails = async (car_id: number): Promise<CarDetails> => {
 
     console.log("📥 Car Details Response:", response.data);
 
-    return response.data as CarDetails;
+    return response.data as CarDetailsType;
   } catch (error: any) {
     console.error(
       "❌ Error fetching car details:",

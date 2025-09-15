@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./searchedCars.css";
 import Navbar from "../../components/Navbar/Navbar";
 
@@ -13,7 +13,14 @@ interface Car {
 
 export default function SearchedCars() {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // ✅ Extract data properly
   const cars: Car[] = location.state?.cars || [];
+  const bookingDetails = location.state?.bookingDetails || {};
+
+  console.log("🚗 Cars received:", cars);
+  console.log("📅 Booking Details received:", bookingDetails);
 
   return (
     <>
@@ -46,10 +53,33 @@ export default function SearchedCars() {
                   <p>Year: {car.year}</p>
                   <p className="car-price">₹{car.price_per_hour} / hour</p>
                 </div>
+
                 {/* ✅ Action buttons */}
                 <div className="car-actions">
                   <button className="btn-book">Book now</button>
-                  <button className="btn-details">Details</button>
+                  <button
+                    className="btn-details"
+                    onClick={() =>
+                      navigate(`/car-details/${car.id}`, {
+                        state: {
+                          pickup_datetime:
+                            bookingDetails.pickupDate +
+                            "T" +
+                            bookingDetails.pickupTime,
+                          dropoff_datetime:
+                            bookingDetails.dropDate +
+                            "T" +
+                            bookingDetails.dropTime,
+                          insurance: bookingDetails.insureTrip,
+                          driver: bookingDetails.driverRequired,
+                          differentDrop: bookingDetails.differentDrop,
+                          price_per_hour: car.price_per_hour,
+                        },
+                      })
+                    }
+                  >
+                    Details
+                  </button>
                 </div>
               </div>
             ))}

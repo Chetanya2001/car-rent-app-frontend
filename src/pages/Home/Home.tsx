@@ -69,15 +69,35 @@ export default function Home() {
     }
 
     try {
-      // Call searchCars with query params
       const data = await searchCars({
         city,
         pickup_datetime: pickupDate,
         dropoff_datetime: dropDate,
       });
 
-      // Navigate to /cars page and pass results via state
-      navigate("/searched-cars", { state: { cars: data.cars } });
+      console.log("✅ Cars fetched from API:", data.cars);
+      console.log("🔹 Extra Booking Info:", {
+        insureTrip,
+        driverRequired,
+        differentDrop,
+      });
+
+      // 👉 Send everything in state
+      navigate("/searched-cars", {
+        state: {
+          cars: data.cars,
+          bookingDetails: {
+            city,
+            pickupDate,
+            pickupTime,
+            dropDate,
+            dropTime,
+            insureTrip,
+            driverRequired,
+            differentDrop,
+          },
+        },
+      });
     } catch (err) {
       console.error("❌ Error searching cars:", err);
       alert("Failed to fetch cars. Try again.");

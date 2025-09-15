@@ -23,7 +23,8 @@ export interface CarPhoto {
   photo_url: string;
 }
 
-export interface CarDetails {
+export interface CarDetailsType {
+  price_per_hour: number;
   id: number;
   make: string;
   model: string;

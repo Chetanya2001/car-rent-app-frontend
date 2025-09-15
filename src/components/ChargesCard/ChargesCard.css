@@ -1,0 +1,98 @@
+.booking-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #fff;
+}
+
+.check-details {
+  flex: 1;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin-right: 20px;
+  text-align: center;
+}
+
+.check-details h3 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: #555;
+}
+
+.detail-item .icon {
+  font-size: 24px;
+  margin-right: 10px;
+  color: #007bff;
+}
+
+.detail-item span {
+  display: flex;
+  align-items: center;
+}
+
+.login-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.login-btn:hover {
+  background-color: #0056b3;
+}
+
+.charges-card {
+  max-width: 28rem;
+  min-height: 30rem;
+  padding: 20px;
+  background: #007bff;
+  color: white;
+  border-radius: 8px;
+  text-align: left;
+}
+.charges-card h3 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.charge-item,
+.charge-total {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.pay-btn {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+  margin-top: 20px;
+}
+
+.pay-btn:hover {
+  background-color: #27ae60;
+}
