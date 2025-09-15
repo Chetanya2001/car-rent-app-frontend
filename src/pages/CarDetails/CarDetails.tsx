@@ -13,26 +13,18 @@ interface LocationState {
   insurance: boolean;
   driver: boolean;
   differentDrop: boolean;
-  price_per_hour: number; // ✅ add this
+  price_per_hour: number;
 }
 
 const CarDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
-  const state = location.state as LocationState;
+  const state = location.state as LocationState | undefined; // ✅ make it optional
   console.log("📦 State received in CarDetails:", state);
 
   const [car, setCar] = useState<CarDetailsType | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  // ⏳ Calculate rental duration
-  const pickup = new Date(state?.pickup_datetime);
-  const dropoff = new Date(state?.dropoff_datetime);
-  const hours = Math.max(
-    1,
-    Math.ceil((dropoff.getTime() - pickup.getTime()) / (1000 * 60 * 60))
-  );
 
   useEffect(() => {
     const fetchCar = async () => {
@@ -53,28 +45,44 @@ const CarDetails: React.FC = () => {
   if (loading) return <p>Loading car details...</p>;
   if (!car) return <p>No car found.</p>;
 
-  // 💰 Charges Calculation
-  const hourlyRate = car?.price_per_hour || state.price_per_hour; // ✅ fallback
-  const carCharges = hourlyRate * hours;
+  // 🧾 Charges (only if state exists)
+  let carCharges = 0,
+    insuranceCharges = 0,
+    driverCharges = 0,
+    pickDropCharges = 0,
+    gst = 0;
 
-  const insuranceCharges = state.insurance ? 20 * hours : 0;
-  const driverCharges = state.driver ? 150 * hours : 0;
-  const pickDropCharges = state.differentDrop ? 1000 : 0;
+  if (state) {
+    const pickup = new Date(state.pickup_datetime);
+    const dropoff = new Date(state.dropoff_datetime);
+    const hours = Math.max(
+      1,
+      Math.ceil((dropoff.getTime() - pickup.getTime()) / (1000 * 60 * 60))
+    );
 
-  const subTotal =
-    carCharges + insuranceCharges + driverCharges + pickDropCharges;
-  const gst = Math.round(subTotal * 0.18);
+    const hourlyRate = car.price_per_hour || state.price_per_hour;
+    carCharges = hourlyRate * hours;
 
-  console.log("🧾 Charges Breakdown:", {
-    hourlyRate,
-    hours,
-    carCharges,
-    insuranceCharges,
-    driverCharges,
-    pickDropCharges,
-    subTotal,
-    gst,
-  });
+    insuranceCharges = state.insurance ? 20 * hours : 0;
+    driverCharges = state.driver ? 150 * hours : 0;
+    pickDropCharges = state.differentDrop ? 1000 : 0;
+
+    const subTotal =
+      carCharges + insuranceCharges + driverCharges + pickDropCharges;
+    gst = Math.round(subTotal * 0.18);
+
+    console.log("🧾 Charges Breakdown:", {
+      hourlyRate,
+      hours,
+      carCharges,
+      insuranceCharges,
+      driverCharges,
+      pickDropCharges,
+      subTotal,
+      gst,
+    });
+  }
+
   // Image navigation
   const nextImage = () => {
     if (car.photos?.length) {
@@ -132,15 +140,22 @@ const CarDetails: React.FC = () => {
         {/* Tabs */}
         <CarTabs car={car} />
 
-        {/* Charges */}
-        <ChargesCard
-          carCharges={carCharges}
-          insuranceCharges={insuranceCharges}
-          driverCharges={driverCharges}
-          pickDropCharges={pickDropCharges}
-          gst={gst}
-          onPay={() => alert("Proceeding to payment...")}
-        />
+        {/* Charges - only if state exists */}
+        {state &&
+          (carCharges > 0 ||
+            insuranceCharges > 0 ||
+            driverCharges > 0 ||
+            pickDropCharges > 0 ||
+            gst > 0) && (
+            <ChargesCard
+              carCharges={carCharges}
+              insuranceCharges={insuranceCharges}
+              driverCharges={driverCharges}
+              pickDropCharges={pickDropCharges}
+              gst={gst}
+              onPay={() => alert("Proceeding to payment...")}
+            />
+          )}
       </div>
       <Footer />
     </>
