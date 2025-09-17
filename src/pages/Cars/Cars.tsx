@@ -13,6 +13,7 @@ const Cars: React.FC = () => {
     const fetchCars = async () => {
       try {
         const data = await getCars();
+        console.log("🚗 Fetched cars:", data);
         setCars(data);
       } catch (error) {
         console.error("❌ Error fetching cars:", error);
@@ -50,7 +51,7 @@ const Cars: React.FC = () => {
                     {car.brand}, {car.year}
                   </p>
                   <p className="fw-bold text-primary mb-3">
-                    INR {car.price_per_hour} <small>/hour</small>
+                    INR {car.price} <small>/hour</small>
                   </p>
                   <div className="mt-auto d-flex gap-2">
                     <button className="btn btn-primary flex-fill">

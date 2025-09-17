@@ -5,6 +5,7 @@ export interface Car {
   name?: string; // if backend sends it
   brand?: string; // if backend sends it
   make: string;
+  price: number;
   model: string;
   year: number;
   price_per_hour: number | null;

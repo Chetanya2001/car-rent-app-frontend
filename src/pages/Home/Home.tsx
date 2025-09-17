@@ -43,6 +43,7 @@ export default function Home() {
   );
   const [role, setRole] = useState<"host" | "guest" | null>(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   // Booking form state
   const [city, setCity] = useState("");
@@ -163,18 +164,39 @@ export default function Home() {
     >
       {/* Header */}
       <header className="home-header">
+        {/* Logo */}
         <img src={logo} alt="Logo" className="home-logo" />
-        <nav className="home-nav">
-          <Link to="/">Home</Link>
-          <Link to="/cars">Cars</Link>
-          <a href="#services">Community</a>
-          <a href="#contact">Support</a>
+
+        {/* Hamburger (mobile only) */}
+        <div
+          className="hamburger"
+          onClick={() => setIsNavOpen((prev) => !prev)}
+        >
+          {isNavOpen ? "✖" : "☰"}
+        </div>
+
+        {/* Navigation */}
+        <nav className={`home-nav ${isNavOpen ? "active" : ""}`}>
+          <Link to="/" onClick={() => setIsNavOpen(false)}>
+            Home
+          </Link>
+          <Link to="/cars" onClick={() => setIsNavOpen(false)}>
+            Cars
+          </Link>
+          <a href="#services" onClick={() => setIsNavOpen(false)}>
+            Community
+          </a>
+          <a href="#contact" onClick={() => setIsNavOpen(false)}>
+            Support
+          </a>
+
           {!user ? (
             <a
               href="#login"
               className="login-link"
               onClick={(e) => {
                 e.preventDefault();
+                setIsNavOpen(false);
                 setActiveModal("login");
               }}
             >

@@ -26,8 +26,8 @@
   top: 0;
   left: 0;
   z-index: 1000;
-  background-color: transparent; /* transparent background */
-  backdrop-filter: blur(8px); /* optional: blur behind the header */
+  background-color: transparent;
+  backdrop-filter: blur(8px);
 }
 
 .home-logo {
@@ -38,14 +38,14 @@
 .home-nav {
   display: flex;
   gap: 20px;
-  align-items: center; /* ✅ keeps all links aligned */
+  align-items: center;
 }
 
 .home-nav a {
   color: #10d28e;
   text-decoration: none;
   font-weight: 500;
-  padding: 8px 0; /* ✅ balances vertical alignment with button */
+  padding: 8px 0;
   transition: color 0.3s ease-in-out;
 }
 
@@ -53,16 +53,24 @@
   color: #01d28e;
 }
 
+.hamburger {
+  font-size: 28px;
+  cursor: pointer;
+  user-select: none;
+  display: none; /* hidden by default */
+  color: #000000; /* make sure it's visible on dark bg */
+  margin-left: auto; /* pushes it to the right */
+}
 /* ===========================
    Hero Section
 =========================== */
 .hero-wrapper {
   position: relative;
   width: 100%;
-  min-height: 70vh; /* extra space */
+  min-height: 70vh;
   background-size: cover;
-  background-position: bottom; /* anchor bottom */
-  background-repeat: no-repeat;
+  background-position: bottom;
+  background-repeat: no-repeat; /* ✅ prevents repeating */
 }
 
 .home-overlay {
@@ -686,7 +694,7 @@ input:checked + .slider:before {
   position: absolute;
   top: 50px; /* below the avatar */
   right: 0;
-  width: 220px;
+  width: 14rem;
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
@@ -727,88 +735,84 @@ input:checked + .slider:before {
 /* ===========================
    Responsive
 =========================== */
-@media (max-width: 1200px) {
-  .hero-wrapper {
-    min-height: 70vh;
-  }
-
-  .home-hero h1 {
-    font-size: 2.5rem;
-  }
-
-  .home-hero p {
-    font-size: 1.1rem;
-    max-width: 500px;
-  }
-
-  .booking-section {
-    flex-direction: column;
-    margin-top: -50px;
-  }
-}
-
-/* -------- Tablets / Large Phones -------- */
-@media (max-width: 992px) {
-  .hero-wrapper {
-    padding: 5% 1rem;
-  }
-
-  .home-hero h1 {
-    font-size: 2.2rem;
-  }
-
-  .home-hero p {
-    font-size: 1rem;
-  }
-
-  .booking-section {
-    padding: 40px 20px;
-  }
-
-  .info-box,
-  .booking-box {
-    width: 90%;
-    max-width: 500px;
-    top: 0;
-    left: 0;
-  }
-}
-
-/* -------- Mobile -------- */
-@media (max-width: 600px) {
-  .hero-wrapper {
-    min-height: 60vh;
-    padding: 5% 1rem;
-  }
-
-  .home-hero h1 {
-    font-size: 1.8rem;
-  }
-
-  .home-hero p {
-    font-size: 0.95rem;
-    max-width: 100%;
-  }
-
-  .home-play {
-    flex-direction: column;
-  }
-
-  .booking-section {
-    margin-top: 20px;
-    padding: 20px 10px;
-  }
-
-  .about-image {
+@media (max-width: 320px) {
+  .home-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: #353535; /* adjust to your theme */
     position: relative;
-    width: 100%;
-    left: 0;
-    top: 0;
-    transform: none;
+    z-index: 1000;
   }
 
-  .about-right {
-    padding: 20px;
+  .home-logo {
+    width: 120px;
+  }
+
+  /* Hamburger styles */
+  .hamburger {
+    display: block;
+    font-size: 28px;
+    cursor: pointer;
+    color: #fff; /* 👈 change to #000 if header is white */
+    z-index: 1001;
+  }
+
+  /* Nav hidden by default */
+  .home-nav {
+    display: none;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    flex-direction: column;
+    background: rgba(51, 51, 51, 0.9);
+    padding: 15px 0;
     text-align: center;
+    gap: 15px;
+  }
+
+  /* Nav when active */
+  .home-nav.active {
+    display: flex;
+  }
+
+  .home-nav a {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .profile-menu {
+    position: relative; /* float on screen */
+    bottom: 200%; /* center vertically */
+    left: 50%; /* center horizontally */
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95); /* black background */
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    z-index: 2000;
+    width: 80%; /* keep it compact */
+  }
+
+  .profile-menu li {
+    color: white; /* white text */
+    font-size: 8px; /* smaller size */
+    padding: 6px 0;
+    transition: background 0.15s ease;
+  }
+  .profile-menu li:hover {
+    color: #ccc;
+  }
+  .hero-wrapper {
+    background-repeat: no-repeat !important;
+    background-size: cover !important; /* make image cover area */
+    background-position: center center !important;
+    background-attachment: scroll !important; /* prevent weird repeat */
   }
 }

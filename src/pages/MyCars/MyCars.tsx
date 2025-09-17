@@ -46,8 +46,8 @@ export default function MyCars() {
           {cars.length === 0 && <p>No cars found.</p>}
 
           {cars.map((car) => {
-            const mainImage =
-              car.photos?.[0] || car.documents?.rc_image_front || "";
+            // ✅ Only use the first car photo
+            const mainImage = car.photos?.[0] || "";
 
             return (
               <div key={car.id} className="car-card">
