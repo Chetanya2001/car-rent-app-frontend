@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getHostCars } from "../../services/carService";
 import type { Car } from "../../types/Cars";
 import Navbar from "../../components/Navbar/Navbar";
-import "./myCars.css";
+import "./MyCars.css";
 
 export default function MyCars() {
   const [cars, setCars] = useState<Car[]>([]);

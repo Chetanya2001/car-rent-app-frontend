@@ -1,18 +1,20 @@
 import axios from "axios";
 import type { UserRegister, UserLogin, AuthResponse } from "../types/user";
 import { jwtDecode } from "jwt-decode";
-const API_URL = "http://localhost:5000/api/users";
+
+// ✅ Use Vite env variable instead of localhost
+const API_URL = `${import.meta.env.VITE_API_URL}/api/users`;
 
 export const registerUser = async (
   data: UserRegister
 ): Promise<AuthResponse> => {
   try {
     const res = await axios.post<AuthResponse>(`${API_URL}/register`, data);
-    console.log("Register response:", res.status, res.data);
+    console.log("✅ Register response:", res.status, res.data);
     return res.data;
   } catch (err: any) {
     console.error(
-      "Error registering user:",
+      "❌ Error registering user:",
       err.response?.status,
       err.response?.data || err.message
     );
@@ -23,11 +25,11 @@ export const registerUser = async (
 export const loginUser = async (data: UserLogin): Promise<AuthResponse> => {
   try {
     const res = await axios.post<AuthResponse>(`${API_URL}/login`, data);
-    console.log("Login response:", res.status, res.data);
+    console.log("✅ Login response:", res.status, res.data);
     return res.data;
   } catch (err: any) {
     console.error(
-      "Error logging in:",
+      "❌ Error logging in:",
       err.response?.status,
       err.response?.data || err.message
     );
@@ -37,7 +39,7 @@ export const loginUser = async (data: UserLogin): Promise<AuthResponse> => {
 
 interface TokenPayload {
   role: "host" | "guest";
-  // other fields like userId, name, etc.
+  // add userId, name, etc. if needed
 }
 
 export const getUserRole = (): "host" | "guest" | null => {

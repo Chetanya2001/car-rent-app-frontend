@@ -1,11 +1,12 @@
 import axios from "axios";
 import type { Car } from "../types/Cars";
 
-const API_URL = "http://localhost:5000/api/cars";
+// ✅ Use env variable
+const API_URL = `${import.meta.env.VITE_API_URL}/api/cars`;
 
 export const getCars = async (): Promise<Car[]> => {
   const response = await axios.get<Car[]>(API_URL);
-  console.log("🚗 Cars API Response:", response.data); // 👈 log everything
+  console.log("🚗 Cars API Response:", response.data);
   return response.data;
 };
 
@@ -23,8 +24,7 @@ export const addCar = async (carData: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
-
-  return response.data; // should return { car_id: ... } from your backend
+  return response.data;
 };
 
 export const uploadRC = async (rcData: {
@@ -47,11 +47,8 @@ export const uploadRC = async (rcData: {
   formData.append("rc_image_front", rcData.rc_image_front);
   formData.append("rc_image_back", rcData.rc_image_back);
 
-  // ✅ Debug log
   console.log("📤 Sending RC Data:");
-  formData.forEach((value, key) => {
-    console.log(`${key}:`, value);
-  });
+  formData.forEach((value, key) => console.log(`${key}:`, value));
 
   const response = await axios.post(`${API_URL}/addRC`, formData, {
     headers: {
@@ -60,7 +57,7 @@ export const uploadRC = async (rcData: {
     },
   });
 
-  return response.data; // will contain { message, data }
+  return response.data;
 };
 
 export const addInsurance = async (insuranceData: {
@@ -72,7 +69,6 @@ export const addInsurance = async (insuranceData: {
 }) => {
   const token = localStorage.getItem("token");
 
-  // Create FormData to handle file upload
   const formData = new FormData();
   formData.append("car_id", String(insuranceData.car_id));
   formData.append("insurance_company", insuranceData.insurance_company);
@@ -83,11 +79,8 @@ export const addInsurance = async (insuranceData: {
   formData.append("insurance_valid_till", insuranceData.insurance_valid_till);
   formData.append("insurance_image", insuranceData.insurance_image);
 
-  // ✅ Debug log
   console.log("📤 Sending Insurance Data:");
-  formData.forEach((value, key) => {
-    console.log(`${key}:`, value);
-  });
+  formData.forEach((value, key) => console.log(`${key}:`, value));
 
   const response = await axios.post(`${API_URL}/addInsurance`, formData, {
     headers: {
@@ -96,26 +89,20 @@ export const addInsurance = async (insuranceData: {
     },
   });
 
-  return response.data; // will contain { message, data }
+  return response.data;
 };
 
 export const uploadImages = async (carId: number, images: File[]) => {
   const token = localStorage.getItem("token");
   const formData = new FormData();
 
-  // Append car_id
   formData.append("car_id", carId.toString());
-
-  // Append each image file
   images.forEach((image) => {
-    formData.append("images", image, image.name); // Use "images" as the field name for multiple files
+    formData.append("images", image, image.name);
   });
 
-  // ✅ Debug log
   console.log("📤 Sending Image Upload Data:");
-  formData.forEach((value, key) => {
-    console.log(`${key}:`, value);
-  });
+  formData.forEach((value, key) => console.log(`${key}:`, value));
 
   const response = await axios.post(`${API_URL}/addImage`, formData, {
     headers: {
@@ -169,28 +156,24 @@ export const searchCars = async (searchData: {
 
   return response.data;
 };
+
 export const getHostCars = async () => {
   try {
-    // Get JWT token from localStorage
     const token = localStorage.getItem("token");
+    if (!token) throw new Error("No auth token found. Please login first.");
 
-    if (!token) {
-      throw new Error("No auth token found. Please login first.");
-    }
-
-    // Make POST request to backend
     const response = await axios.post(
-      "http://localhost:5000/api/cars/my-host-cars",
-      {}, // POST body can be empty if backend only uses token
+      `${API_URL}/my-host-cars`,
+      {},
       {
         headers: {
-          Authorization: `Bearer ${token}`, // Backend expects this
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       }
     );
 
-    return response.data; // Expecting: { cars: [...] }
+    return response.data;
   } catch (err: any) {
     console.error("❌ getHostCars error:", err.response?.data || err.message);
     throw err;
@@ -198,6 +181,6 @@ export const getHostCars = async () => {
 };
 
 export const getCarById = async (id: number): Promise<Car> => {
-  const response = await axios.get(`/api/cars/${id}`);
+  const response = await axios.get(`${API_URL}/${id}`);
   return response.data;
 };

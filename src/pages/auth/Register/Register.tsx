@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import type { User, UserRegister } from "../../../types/user";
 import { registerUser } from "../../../services/auth";
+import "./Register.css";
 
 export interface RegisterProps {
   onClose: () => void;

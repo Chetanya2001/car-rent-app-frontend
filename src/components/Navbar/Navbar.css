@@ -1,3 +1,4 @@
+/* Base styles for navbar */
 .scroll-navbar {
   display: flex;
   justify-content: space-between;
@@ -10,17 +11,22 @@
   z-index: 100;
 }
 
+/* Logo styling */
 .scroll-navbar-logo img {
   height: 50px;
   width: auto;
 }
 
+/* Main nav links */
 .scroll-navbar-links {
   display: flex;
   list-style: none;
   gap: 2rem;
+  margin: 0;
+  padding: 0;
 }
 
+/* Individual nav links */
 .scroll-navbar-links li a {
   text-decoration: none;
   color: #333;
@@ -32,6 +38,7 @@
   color: #0d6efd;
 }
 
+/* Login/Profile Section */
 .scroll-navbar-login {
   display: flex;
   align-items: center;
@@ -44,13 +51,14 @@
   align-items: center;
 }
 
+/* Avatar styling */
 .profile-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s;
   border: 2px solid #10d28e;
 }
 
@@ -58,10 +66,10 @@
   transform: scale(1.05);
 }
 
-/* Dropdown menu */
+/* Profile dropdown menu */
 .profile-menu-outside {
   position: absolute;
-  top: 55px; /* connected below avatar */
+  top: 55px;
   right: 0;
   width: 200px;
   background: white;
@@ -73,49 +81,144 @@
   z-index: 999;
   animation: fadeIn 0.2s ease-in-out;
 }
-
-/* Triangle on top-right of dropdown */
 .profile-menu-outside::before {
   content: "";
   position: absolute;
   top: -8px;
-  right: 15px; /* aligns with avatar */
+  right: 15px;
   border-width: 0 8px 8px 8px;
   border-style: solid;
   border-color: transparent transparent #fff transparent;
 }
-
-/* Dropdown items */
 .profile-menu-outside li {
   display: flex;
   align-items: center;
-  gap: 10px; /* space between icon and text */
+  gap: 10px;
   padding: 12px 20px;
   cursor: pointer;
-  transition: background 0.15s ease;
   font-weight: 500;
   color: #333;
+  transition: background 0.15s;
 }
-
 .profile-menu-outside li:hover {
   background-color: #f7f7f7;
   color: #000;
 }
 
-/* Buttons */
-.scroll-navbar-login button {
-  background-color: #10d28e;
-  color: #ffffff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
+.menu-icon {
+  min-width: 22px;
 }
 
-.scroll-navbar-login button:hover {
-  background-color: #0bb67a; /* slightly darker green on hover */
+/* Hamburger icon: hidden by default */
+.scroll-navbar-hamburger {
+  display: none;
+  cursor: pointer;
+  margin-left: 1.2rem;
+}
+
+@media (max-width: 1100px) {
+  .scroll-navbar {
+    padding: 1rem 1.2rem;
+  }
+  .scroll-navbar-links {
+    gap: 1.4rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .scroll-navbar-links {
+    gap: 1rem;
+  }
+  .scroll-navbar-logo img {
+    height: 38px;
+  }
+  .profile-avatar {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* MOBILE / TABLET STYLES */
+@media (max-width: 700px) {
+  .scroll-navbar {
+    flex-direction: row;
+    align-items: center;
+    padding: 0.7rem 0.5rem;
+  }
+
+  .scroll-navbar-hamburger {
+    display: flex;
+    align-items: center;
+    z-index: 1200;
+  }
+
+  /* Hide nav links by default on mobile */
+  .scroll-navbar-links {
+    position: absolute;
+    top: 62px;
+    right: 0;
+    left: 0;
+    width: 100vw;
+    background: #fff;
+    flex-direction: column;
+    gap: 0;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 14px 14px;
+    padding: 0.5rem 0;
+    display: none;
+    animation: fadeIn 0.18s;
+  }
+  .scroll-navbar-links.active {
+    display: flex;
+  }
+  .scroll-navbar-links li {
+    width: 100%;
+  }
+  .scroll-navbar-links li a {
+    padding: 1rem 2.5rem;
+    width: 100%;
+    display: block;
+    font-size: 1.08rem;
+  }
+  .scroll-navbar-links li a:hover {
+    background: #f2f2f2;
+    color: #0d6efd;
+  }
+
+  .scroll-navbar-login {
+    margin-left: 0.7rem;
+  }
+}
+
+/* Adjust profile dropdown for tiny screens */
+@media (max-width: 550px) {
+  .profile-menu-outside {
+    right: 5px;
+    width: 92vw;
+    min-width: 120px;
+    max-width: 99vw;
+    padding: 6px 0.5rem;
+  }
+  .profile-avatar {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Smaller logo for tiny screens */
+@media (max-width: 410px) {
+  .scroll-navbar-logo img {
+    height: 28px;
+    max-width: 70vw;
+  }
+}
+
+/* Modal overlay fix for mobile if needed */
+@media (max-width: 700px) {
+  .modal-wrapper {
+    width: 97vw !important;
+    left: 1vw !important;
+  }
 }
 
 /* Smooth fade-in animation */

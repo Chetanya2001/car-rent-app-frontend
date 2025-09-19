@@ -1,7 +1,8 @@
 import axios from "axios";
 import type { CarDetailsType } from "../types/CarDetails";
 
-const API_URL = "http://localhost:5000/api/car-details/getCarDetails";
+// ✅ Use env variable for API base
+const API_URL = `${import.meta.env.VITE_API_URL}/api/car-details/getCarDetails`;
 
 // 📌 Get Car Details by ID (car_id in body)
 export const getCarDetails = async (
@@ -11,8 +12,8 @@ export const getCarDetails = async (
     const token = localStorage.getItem("token");
 
     const response = await axios.post(
-      API_URL, // ✅ updated route
-      { car_id }, // Send car_id in body
+      API_URL,
+      { car_id },
       {
         headers: {
           "Content-Type": "application/json",

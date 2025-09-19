@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import logo from "../../assets/logo.png";
 import defaultAvatar from "../../assets/user.png";
 import "./Navbar.css";
@@ -16,6 +16,8 @@ import {
   faLifeRing,
   faDoorOpen,
   faPlus,
+  faBars,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import type { User } from "../../types/user";
 
@@ -23,7 +25,6 @@ interface TokenPayload {
   role: "host" | "guest";
 }
 
-// Updated menu items with consistent capitalization
 const hostMenu = [
   "Add a Car",
   "My Cars",
@@ -61,9 +62,32 @@ export default function Navbar() {
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null
   );
-  const [showMenu, setShowMenu] = useState(false);
+  const [showMenu, setShowMenu] = useState(false); // profile dropdown
+  const [navOpen, setNavOpen] = useState(false); // hamburger nav links
+  const profileMenuRef = useRef<HTMLUListElement | null>(null);
+  const hamburgerRef = useRef<HTMLDivElement | null>(null);
 
-  // Load user and role from localStorage
+  // Close dropdown/profile nav on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowMenu(false);
+      }
+      if (
+        hamburgerRef.current &&
+        !hamburgerRef.current.contains(event.target as Node)
+      ) {
+        setNavOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Load user/role from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -84,7 +108,8 @@ export default function Navbar() {
     setUser(null);
     setRole(null);
     setShowMenu(false);
-    navigate("/"); // Redirect to home page after logout
+    setNavOpen(false);
+    navigate("/");
   };
 
   const handleUserLogin = (userData: User) => {
@@ -134,6 +159,7 @@ export default function Navbar() {
         break;
     }
     setShowMenu(false); // close menu after click
+    setNavOpen(false);
   };
 
   return (
@@ -142,22 +168,35 @@ export default function Navbar() {
         <div className="scroll-navbar-logo">
           <img src={logo} alt="Logo" />
         </div>
-
-        <ul className="scroll-navbar-links">
+        <div
+          className="scroll-navbar-hamburger"
+          onClick={() => setNavOpen((prev) => !prev)}
+          ref={hamburgerRef}
+        >
+          <FontAwesomeIcon icon={navOpen ? faTimes : faBars} size="lg" />
+        </div>
+        <ul className={`scroll-navbar-links${navOpen ? " active" : ""}`}>
           <li>
-            <Link to="/">Home</Link>
+            <Link to="/" onClick={() => setNavOpen(false)}>
+              Home
+            </Link>
           </li>
           <li>
-            <Link to="/cars">Cars</Link>
+            <Link to="/cars" onClick={() => setNavOpen(false)}>
+              Cars
+            </Link>
           </li>
           <li>
-            <a href="#services">Community</a>
+            <a href="#services" onClick={() => setNavOpen(false)}>
+              Community
+            </a>
           </li>
           <li>
-            <a href="#contact">Support</a>
+            <a href="#contact" onClick={() => setNavOpen(false)}>
+              Support
+            </a>
           </li>
         </ul>
-
         <div className="scroll-navbar-login">
           {!user ? (
             <button
@@ -175,7 +214,7 @@ export default function Navbar() {
                 onClick={() => setShowMenu((prev) => !prev)}
               />
               {showMenu && (
-                <ul className="profile-menu">
+                <ul className="profile-menu-outside" ref={profileMenuRef}>
                   {menuItems.map((item, idx) => (
                     <li key={idx} onClick={() => handleMenuClick(item)}>
                       <FontAwesomeIcon
