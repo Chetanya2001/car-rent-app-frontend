@@ -25,7 +25,7 @@ jobs:
         run: npm run build
 
       - name: Verify build output
-        run: ls -l ./build # Change 'build' to your output folder if different
+        run: ls -l ./dist
 
       - name: Copy build files to EC2
         uses: appleboy/scp-action@master
@@ -34,7 +34,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
-          source: "./build/" # Change 'build' if your output folder differs
+          source: "./dist/"
           target: "/tmp/build/"
 
       - name: Deploy to EC2 via SSH
