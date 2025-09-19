@@ -3,7 +3,7 @@ name: Frontend CI/CD
 on:
   push:
     branches:
-      - main # Or your production branch
+      - main # or your production branch
 
 jobs:
   build-and-deploy:
@@ -46,8 +46,7 @@ jobs:
           port: 22
           script: |
             sudo rm -rf /usr/share/nginx/html/*
-            sudo cp -r /tmp/dist/* /usr/share/nginx/html/
+            sudo cp -r ~/car-rent-app-frontend/dist/* /usr/share/nginx/html/
             sudo chown -R www-data:www-data /usr/share/nginx/html
-            sudo find /usr/share/nginx/html -type d -exec chmod 755 {} \;
-            sudo find /usr/share/nginx/html -type f -exec chmod 644 {} \;
+            sudo chmod -R 755 /usr/share/nginx/html
             sudo systemctl reload nginx
