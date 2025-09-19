@@ -32,7 +32,7 @@ function VerifyEmail() {
       })
       .catch(() => {
         setStatus("error");
-        setMessage("Something went wrong. Please try again.");
+        setMessage("Something went wrong. Please Try again.");
       });
   }, [location]);
 
