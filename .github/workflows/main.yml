@@ -3,7 +3,7 @@ name: Frontend CI/CD
 on:
   push:
     branches:
-      - main  # or your production branch
+      - main # or your production branch
 
 jobs:
   build-and-deploy:
@@ -16,13 +16,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18  # Choose your Node version
+          node-version: 18 # Choose your Node version
 
       - name: Install dependencies
         run: npm install
 
       - name: Build frontend
         run: npm run build
+
+      - name: Verify build output
+        run: ls -l ./build # Change 'build' to your output folder if different
 
       - name: Copy build files to EC2
         uses: appleboy/scp-action@master
@@ -31,7 +34,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
-          source: "./build/"
+          source: "./build/" # Change 'build' if your output folder differs
           target: "/tmp/build/"
 
       - name: Deploy to EC2 via SSH
