@@ -17,7 +17,9 @@ function VerifyEmail() {
     }
 
     // Call backend API to verify email
-    fetch(`${import.meta.env.VITE_API_URL}/verify-email?token=${token}`)
+    fetch(
+      `${import.meta.env.VITE_API_URL}/api/users/verify-email?token=${token}`
+    )
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
