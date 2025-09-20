@@ -13,31 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build frontend
-        run: npm run build
-
-      - name: Verify build output
-        run: ls -l ./dist
-
-      - name: Copy build files to EC2
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
-          source: "./dist/"
-          target: "/tmp/dist/"
-
-      - name: Deploy to EC2 via SSH
+      - name: Deploy and build on EC2 via SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -45,8 +21,33 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            APP_DIR=~/car-rent-app-frontend
+
+            # Remove existing files
+            rm -rf $APP_DIR/*
+
+            # Clone fresh repo if it doesn't exist, else pull latest
+            if [ ! -d "$APP_DIR/.git" ]; then
+              git clone https://github.com/Chetanya2001/car-rent-app-frontend.git $APP_DIR
+            else
+              cd $APP_DIR
+              git reset --hard
+              git pull origin main
+            fi
+
+            # Install dependencies and build
+            cd $APP_DIR
+            npm install
+            npm run build
+
+            # Deploy build to NGINX root
             sudo rm -rf /usr/share/nginx/html/*
-            sudo cp -r /tmp/dist/* /usr/share/nginx/html/
+            sudo cp -r $APP_DIR/dist/* /usr/share/nginx/html/
             sudo chown -R www-data:www-data /usr/share/nginx/html
             sudo chmod -R 755 /usr/share/nginx/html
+
+            # Reload NGINX
             sudo systemctl reload nginx
+
+            # Verify deployment
+            ls -l /usr/share/nginx/html
