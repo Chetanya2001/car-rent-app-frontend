@@ -1,12 +1,20 @@
-/* Make the switch bigger */
+/* Default large toggle for desktop and tablets */
 .big-switch .form-check-input {
-  width: 3.5rem; /* wider switch */
-  height: 1.8rem; /* taller switch */
-  cursor: pointer;
+  width: 3.5rem !important;
+  height: 1.8rem !important;
 }
 
+/* On small mobile devices, keep the switch large but slightly reduced for spacing */
+@media (max-width: 768px) {
+  .big-switch .form-check-input {
+    width: 2.6rem !important;
+    height: 1.4rem !important;
+  }
+}
+
+/* Optionally, boost thumb size for clarity (works with Bootstrap switches) */
 .big-switch .form-check-input:checked {
-  background-color: #0d6efd; /* Bootstrap primary */
+  background-color: #0d6efd;
   border-color: #0d6efd;
 }
 
