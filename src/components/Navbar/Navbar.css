@@ -24,6 +24,8 @@
   gap: 2rem;
   margin: 0;
   padding: 0;
+  z-index: 1100; /* Added for mobile overlay layering */
+  box-sizing: border-box; /* Added */
 }
 
 /* Individual nav links */
@@ -32,6 +34,7 @@
   color: #333;
   font-weight: 500;
   transition: color 0.3s;
+  pointer-events: auto; /* Ensure clicks are enabled */
 }
 
 .scroll-navbar-links li a:hover {
@@ -114,8 +117,12 @@
   display: none;
   cursor: pointer;
   margin-left: 1.2rem;
+  z-index: 1200;
 }
 
+/* Responsive adjustments */
+
+/* For screen width max 1100px */
 @media (max-width: 1100px) {
   .scroll-navbar {
     padding: 1rem 1.2rem;
@@ -125,6 +132,7 @@
   }
 }
 
+/* For screen width max 900px */
 @media (max-width: 900px) {
   .scroll-navbar-links {
     gap: 1rem;
@@ -156,8 +164,8 @@
   .scroll-navbar-links {
     position: absolute;
     top: 62px;
-    right: 0;
-    left: 0;
+    right: 0 !important;
+    left: 0 !important;
     width: 100vw;
     background: #fff;
     flex-direction: column;
@@ -167,6 +175,8 @@
     padding: 0.5rem 0;
     display: none;
     animation: fadeIn 0.18s;
+    z-index: 1100; /* For layering */
+    box-sizing: border-box;
   }
   .scroll-navbar-links.active {
     display: flex;
@@ -179,6 +189,7 @@
     width: 100%;
     display: block;
     font-size: 1.08rem;
+    pointer-events: auto; /* Ensure clickable */
   }
   .scroll-navbar-links li a:hover {
     background: #f2f2f2;
