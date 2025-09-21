@@ -51,7 +51,6 @@ function VerifyEmail() {
       {status === "loading" && <p>Verifying your email...</p>}
       {(status === "success" || status === "error") && (
         <>
-          <h2>{status === "success" ? "Success!" : "Error"}</h2>
           <p>{message}</p>
         </>
       )}
