@@ -5,7 +5,7 @@ import "./Navbar.css";
 import Login from "../../pages/auth/Login/Login";
 import Register from "../../pages/auth/Register/Register";
 import ModalWrapper from "../ModalWrapper/ModalWrapper";
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -66,28 +66,33 @@ export default function Navbar() {
   const [navOpen, setNavOpen] = useState(false); // hamburger nav links
   const profileMenuRef = useRef<HTMLUListElement | null>(null);
   const hamburgerRef = useRef<HTMLDivElement | null>(null);
+  const navMenuRef = useRef<HTMLUListElement | null>(null);
 
-  // Close dropdown/profile nav on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      // Close profile dropdown
       if (
         profileMenuRef.current &&
         !profileMenuRef.current.contains(event.target as Node)
       ) {
         setShowMenu(false);
       }
+
+      // Close hamburger nav
       if (
         hamburgerRef.current &&
-        !hamburgerRef.current.contains(event.target as Node)
+        !hamburgerRef.current.contains(event.target as Node) &&
+        navMenuRef.current &&
+        !navMenuRef.current.contains(event.target as Node)
       ) {
         setNavOpen(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Load user/role from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -158,7 +163,7 @@ export default function Navbar() {
       default:
         break;
     }
-    setShowMenu(false); // close menu after click
+    setShowMenu(false);
     setNavOpen(false);
   };
 
@@ -168,23 +173,48 @@ export default function Navbar() {
         <div className="scroll-navbar-logo">
           <img src={logo} alt="Logo" />
         </div>
+
+        {/* Hamburger button */}
         <div
           className="scroll-navbar-hamburger"
           onClick={() => setNavOpen((prev) => !prev)}
           ref={hamburgerRef}
+          role="button"
+          tabIndex={0}
+          aria-label={
+            navOpen ? "Close navigation menu" : "Open navigation menu"
+          }
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              setNavOpen((prev) => !prev);
+            }
+          }}
         >
           <FontAwesomeIcon icon={navOpen ? faTimes : faBars} size="lg" />
         </div>
-        <ul className={`scroll-navbar-links${navOpen ? " active" : ""}`}>
+
+        {/* Navigation Links */}
+        <ul
+          className={`scroll-navbar-links${navOpen ? " active" : ""}`}
+          ref={navMenuRef}
+        >
           <li>
-            <Link to="/" onClick={() => setNavOpen(false)}>
+            <NavLink
+              to="/"
+              className={({ isActive }) => (isActive ? "active" : "")}
+              onClick={() => setNavOpen(false)}
+            >
               Home
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/cars" onClick={() => setNavOpen(false)}>
+            <NavLink
+              to="/cars"
+              className={({ isActive }) => (isActive ? "active" : "")}
+              onClick={() => setNavOpen(false)}
+            >
               Cars
-            </Link>
+            </NavLink>
           </li>
           <li>
             <a href="#services" onClick={() => setNavOpen(false)}>
@@ -197,6 +227,8 @@ export default function Navbar() {
             </a>
           </li>
         </ul>
+
+        {/* Login/Profile */}
         <div className="scroll-navbar-login">
           {!user ? (
             <button
@@ -216,7 +248,17 @@ export default function Navbar() {
               {showMenu && (
                 <ul className="profile-menu-outside" ref={profileMenuRef}>
                   {menuItems.map((item, idx) => (
-                    <li key={idx} onClick={() => handleMenuClick(item)}>
+                    <li
+                      key={idx}
+                      tabIndex={0}
+                      role="menuitem"
+                      onClick={() => handleMenuClick(item)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          handleMenuClick(item);
+                        }
+                      }}
+                    >
                       <FontAwesomeIcon
                         icon={iconMap[item]}
                         className="menu-icon"
