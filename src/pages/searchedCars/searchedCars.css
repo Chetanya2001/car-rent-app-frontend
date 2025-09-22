@@ -14,7 +14,7 @@
 }
 /* Search Button */
 .search-btn {
-  background: #2a9d8f;
+  background: #01d28e;
   color: #fff;
   padding: 8px 16px; /* smaller padding for less width */
   border: none;
@@ -88,7 +88,7 @@
   width: 20px;
   height: 20px;
   margin-top: 0.3rem;
-  accent-color: #2a9d8f;
+  accent-color: #01d28e;
   cursor: pointer;
 }
 
@@ -195,7 +195,7 @@
   width: 34vw;
   min-width: 180px;
   max-width: 600px;
-  background: #05d299;
+  background: #01d28e;
   clip-path: polygon(0 0, 100% 0, 80% 100%, 0% 100%);
   z-index: 1;
 }
