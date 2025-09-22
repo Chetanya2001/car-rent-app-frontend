@@ -42,7 +42,6 @@ export default function SearchedCars() {
     }));
   };
 
-  // 🔹 Call API again when "Search" button is clicked
   const handleSearch = async () => {
     if (!filters.city || !filters.pickupDate || !filters.dropDate) {
       alert("Please fill all fields");
@@ -63,7 +62,6 @@ export default function SearchedCars() {
     }
   };
 
-  // 🔹 Dynamic filtering of already fetched cars
   const filteredCars = useMemo(() => {
     return cars.filter((car) => {
       if (
@@ -102,7 +100,7 @@ export default function SearchedCars() {
       <Navbar />
 
       {/* Filters with Search Button */}
-      <div className="filters-panel">
+      <div className="searched-filters-panel">
         <label>
           City:
           <input
@@ -151,52 +149,51 @@ export default function SearchedCars() {
         </label>
 
         {/* Toggles */}
-        <label className="switch-label">
+        <label className="searched-switch-label">
           Insure Trip:
-          <span className="switch">
+          <span className="searched-switch">
             <input
               type="checkbox"
               name="insureTrip"
               checked={filters.insureTrip}
               onChange={handleFilterChange}
             />
-            <span className="slider"></span>
+            <span className="searched-slider"></span>
           </span>
         </label>
-        <label className="switch-label">
+        <label className="searched-switch-label">
           Driver Required:
-          <span className="switch">
+          <span className="searched-switch">
             <input
               type="checkbox"
               name="driverRequired"
               checked={filters.driverRequired}
               onChange={handleFilterChange}
             />
-            <span className="slider"></span>
+            <span className="searched-slider"></span>
           </span>
         </label>
-        <label className="switch-label">
+        <label className="searched-switch-label">
           Different Drop Location:
-          <span className="switch">
+          <span className="searched-switch">
             <input
               type="checkbox"
               name="differentDrop"
               checked={filters.differentDrop}
               onChange={handleFilterChange}
             />
-            <span className="slider"></span>
+            <span className="searched-slider"></span>
           </span>
         </label>
 
-        {/* 🔹 Search Button */}
-        <button className="search-btn" onClick={handleSearch}>
+        <button className="searched-search-btn" onClick={handleSearch}>
           Search
         </button>
       </div>
 
       {/* Banner */}
-      <div className="search-results-banner">
-        <div className="banner-content">
+      <div className="searched-results-banner">
+        <div className="searched-banner-content">
           <h2>Your Search results</h2>
           <p>
             Found {filteredCars.length.toString().padStart(2, "0")} cars for
@@ -206,38 +203,42 @@ export default function SearchedCars() {
       </div>
 
       {/* Car Listing */}
-      <div className="searched-cars-page">
+      <div className="searched-cars-container">
         {filteredCars.length === 0 ? (
-          <p className="no-cars">No cars found for the selected criteria.</p>
+          <p className="searched-no-cars">
+            No cars found for the selected criteria.
+          </p>
         ) : (
-          <div className="car-list">
+          <div className="searched-car-list">
             {filteredCars.map((car) => (
-              <div key={car.id} className="car-card">
-                <div className="car-image-wrapper">
+              <div key={car.id} className="searched-car-card">
+                <div className="searched-car-image-wrapper">
                   {car.photos && car.photos.length > 0 ? (
                     <img
                       src={car.photos[0]}
                       alt={`${car.make} ${car.model}`}
-                      className="car-image"
+                      className="searched-car-image"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/placeholder.png";
                       }}
                     />
                   ) : (
-                    <div className="car-placeholder">No Image</div>
+                    <div className="searched-car-placeholder">No Image</div>
                   )}
                 </div>
-                <div className="car-info">
+                <div className="searched-car-info">
                   <h3>
                     {car.make} {car.model}
                   </h3>
                   <p>Year: {car.year}</p>
-                  <p className="car-price">₹{car.price_per_hour} / hour</p>
+                  <p className="searched-car-price">
+                    ₹{car.price_per_hour} / hour
+                  </p>
                 </div>
-                <div className="car-actions">
-                  <button className="btn-book">Book now</button>
+                <div className="searched-car-actions">
+                  <button className="searched-btn-book">Book now</button>
                   <button
-                    className="btn-details"
+                    className="searched-btn-details"
                     onClick={() =>
                       navigate(`/car-details/${car.id}`, {
                         state: {

@@ -373,39 +373,39 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="toggles">
-            <label className="switch-label">
-              Insure Trip
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  checked={insureTrip}
-                  onChange={() => setInsureTrip(!insureTrip)}
-                />
-                <span className="slider round"></span>
-              </label>
+          <div className="toggle-wrapper">
+            <span className="switch-label">Insure Trip</span>
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={insureTrip}
+                onChange={() => setInsureTrip(!insureTrip)}
+              />
+              <span className="slider round"></span>
             </label>
-            <label className="switch-label">
-              Driver Required
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  checked={driverRequired}
-                  onChange={() => setDriverRequired(!driverRequired)}
-                />
-                <span className="slider round"></span>
-              </label>
+          </div>
+
+          <div className="toggle-wrapper">
+            <span className="switch-label">Driver Required</span>
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={driverRequired}
+                onChange={() => setDriverRequired(!driverRequired)}
+              />
+              <span className="slider round"></span>
             </label>
-            <label className="switch-label">
-              Different Drop-off Location
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  checked={differentDrop}
-                  onChange={() => setDifferentDrop(!differentDrop)}
-                />
-                <span className="slider round"></span>
-              </label>
+          </div>
+
+          <div className="toggle-wrapper">
+            <span className="switch-label">Different Drop-off Location</span>
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={differentDrop}
+                onChange={() => setDifferentDrop(!differentDrop)}
+              />
+              <span className="slider round"></span>
             </label>
           </div>
 
