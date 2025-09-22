@@ -79,8 +79,8 @@
 .filters-panel input[type="text"]:focus,
 .filters-panel input[type="date"]:focus,
 .filters-panel input[type="time"]:focus {
-  border-color: #2a9d8f;
-  box-shadow: 0 0 6px #2a9d8f88;
+  border-color: #01d28e;
+  box-shadow: 0 0 6px #01d28e;
   outline: none;
 }
 
@@ -147,7 +147,7 @@
 
 /* Checked state slider and circle position */
 .switch input:checked + .slider {
-  background-color: #2a9d8f;
+  background-color: #01d28e;
 }
 
 .switch input:checked + .slider:before {
@@ -346,11 +346,11 @@
 
 /* details button */
 .btn-details {
-  background-color: #2a9d8f;
+  background-color: #01d28e;
   color: #fff;
 }
 
 .btn-details:hover {
-  background-color: #1f7a6c;
+  background-color: #01d28e;
   transform: scale(1.03);
 }
