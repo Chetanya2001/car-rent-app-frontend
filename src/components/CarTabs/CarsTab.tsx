@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import type { CarDetailsType } from "../../types/CarDetails";
+import "./CarTabs.css";
 
 interface Feature {
   name: string;
@@ -32,36 +33,14 @@ const CarTabs: React.FC<Props> = ({ car }) => {
   ];
 
   return (
-    <div
-      style={{
-        maxWidth: "900px",
-        margin: "40px auto",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
+    <div className="car-tabs-container">
       {/* Tabs header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          borderBottom: "1px solid #ddd",
-          marginBottom: "20px",
-        }}
-      >
+      <div className="tabs-header">
         {["features", "description", "review"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab as any)}
-            style={{
-              background: "none",
-              border: "none",
-              margin: "0 20px",
-              padding: "10px 0",
-              cursor: "pointer",
-              fontWeight: activeTab === tab ? "bold" : "normal",
-              color: activeTab === tab ? "#007bff" : "#888",
-              borderBottom: activeTab === tab ? "2px solid #007bff" : "none",
-            }}
+            className={`tab-button ${activeTab === tab ? "active" : ""}`}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
           </button>
@@ -69,35 +48,20 @@ const CarTabs: React.FC<Props> = ({ car }) => {
       </div>
 
       {/* Tab content */}
-      <div style={{ minHeight: "180px" }}>
+      <div className="tab-content">
         {activeTab === "features" && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
-              gap: "20px 30px",
-            }}
-          >
+          <div className="features-grid">
             {columns.map((column, idx) => (
-              <ul
-                key={idx}
-                style={{ listStyle: "none", padding: 0, margin: 0 }}
-              >
+              <ul key={idx} className="feature-column">
                 {column.map((f, i) => (
                   <li
                     key={i}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: "12px",
-                      fontSize: "15px",
-                      color: f.active ? "green" : "red",
-                    }}
+                    className={`feature-item ${
+                      f.active ? "active" : "inactive"
+                    }`}
                   >
-                    <span style={{ width: "20px", display: "inline-block" }}>
-                      {f.active ? "✔" : "✘"}
-                    </span>
-                    <span style={{ color: "#333" }}>{f.name}</span>
+                    <span className="feature-icon">{f.active ? "✔" : "✘"}</span>
+                    <span className="feature-name">{f.name}</span>
                   </li>
                 ))}
               </ul>
@@ -106,15 +70,13 @@ const CarTabs: React.FC<Props> = ({ car }) => {
         )}
 
         {activeTab === "description" && (
-          <p style={{ fontSize: "15px", color: "#555" }}>
+          <p className="tab-description">
             {car.description || "No description available."}
           </p>
         )}
 
         {activeTab === "review" && (
-          <p style={{ fontSize: "15px", color: "#555" }}>
-            Reviews will go here...
-          </p>
+          <p className="tab-description">Reviews will go here...</p>
         )}
       </div>
     </div>

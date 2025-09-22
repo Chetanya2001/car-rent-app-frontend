@@ -5,7 +5,6 @@
 }
 
 /* Hero background image */
-
 .car-hero {
   position: relative;
   height: 400px;
@@ -103,23 +102,24 @@
   margin-top: 0.2rem;
 }
 
+/* Responsive Carousel */
 .carousel {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 30px 0;
+  margin: 30px auto;
   position: relative;
-  width: 600px; /* fixed width */
-  height: 400px; /* fixed height */
+  width: 100%;
+  max-width: 600px;
+  height: 400px;
   overflow: hidden;
-  margin-left: auto;
-  margin-right: auto; /* centers the carousel */
+  padding: 0 1rem;
 }
 
 .carousel-image {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* fills the box tightly, crops excess */
+  object-fit: cover;
   border-radius: 10px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
@@ -136,6 +136,7 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 10;
+  transition: background-color 0.3s ease;
 }
 
 .carousel .prev {
@@ -148,4 +149,241 @@
 
 .carousel button:hover {
   background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Tablet Styles (768px - 1024px) */
+@media screen and (max-width: 1024px) {
+  .car-hero {
+    height: 350px;
+  }
+
+  .car-info {
+    max-width: 90%;
+    margin: 1.5rem auto;
+  }
+
+  .car-info h2 {
+    font-size: 24px;
+  }
+
+  .car-features {
+    gap: 2rem;
+    margin-top: 1rem;
+  }
+
+  .feature {
+    min-width: 100px;
+  }
+
+  .feature i {
+    font-size: 24px;
+  }
+
+  .carousel {
+    height: 300px;
+    margin: 20px auto;
+  }
+
+  .carousel button {
+    font-size: 24px;
+    padding: 8px;
+  }
+}
+
+/* Mobile Styles (max-width: 768px) */
+@media screen and (max-width: 768px) {
+  .car-hero {
+    height: 250px;
+  }
+
+  .overlay {
+    padding: 15px;
+  }
+
+  .car-hero .overlay h1 {
+    font-size: 24px;
+    margin: 0;
+  }
+
+  .breadcrumb {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .car-info {
+    margin: 1rem auto;
+    padding: 0 0.5rem;
+  }
+
+  .car-info h2 {
+    font-size: 20px;
+    margin-bottom: 1rem;
+  }
+
+  .car-features {
+    gap: 1.5rem;
+    flex-direction: row;
+    justify-content: space-around;
+  }
+
+  .feature {
+    min-width: 80px;
+    flex: 1;
+  }
+
+  .feature i {
+    font-size: 20px;
+    margin-bottom: 0.3rem;
+  }
+
+  .feature p {
+    font-size: 12px;
+  }
+
+  .feature span {
+    font-size: 14px;
+  }
+
+  .carousel {
+    height: 250px;
+    margin: 15px auto;
+    padding: 0 0.5rem;
+  }
+
+  .carousel button {
+    font-size: 20px;
+    padding: 6px;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .carousel .prev {
+    left: 5px;
+  }
+
+  .carousel .next {
+    right: 5px;
+  }
+}
+
+/* Small Mobile Styles (max-width: 480px) */
+@media screen and (max-width: 480px) {
+  .car-hero {
+    height: 200px;
+  }
+
+  .car-hero .overlay h1 {
+    font-size: 20px;
+  }
+
+  .car-info h2 {
+    font-size: 18px;
+  }
+
+  .car-features {
+    gap: 1rem;
+    padding: 0 0.5rem;
+  }
+
+  .feature {
+    min-width: 70px;
+  }
+
+  .feature i {
+    font-size: 18px;
+  }
+
+  .feature p {
+    font-size: 11px;
+  }
+
+  .feature span {
+    font-size: 12px;
+  }
+
+  .carousel {
+    height: 200px;
+    margin: 10px auto;
+  }
+
+  .carousel-image {
+    border-radius: 8px;
+  }
+
+  .carousel button {
+    font-size: 18px;
+    padding: 4px;
+    width: 30px;
+    height: 30px;
+  }
+}
+
+/* Extra Small Mobile (max-width: 320px) */
+@media screen and (max-width: 320px) {
+  .car-hero {
+    height: 180px;
+  }
+
+  .overlay {
+    padding: 10px;
+  }
+
+  .car-hero .overlay h1 {
+    font-size: 18px;
+  }
+
+  .car-info {
+    padding: 0 0.25rem;
+  }
+
+  .car-info h2 {
+    font-size: 16px;
+    margin-bottom: 0.8rem;
+  }
+
+  .car-features {
+    gap: 0.8rem;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .feature {
+    min-width: 60px;
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .carousel {
+    height: 180px;
+    padding: 0 0.25rem;
+  }
+
+  .carousel button {
+    font-size: 16px;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Landscape orientation adjustments for mobile */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .car-hero {
+    height: 150px;
+  }
+
+  .carousel {
+    height: 150px;
+    margin: 10px auto;
+  }
+
+  .car-info {
+    margin: 0.5rem auto;
+  }
+
+  .car-info h2 {
+    margin-bottom: 0.5rem;
+  }
 }
