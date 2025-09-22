@@ -386,6 +386,10 @@
   max-width: 95%;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
 }
+
+/* ===========================
+   UPDATED TOGGLE STYLES - Right-aligned with white labels
+=========================== */
 .toggles {
   display: flex;
   flex-direction: column;
@@ -398,7 +402,7 @@
   align-items: center;
   font-size: 1rem;
   cursor: pointer;
-  color: #fff;
+  color: #fff; /* Ensures white label text */
 }
 
 .switch {
@@ -406,7 +410,7 @@
   display: inline-block;
   width: 50px;
   height: 24px;
-  margin-left: 10px;
+  margin-left: auto; /* This pushes the switch to the right */
 }
 
 .switch input {
@@ -936,50 +940,76 @@ input:checked + .slider:before {
 
   /* Booking Section */
   .booking-section {
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px;
-    margin-top: 80px;
-    gap: 30px;
+    position: relative !important;
+    z-index: 5 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    gap: 30px !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    min-height: 50vh !important;
+    background: #fff !important;
+    padding: 60px 40px !important;
+    margin-top: 120px !important;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.16) !important;
   }
 
   .booking-box {
-    width: 100%;
-    max-width: 380px;
-    top: -150px;
-    padding: 35px 25px;
-    margin-bottom: 0;
+    background: #1089ff !important;
+    color: #fff !important;
+    padding: 40px !important;
+    border-radius: 5px !important;
+    width: 380px !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25) !important;
+    position: relative !important;
+    top: -220px !important;
+    z-index: 20 !important;
+    text-align: left !important;
   }
 
   .booking-box h2 {
-    font-size: 1.5rem;
-    margin-bottom: 25px;
+    margin-bottom: 20px !important;
+    font-size: 1.7rem !important;
+    font-weight: 700 !important;
   }
 
   .booking-box input[type="text"],
   .booking-box input[type="date"],
   .booking-box input[type="time"] {
-    padding: 12px;
-    font-size: 16px; /* Prevents zoom on iOS */
-    margin-bottom: 15px;
+    width: 100% !important;
+    padding: 10px !important;
+    margin-top: 5px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 6px !important;
+    background: #fff !important;
+    color: #333 !important;
+    font-size: 0.95rem !important;
   }
 
-  .date-time {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin: 15px 0;
+  .toggles {
+    margin-top: 15px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
   }
 
-  .date-time > div {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  .search-btn {
+    margin-top: 20px !important;
+    background: #01d28e !important;
+    color: #fff !important;
+    padding: 12px !important;
+    border: none !important;
+    width: 100% !important;
+    border-radius: 6px !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: background 0.2s ease-in-out !important;
   }
 
-  .date-time label {
-    font-weight: 600;
-    margin-bottom: 5px;
+  .search-btn:hover {
+    background: #00b36b !important;
   }
 
   /* Info Box */
@@ -1236,15 +1266,20 @@ input:checked + .slider:before {
     min-height: 48px; /* Touch-friendly */
   }
 
-  /* Toggle switches */
+  /* Mobile Toggle switches - maintain right alignment and white labels */
   .switch-label {
     font-size: 15px;
     margin-bottom: 15px;
+    color: #fff; /* Ensure white color on mobile too */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .switch {
     width: 50px;
     height: 26px;
+    margin-left: auto; /* Keep right alignment on mobile */
   }
 
   .slider:before {
@@ -1334,6 +1369,11 @@ input:checked + .slider:before {
   .why-section {
     padding: 50px 20px;
   }
+
+  /* Toggle switches for smaller phones - maintain settings */
+  .switch-label {
+    color: #fff; /* Keep white labels */
+  }
 }
 
 /* Very small phones */
@@ -1418,5 +1458,11 @@ input:checked + .slider:before {
   .testimonial-card {
     max-width: 260px;
     padding: 25px 20px;
+  }
+
+  /* Toggle switches for very small phones - maintain settings */
+  .switch-label {
+    color: #fff; /* Keep white labels */
+    font-size: 14px;
   }
 }

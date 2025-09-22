@@ -232,7 +232,7 @@ export default function Navbar() {
         <div className="scroll-navbar-login">
           {!user ? (
             <button
-              className="btn btn-primary"
+              className="btn btn-custom"
               onClick={() => setActiveModal("login")}
             >
               Login

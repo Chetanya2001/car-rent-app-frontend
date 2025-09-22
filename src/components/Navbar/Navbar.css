@@ -18,6 +18,18 @@
   width: auto;
 }
 
+.btn-custom {
+  background-color: #01d28e;
+  border-color: #01d28e;
+  color: white; /* or another text color for contrast */
+}
+.btn-custom:hover,
+.btn-custom:focus,
+.btn-custom:active {
+  background-color: #019c6b; /* slightly darker shade for hover/focus/active */
+  border-color: #019c6b;
+  color: white;
+}
 /* Main nav links */
 .scroll-navbar-links {
   display: flex;
