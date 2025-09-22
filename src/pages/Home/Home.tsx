@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import "./Home.css";
 import logo from "../../assets/logo.png";
-import backgroundImage from "../../assets/bg_1.jpg";
 import pickupIcon from "../../assets/smart-transportation.png";
 import bestdealIcon from "../../assets/communication.png";
 import carrentIcon from "../../assets/car-rent.png";
@@ -158,10 +157,7 @@ export default function Home() {
   };
 
   return (
-    <div
-      className="home-container"
-      style={{ backgroundImage: `url(${backgroundImage})` }}
-    >
+    <div className="home-container">
       {/* Header */}
       <header className="home-header">
         {/* Logo */}
@@ -449,7 +445,12 @@ export default function Home() {
           <p>
             Contact: <b>support@zipdrive.in</b>
           </p>
-          <button className="about-btn">Search Vehicle</button>
+          <button
+            className="about-btn"
+            onClick={() => navigate("/searched-cars")}
+          >
+            Search Vehicle
+          </button>
         </div>
         <div className="about-image">
           <img src={aboutImage} alt="About Zipdrive" />

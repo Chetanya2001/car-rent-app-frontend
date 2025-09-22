@@ -52,7 +52,7 @@
 /* Features Grid */
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 1fr); /* Desktop & tablet: 3 columns */
   gap: 20px 30px;
 }
 
@@ -146,8 +146,8 @@
   }
 
   .features-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px 20px;
+    grid-template-columns: repeat(2, 1fr); /* Mobile: 2 columns only */
+    gap: 12px 15px;
   }
 
   .feature-item {
@@ -193,9 +193,8 @@
   }
 
   .features-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-    padding: 0 5px;
+    grid-template-columns: repeat(2, 1fr); /* 2 columns for small mobile */
+    gap: 8px 10px;
   }
 
   .feature-item {
@@ -230,7 +229,11 @@
   }
 
   .features-grid {
-    padding: 0;
+    grid-template-columns: repeat(
+      2,
+      1fr
+    ); /* 2 columns on extra small screens */
+    gap: 5px 8px;
   }
 
   .feature-item {
