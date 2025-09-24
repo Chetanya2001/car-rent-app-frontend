@@ -6,6 +6,9 @@ import SearchedCars from "../pages/searchedCars/searchedCars";
 import MyCars from "../pages/MyCars/MyCars";
 import CarDetails from "../pages/CarDetails/CarDetails";
 import VerifyEmail from "../pages/verify-email/verify-email";
+import ManageCars from "../pages/admin/manageCars/manageCars";
+import ManageGuests from "../pages/admin/manageGuests/manageGuest";
+import ManageHosts from "../pages/admin/manageHosts/manageHosts";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -17,7 +20,9 @@ const AppRoutes = () => (
       <Route path="/my-cars" element={<MyCars />} />
       <Route path="/car-details/:id" element={<CarDetails />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
-      {/* other routes */}
+      <Route path="/admin/manage-cars" element={<ManageCars />} />
+      <Route path="/admin/manage-guests" element={<ManageGuests />} />
+      <Route path="/admin/manage-hosts" element={<ManageHosts />} />
     </Routes>
   </BrowserRouter>
 );
