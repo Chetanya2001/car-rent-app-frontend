@@ -50,7 +50,7 @@ jobs:
 
             # Deploy build to NGINX root
             sudo rm -rf /usr/share/nginx/html/*
-            sudo cp -r $APP_DIR/build/* /usr/share/nginx/html/
+            sudo cp -r $APP_DIR/dist/* /usr/share/nginx/html/
             sudo chown -R www-data:www-data /usr/share/nginx/html
             sudo chmod -R 755 /usr/share/nginx/html
 
