@@ -1,83 +1,49 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
+import { getAllUsers } from "./../../../services/admin";
+import type { User } from "./../../../services/admin";
 import "./manageGuest.css";
 
-interface Guest {
-  id: number;
-  name: string;
-  contact: string;
-  rentals: number;
-  status: "Active" | "Inactive";
-}
-
-const guestData: Guest[] = [
-  {
-    id: 1,
-    name: "Ethan Carter",
-    contact: "ethan.carter@email.com",
-    rentals: 5,
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Olivia Bennett",
-    contact: "olivia.bennett@email.com",
-    rentals: 3,
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Noah Thompson",
-    contact: "noah.thompson@email.com",
-    rentals: 2,
-    status: "Inactive",
-  },
-  {
-    id: 4,
-    name: "Ava Rodriguez",
-    contact: "ava.rodriguez@email.com",
-    rentals: 7,
-    status: "Active",
-  },
-  {
-    id: 5,
-    name: "Liam Harper",
-    contact: "liam.harper@email.com",
-    rentals: 1,
-    status: "Inactive",
-  },
-  {
-    id: 6,
-    name: "Emma Wilson",
-    contact: "emma.wilson@email.com",
-    rentals: 4,
-    status: "Active",
-  },
-  {
-    id: 7,
-    name: "Mason Davis",
-    contact: "mason.davis@email.com",
-    rentals: 6,
-    status: "Inactive",
-  },
-];
-
 export default function ManageGuests() {
+  const [guests, setGuests] = useState<User[]>([]);
   const [filter, setFilter] = useState<"All" | "Active" | "Inactive">("All");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 5;
 
+  // ✅ Fetch guest users
+  useEffect(() => {
+    const fetchGuests = async () => {
+      try {
+        const users = await getAllUsers(); // no need to pass token manually
+        const onlyGuests = users.filter((u) => u.role === "guest");
+        setGuests(onlyGuests);
+      } catch (error) {
+        console.error("Failed to load guests:", error);
+      }
+    };
+
+    fetchGuests();
+  }, []);
+
+  // ✅ Filter guests
   const filteredGuests = useMemo(() => {
-    return guestData.filter((guest) => {
+    return guests.filter((guest) => {
       const matchesSearch =
-        guest.name.toLowerCase().includes(search.toLowerCase()) ||
-        guest.contact.toLowerCase().includes(search.toLowerCase());
-      const matchesFilter = filter === "All" || guest.status === filter;
+        guest.first_name.toLowerCase().includes(search.toLowerCase()) ||
+        guest.last_name.toLowerCase().includes(search.toLowerCase()) ||
+        guest.email.toLowerCase().includes(search.toLowerCase());
+
+      const matchesFilter =
+        filter === "All" ||
+        (filter === "Active" && guest.is_verified) ||
+        (filter === "Inactive" && !guest.is_verified);
+
       return matchesSearch && matchesFilter;
     });
-  }, [search, filter]);
+  }, [search, filter, guests]);
 
+  // ✅ Paginate
   const paginatedGuests = useMemo(() => {
     const start = (page - 1) * pageSize;
     return filteredGuests.slice(start, start + pageSize);
@@ -130,7 +96,6 @@ export default function ManageGuests() {
                 <tr>
                   <th>Guest Name</th>
                   <th>Contact Information</th>
-                  <th>Total Rentals</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -143,19 +108,21 @@ export default function ManageGuests() {
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
                       <td>
-                        <div className="guest-name">{guest.name}</div>
+                        <div className="guest-name">
+                          {guest.first_name} {guest.last_name}
+                        </div>
                       </td>
                       <td>
-                        <div className="guest-contact">{guest.contact}</div>
-                      </td>
-                      <td>
-                        <span className="rental-count">{guest.rentals}</span>
+                        <div className="guest-contact">{guest.email}</div>
+                        <div className="guest-contact">{guest.phone}</div>
                       </td>
                       <td>
                         <span
-                          className={`status ${guest.status.toLowerCase()}`}
+                          className={`status ${
+                            guest.is_verified ? "active" : "inactive"
+                          }`}
                         >
-                          {guest.status}
+                          {guest.is_verified ? "Active" : "Inactive"}
                         </span>
                       </td>
                       <td>

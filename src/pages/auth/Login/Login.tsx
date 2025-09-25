@@ -1,12 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../../services/auth";
+import { jwtDecode } from "jwt-decode";
 import "./Login.css";
 import type { User } from "../../../types/user";
+
 interface LoginProps {
   onClose: () => void;
   onSwitch: () => void;
-  onLoginSuccess: (userData: User) => void; // 👈 new prop for switching to Register
+  onLoginSuccess: (userData: User) => void;
+}
+
+interface JwtPayload {
+  id: number;
+  email: string;
+  role: "admin" | "host" | "guest";
+  iat: number;
+  exp: number;
 }
 
 export default function Login({
@@ -24,32 +34,45 @@ export default function Login({
     setError("");
 
     try {
+      // Call backend login API
       const res = await loginUser({ email, password });
-      console.log("API response:", res); // 👈 debug
+      const token = res.token;
 
-      localStorage.setItem("token", res.token);
+      if (!token) throw new Error("No token returned from server");
 
-      // 👇 Use default name and avatar since user info is missing
-      const userData = {
-        name: email, // or "User"
-        avatar: undefined, // will use defaultAvatar in Navbar
-        token: res.token,
+      // Store token in localStorage
+      localStorage.setItem("token", token);
+
+      // Decode JWT to get user info
+      const decoded: JwtPayload = jwtDecode(token);
+
+      const userData: User = {
+        id: decoded.id,
+        email: decoded.email,
+        role: decoded.role,
+        token,
       };
+
       localStorage.setItem("user", JSON.stringify(userData));
       onLoginSuccess(userData);
 
-      navigate("/");
+      // Redirect based on role
+      if (decoded.role === "admin") navigate("/admin/manage-cars");
+      else if (decoded.role === "host") navigate("/host/dashboard");
+      else if (decoded.role === "guest") navigate("/guest/dashboard");
+
       onClose();
     } catch (err: any) {
-      console.log("Login error:", err); // 👈 debug
-      setError(err.response?.data?.message || "Login failed");
+      console.error("Login error:", err);
+      setError(err.response?.data?.message || err.message || "Login failed");
     }
   };
+
   return (
     <div className="login-overlay" onClick={onClose}>
       <div
         className="login-dialog card shadow-lg border-0 rounded-4 overflow-hidden"
-        onClick={(e) => e.stopPropagation()} // prevent close when clicking inside
+        onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import logo from "../../assets/logo.png";
 import userIcon from "../../assets/user.png";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // ✅ import useLocation
 import "./AdminNavbar.css";
 
 const adminMenu = [
@@ -18,6 +18,7 @@ export default function AdminNavBar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
+  const location = useLocation(); // ✅ track current path
 
   // Close profile menu on outside click
   useEffect(() => {
@@ -45,7 +46,9 @@ export default function AdminNavBar() {
         {adminMenu.map((item) => (
           <li
             key={item.name}
-            className="zipd-nav-linkitem_9214"
+            className={`zipd-nav-linkitem_9214 ${
+              location.pathname === item.path ? "active" : ""
+            }`} // ✅ add active class
             onClick={() => navigate(item.path)}
           >
             {item.name}
@@ -92,7 +95,9 @@ export default function AdminNavBar() {
           {adminMenu.map((item) => (
             <div
               key={item.name}
-              className="zipd-nav-mobileitem_9214"
+              className={`zipd-nav-mobileitem_9214 ${
+                location.pathname === item.path ? "active" : ""
+              }`} // ✅ highlight in mobile too
               onClick={() => {
                 navigate(item.path);
                 setMobileOpen(false);

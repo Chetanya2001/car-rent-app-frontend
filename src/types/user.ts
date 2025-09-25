@@ -26,7 +26,8 @@ export interface AuthResponse {
 }
 
 export interface User {
-  name: string;
-  avatar?: string; // optional profile picture
-  token: string; // JWT or any authentication token
+  id: number;
+  email: string;
+  role: "admin" | "host" | "guest";
+  token: string;
 }
