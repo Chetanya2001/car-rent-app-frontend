@@ -3,7 +3,10 @@ name: Frontend CI/CD
 on:
   push:
     branches:
-      - main # or your production branch
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build-and-deploy:
@@ -11,51 +14,118 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Deploy and build on EC2 via SSH
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
+          timeout: 300s
           script: |
+            set -e  # Exit on any error
+
             APP_DIR=~/car-rent-app-frontend
+            NGINX_ROOT=/usr/share/nginx/html
+            BACKUP_DIR=~/nginx_backup_$(date +%Y%m%d_%H%M%S)
+
+            echo "Starting deployment process..."
+
+            # Create backup of current nginx content
+            if [ -d "$NGINX_ROOT" ] && [ "$(ls -A $NGINX_ROOT)" ]; then
+              echo "Creating backup of current deployment..."
+              sudo cp -r $NGINX_ROOT $BACKUP_DIR
+            fi
 
             # Ensure the directory exists
             mkdir -p $APP_DIR
 
-            # Remove existing files
-            rm -rf $APP_DIR/*
-
-            # Clone repo if not present, otherwise pull latest
+            # Clone or update repository
             if [ ! -d "$APP_DIR/.git" ]; then
+              echo "Cloning repository..."
               git clone https://github.com/Chetanya2001/car-rent-app-frontend.git $APP_DIR
             else
+              echo "Updating repository..."
               cd $APP_DIR
-              git reset --hard
-              git pull origin main
+              git fetch origin
+              git reset --hard origin/main
+              git clean -fd
             fi
 
+            cd $APP_DIR
+
             # Write .env file from secret
-            cat <<EOF > $APP_DIR/.env
+            echo "Setting up environment variables..."
+            cat <<'EOF' > .env
             ${{ secrets.FRONTEND_ENV_FILE }}
             EOF
 
-            # Install dependencies and build
-            cd $APP_DIR
-            npm install
+            # Check if Node.js and npm are available
+            if ! command -v node &> /dev/null; then
+              echo "Node.js not found. Please install Node.js on the EC2 instance."
+              exit 1
+            fi
+
+            if ! command -v npm &> /dev/null; then
+              echo "npm not found. Please install npm on the EC2 instance."
+              exit 1
+            fi
+
+            # Clear npm cache and install dependencies
+            echo "Installing dependencies..."
+            npm cache clean --force
+            rm -rf node_modules package-lock.json
+            npm install --production=false
+
+            # Build the application
+            echo "Building React application..."
             npm run build
 
-            # Deploy build to NGINX root
-            sudo rm -rf /usr/share/nginx/html/*
-            sudo cp -r $APP_DIR/dist/* /usr/share/nginx/html/
-            sudo chown -R www-data:www-data /usr/share/nginx/html
-            sudo chmod -R 755 /usr/share/nginx/html
+            # Verify build was successful
+            if [ ! -d "build" ] || [ ! -f "build/index.html" ]; then
+              echo "Build failed - build directory or index.html not found"
+              exit 1
+            fi
 
-            # Reload NGINX
+            # Deploy to nginx with atomic operation
+            echo "Deploying to nginx..."
+            TEMP_DIR=$(mktemp -d)
+            cp -r build/* $TEMP_DIR/
+
+            sudo rm -rf $NGINX_ROOT/*
+            sudo cp -r $TEMP_DIR/* $NGINX_ROOT/
+            sudo chown -R www-data:www-data $NGINX_ROOT
+            sudo chmod -R 755 $NGINX_ROOT
+
+            # Clean up temp directory
+            rm -rf $TEMP_DIR
+
+            # Test nginx configuration
+            sudo nginx -t
+
+            # Reload nginx
+            echo "Reloading nginx..."
             sudo systemctl reload nginx
 
             # Verify deployment
-            ls -l /usr/share/nginx/html
+            echo "Verifying deployment..."
+            if [ -f "$NGINX_ROOT/index.html" ]; then
+              echo "Deployment successful!"
+              ls -la $NGINX_ROOT
+              
+              # Clean up old backups (keep only last 5)
+              cd ~ && ls -t nginx_backup_* 2>/dev/null | tail -n +6 | xargs -r rm -rf
+            else
+              echo "Deployment verification failed!"
+              if [ -d "$BACKUP_DIR" ]; then
+                echo "Restoring from backup..."
+                sudo rm -rf $NGINX_ROOT/*
+                sudo cp -r $BACKUP_DIR/* $NGINX_ROOT/
+                sudo systemctl reload nginx
+              fi
+              exit 1
+            fi
+
+            echo "Deployment completed successfully!"
