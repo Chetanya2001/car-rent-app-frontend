@@ -56,7 +56,6 @@ export default function Login({
       localStorage.setItem("user", JSON.stringify(userData));
       onLoginSuccess(userData);
 
-      // Redirect based on role
       if (decoded.role === "admin") navigate("/admin/manage-cars");
       else if (decoded.role === "host") navigate("/host/dashboard");
       else if (decoded.role === "guest") navigate("/guest/dashboard");
