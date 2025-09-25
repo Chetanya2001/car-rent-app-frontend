@@ -30,4 +30,5 @@ export interface User {
   email: string;
   role: "admin" | "host" | "guest";
   token: string;
+  avatar?: string;
 }
