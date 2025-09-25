@@ -37,7 +37,7 @@ export default function Home() {
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null
   );
-  const [user, setUser] = useState<{ name: string; avatar?: string } | null>(
+  const [user, setUser] = useState<{ name?: string; avatar?: string } | null>(
     null
   );
   const [role, setRole] = useState<"host" | "guest" | null>(null);
