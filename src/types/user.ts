@@ -28,6 +28,7 @@ export interface AuthResponse {
 export interface User {
   id: number;
   email: string;
+  name?: string;
   role: "admin" | "host" | "guest";
   token: string;
   avatar?: string;
