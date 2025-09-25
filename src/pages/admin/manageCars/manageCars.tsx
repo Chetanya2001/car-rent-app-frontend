@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
 import "./manageCars.css";
+
 interface Car {
   id: number;
   name: string;
@@ -8,6 +9,8 @@ interface Car {
   price: number;
   status: "Available" | "Rented";
   location: string;
+  year: number;
+  month: string; // e.g., "January", "February"
 }
 
 const carData: Car[] = [
@@ -18,6 +21,8 @@ const carData: Car[] = [
     price: 120,
     status: "Available",
     location: "Downtown",
+    year: 2025,
+    month: "January",
   },
   {
     id: 2,
@@ -26,6 +31,8 @@ const carData: Car[] = [
     price: 95,
     status: "Rented",
     location: "Airport",
+    year: 2024,
+    month: "December",
   },
   {
     id: 3,
@@ -34,6 +41,8 @@ const carData: Car[] = [
     price: 85,
     status: "Available",
     location: "City Center",
+    year: 2025,
+    month: "February",
   },
   {
     id: 4,
@@ -42,6 +51,8 @@ const carData: Car[] = [
     price: 110,
     status: "Available",
     location: "Marina",
+    year: 2023,
+    month: "November",
   },
   {
     id: 5,
@@ -50,39 +61,30 @@ const carData: Car[] = [
     price: 45,
     status: "Rented",
     location: "Suburbs",
-  },
-  {
-    id: 6,
-    name: "Toyota Camry",
-    type: "Mid-size Sedan",
-    price: 55,
-    status: "Available",
-    location: "Downtown",
-  },
-  {
-    id: 7,
-    name: "Range Rover Sport",
-    type: "Luxury SUV",
-    price: 150,
-    status: "Available",
-    location: "Airport",
-  },
-  {
-    id: 8,
-    name: "Nissan Altima",
-    type: "Mid-size Sedan",
-    price: 50,
-    status: "Rented",
-    location: "City Center",
+    year: 2025,
+    month: "January",
   },
 ];
 
 export default function ManageCars() {
   const [filter, setFilter] = useState<"All" | "Available" | "Rented">("All");
   const [typeFilter, setTypeFilter] = useState<string>("All Types");
+  const [yearFilter, setYearFilter] = useState<string>("All Years");
+  const [monthFilter, setMonthFilter] = useState<string>("All Months");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 5;
+
+  // ✅ unique dropdown values
+  const uniqueTypes = ["All Types", ...new Set(carData.map((car) => car.type))];
+  const uniqueYears = [
+    "All Years",
+    ...new Set(carData.map((car) => car.year.toString())),
+  ];
+  const uniqueMonths = [
+    "All Months",
+    ...new Set(carData.map((car) => car.month)),
+  ];
 
   const filteredCars = useMemo(() => {
     return carData.filter((car) => {
@@ -90,12 +92,24 @@ export default function ManageCars() {
         car.name.toLowerCase().includes(search.toLowerCase()) ||
         car.type.toLowerCase().includes(search.toLowerCase()) ||
         car.location.toLowerCase().includes(search.toLowerCase());
+
       const matchesFilter = filter === "All" || car.status === filter;
       const matchesTypeFilter =
         typeFilter === "All Types" || car.type === typeFilter;
-      return matchesSearch && matchesFilter && matchesTypeFilter;
+      const matchesYearFilter =
+        yearFilter === "All Years" || car.year.toString() === yearFilter;
+      const matchesMonthFilter =
+        monthFilter === "All Months" || car.month === monthFilter;
+
+      return (
+        matchesSearch &&
+        matchesFilter &&
+        matchesTypeFilter &&
+        matchesYearFilter &&
+        matchesMonthFilter
+      );
     });
-  }, [search, filter, typeFilter]);
+  }, [search, filter, typeFilter, yearFilter, monthFilter]);
 
   const paginatedCars = useMemo(() => {
     const start = (page - 1) * pageSize;
@@ -104,11 +118,6 @@ export default function ManageCars() {
 
   const totalPages = Math.ceil(filteredCars.length / pageSize);
 
-  const uniqueTypes = [
-    "All Types",
-    ...Array.from(new Set(carData.map((car) => car.type))),
-  ];
-
   return (
     <>
       <AdminNavBar />
@@ -116,6 +125,7 @@ export default function ManageCars() {
         <h1 className="zipd-mc-title_5832">Car Fleet Management</h1>
 
         <div className="zipd-mc-card_5832">
+          {/* 🔍 Filters */}
           <div className="zipd-mc-toolbar_5832">
             <input
               type="text"
@@ -153,11 +163,42 @@ export default function ManageCars() {
                   </option>
                 ))}
               </select>
+
+              <select
+                value={yearFilter}
+                onChange={(e) => {
+                  setYearFilter(e.target.value);
+                  setPage(1);
+                }}
+                className="zipd-mc-filterselect_5832"
+              >
+                {uniqueYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={monthFilter}
+                onChange={(e) => {
+                  setMonthFilter(e.target.value);
+                  setPage(1);
+                }}
+                className="zipd-mc-filterselect_5832"
+              >
+                {uniqueMonths.map((month) => (
+                  <option key={month} value={month}>
+                    {month}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <button className="zipd-mc-addbtn_5832">Add Vehicle</button>
           </div>
 
+          {/* 🚘 Car Table */}
           <table className="zipd-mc-table_5832">
             <thead>
               <tr>
@@ -165,6 +206,8 @@ export default function ManageCars() {
                 <th>Daily Rate</th>
                 <th>Location</th>
                 <th>Status</th>
+                <th>Year</th>
+                <th>Month</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -175,21 +218,21 @@ export default function ManageCars() {
                     key={car.id}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <td data-label="Vehicle">
+                    <td>
                       <div>
                         <div className="zipd-mc-carname_5832">{car.name}</div>
                         <div className="zipd-mc-cartype_5832">{car.type}</div>
                       </div>
                     </td>
-                    <td data-label="Rate">
+                    <td>
                       <span className="zipd-mc-price_5832">{car.price}</span>
                     </td>
-                    <td data-label="Location">
+                    <td>
                       <span className="zipd-mc-location_5832">
                         {car.location}
                       </span>
                     </td>
-                    <td data-label="Status">
+                    <td>
                       <span
                         className={`zipd-mc-status_5832 ${
                           car.status === "Available"
@@ -200,7 +243,9 @@ export default function ManageCars() {
                         {car.status}
                       </span>
                     </td>
-                    <td data-label="Actions">
+                    <td>{car.year}</td>
+                    <td>{car.month}</td>
+                    <td>
                       <div className="zipd-mc-actions_5832">
                         <button
                           className="zipd-mc-iconbtn_5832"
@@ -226,7 +271,7 @@ export default function ManageCars() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5}>
+                  <td colSpan={7}>
                     <div className="zipd-mc-empty_5832">
                       <h3>No vehicles found</h3>
                       <p>Try adjusting your search criteria or filters</p>
@@ -237,6 +282,7 @@ export default function ManageCars() {
             </tbody>
           </table>
 
+          {/* 📄 Pagination */}
           <div className="zipd-mc-pagination_5832">
             <div className="zipd-mc-paginationtext_5832">
               <span className="zipd-mc-results-count_5832">
@@ -251,13 +297,13 @@ export default function ManageCars() {
             <div className="zipd-mc-paginationbtns_5832">
               <button
                 disabled={page === 1}
-                onClick={() => setPage((prev) => prev - 1)}
+                onClick={() => setPage((p) => p - 1)}
               >
                 ← Previous
               </button>
               <button
                 disabled={page === totalPages || totalPages === 0}
-                onClick={() => setPage((prev) => prev + 1)}
+                onClick={() => setPage((p) => p + 1)}
               >
                 Next →
               </button>

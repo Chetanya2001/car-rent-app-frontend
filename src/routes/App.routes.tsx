@@ -9,6 +9,8 @@ import VerifyEmail from "../pages/verify-email/verify-email";
 import ManageCars from "../pages/admin/manageCars/manageCars";
 import ManageGuests from "../pages/admin/manageGuests/manageGuest";
 import ManageHosts from "../pages/admin/manageHosts/manageHosts";
+import ManageBookings from "../pages/admin/manageBookings/manageBookings";
+import ManagePayments from "../pages/admin/managePayments/managePayments";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -23,6 +25,8 @@ const AppRoutes = () => (
       <Route path="/admin/manage-cars" element={<ManageCars />} />
       <Route path="/admin/manage-guests" element={<ManageGuests />} />
       <Route path="/admin/manage-hosts" element={<ManageHosts />} />
+      <Route path="/admin/manage-bookings" element={<ManageBookings />} />
+      <Route path="/admin/manage-payments" element={<ManagePayments />} />
     </Routes>
   </BrowserRouter>
 );
