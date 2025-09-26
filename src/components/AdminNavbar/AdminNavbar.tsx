@@ -11,6 +11,7 @@ const adminMenu = [
   { name: "Host", path: "/admin/manage-hosts" },
   { name: "Bookings", path: "/admin/manage-bookings" },
   { name: "Payments", path: "/admin/manage-payments" },
+  { name: "Support", path: "/admin/manage-support" },
 ];
 
 export default function AdminNavBar() {

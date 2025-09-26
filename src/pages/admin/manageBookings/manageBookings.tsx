@@ -3,88 +3,59 @@ import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
 import "./manageBooking.css";
 
 interface Booking {
-  id: string;
-  carRented: string;
-  guestName: string;
-  hostName: string;
-  rentalDates: string;
-  totalPrice: number;
-  status: "Active" | "Completed" | "Cancelled" | "Pending";
+  bookingId: string; // Booking ID
+  carNo: string; // Car No
+  bookedBy: string; // Booked by
+  pickUpLoc: string; // Pick-up Loc
+  pickUpType: string; // Pick-up Type
+  dropOffLoc: string; // Drop-off Loc
+  dropOffType: string; // Drop-off Type
+  startDatetime: string; // Start Datetime (ISO format)
+  endDatetime: string; // End DateTime (ISO format)
+  driveType: string; // Drive Type (e.g. Self-drive)
+  insure: boolean; // Insure (true/false)
+  payment: string; // Payment status or method
+  status: "Active" | "Completed" | "Cancelled" | "Pending"; // Status
+  action?: string; // Optional UI usage
+  ratings: number; // Ratings value
 }
 
 const bookingData: Booking[] = [
   {
-    id: "#12345",
-    carRented: "Tesla Model S",
-    guestName: "Ethan Carter",
-    hostName: "Olivia Bennett",
-    rentalDates: "2024-07-15 to 2024-07-20",
-    totalPrice: 750,
+    bookingId: "#12345",
+    carNo: "Tesla-01",
+    bookedBy: "Ethan Carter",
+    pickUpLoc: "Los Angeles",
+    pickUpType: "Airport",
+    dropOffLoc: "San Francisco",
+    dropOffType: "City Center",
+    startDatetime: "2024-07-15T10:00:00",
+    endDatetime: "2024-07-20T18:00:00",
+    driveType: "Self-drive",
+    insure: true,
+    payment: "Paid",
     status: "Active",
+    action: "",
+    ratings: 4.5,
   },
   {
-    id: "#67890",
-    carRented: "BMW X5",
-    guestName: "Sophia Clark",
-    hostName: "Noah Davis",
-    rentalDates: "2024-07-10 to 2024-07-15",
-    totalPrice: 600,
+    bookingId: "#67890",
+    carNo: "BMW-05",
+    bookedBy: "Sophia Clark",
+    pickUpLoc: "New York",
+    pickUpType: "Hotel",
+    dropOffLoc: "Boston",
+    dropOffType: "Airport",
+    startDatetime: "2024-07-10T09:00:00",
+    endDatetime: "2024-07-15T17:00:00",
+    driveType: "Chauffeur",
+    insure: false,
+    payment: "Pending",
     status: "Completed",
+    action: "",
+    ratings: 5,
   },
-  {
-    id: "#11223",
-    carRented: "Audi Q7",
-    guestName: "Liam Evans",
-    hostName: "Ava Foster",
-    rentalDates: "2024-07-05 to 2024-07-10",
-    totalPrice: 550,
-    status: "Completed",
-  },
-  {
-    id: "#44556",
-    carRented: "Mercedes-Benz E-Class",
-    guestName: "Isabella Green",
-    hostName: "Lucas Hayes",
-    rentalDates: "2024-06-30 to 2024-07-05",
-    totalPrice: 700,
-    status: "Active",
-  },
-  {
-    id: "#77889",
-    carRented: "Porsche 911",
-    guestName: "Jackson Ingram",
-    hostName: "Mia Jenkins",
-    rentalDates: "2024-06-25 to 2024-06-30",
-    totalPrice: 900,
-    status: "Cancelled",
-  },
-  {
-    id: "#99001",
-    carRented: "Range Rover Sport",
-    guestName: "Emma Wilson",
-    hostName: "James Miller",
-    rentalDates: "2024-07-20 to 2024-07-25",
-    totalPrice: 875,
-    status: "Pending",
-  },
-  {
-    id: "#33445",
-    carRented: "Toyota Camry",
-    guestName: "Oliver Brown",
-    hostName: "Charlotte Lee",
-    rentalDates: "2024-07-12 to 2024-07-16",
-    totalPrice: 280,
-    status: "Active",
-  },
-  {
-    id: "#55667",
-    carRented: "Honda Civic",
-    guestName: "Amelia Taylor",
-    hostName: "William Anderson",
-    rentalDates: "2024-06-28 to 2024-07-02",
-    totalPrice: 225,
-    status: "Completed",
-  },
+  // Add other bookings similarly
 ];
 
 const months = [
@@ -101,12 +72,11 @@ const months = [
   "November",
   "December",
 ];
-
 const years = ["2023", "2024", "2025"];
 
 export default function BookingManagement() {
-  const [statusFilter, setStatusFilter] = useState<string>("All Status");
-  const [carFilter, setCarFilter] = useState<string>("All Cars");
+  const [statusFilter, setStatusFilter] = useState("All Status");
+  const [carFilter, setCarFilter] = useState("All Cars");
   const [selectedMonth, setSelectedMonth] = useState("All Months");
   const [selectedYear, setSelectedYear] = useState("All Years");
   const [search, setSearch] = useState("");
@@ -116,19 +86,16 @@ export default function BookingManagement() {
   const filteredBookings = useMemo(() => {
     return bookingData.filter((booking) => {
       const matchesSearch =
-        booking.id.toLowerCase().includes(search.toLowerCase()) ||
-        booking.carRented.toLowerCase().includes(search.toLowerCase()) ||
-        booking.guestName.toLowerCase().includes(search.toLowerCase()) ||
-        booking.hostName.toLowerCase().includes(search.toLowerCase());
+        booking.bookingId.toLowerCase().includes(search.toLowerCase()) ||
+        booking.bookedBy.toLowerCase().includes(search.toLowerCase());
 
       const matchesStatus =
         statusFilter === "All Status" || booking.status === statusFilter;
       const matchesCar =
-        carFilter === "All Cars" || booking.carRented === carFilter;
+        carFilter === "All Cars" || booking.carNo === carFilter;
 
-      // Extract month & year from rentalDates (take first date as reference)
-      const startDateStr = booking.rentalDates.split(" to ")[0];
-      const bookingDate = new Date(startDateStr);
+      // Without rentalDates, month/year filtering disabled here; can adapt with startDatetime if needed
+      const bookingDate = new Date(booking.startDatetime);
       const bookingMonth = months[bookingDate.getMonth()];
       const bookingYear = bookingDate.getFullYear().toString();
 
@@ -149,12 +116,9 @@ export default function BookingManagement() {
 
   const uniqueStatuses = [
     "All Status",
-    ...Array.from(new Set(bookingData.map((b) => b.status))),
+    ...new Set(bookingData.map((b) => b.status)),
   ];
-  const uniqueCars = [
-    "All Cars",
-    ...Array.from(new Set(bookingData.map((b) => b.carRented))),
-  ];
+  const uniqueCars = ["All Cars", ...new Set(bookingData.map((b) => b.carNo))];
 
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -211,7 +175,6 @@ export default function BookingManagement() {
                   </option>
                 ))}
               </select>
-
               <select
                 value={selectedYear}
                 onChange={(e) => {
@@ -233,12 +196,11 @@ export default function BookingManagement() {
           <div className="toolbar">
             <input
               type="text"
-              placeholder="🔍 Search bookings by ID, guest, car, or host..."
+              placeholder="🔍 Search bookings by ID or booked by..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="search"
             />
-
             <div className="filters">
               <select
                 value={statusFilter}
@@ -254,7 +216,6 @@ export default function BookingManagement() {
                   </option>
                 ))}
               </select>
-
               <select
                 value={carFilter}
                 onChange={(e) => {
@@ -276,12 +237,19 @@ export default function BookingManagement() {
             <thead>
               <tr>
                 <th>Booking ID</th>
-                <th>Car Rented</th>
-                <th>Guest Name</th>
-                <th>Host Name</th>
-                <th>Rental Dates</th>
-                <th>Total Price</th>
+                <th>Car No</th>
+                <th>Booked By</th>
+                <th>Pick-up Loc</th>
+                <th>Pick-up Type</th>
+                <th>Drop-off Loc</th>
+                <th>Drop-off Type</th>
+                <th>Start Datetime</th>
+                <th>End Datetime</th>
+                <th>Drive Type</th>
+                <th>Insure</th>
+                <th>Payment</th>
                 <th>Status</th>
+                <th>Ratings</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -289,15 +257,21 @@ export default function BookingManagement() {
               {paginatedBookings.length > 0 ? (
                 paginatedBookings.map((booking, index) => (
                   <tr
-                    key={booking.id}
+                    key={booking.bookingId}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <td>{booking.id}</td>
-                    <td>{booking.carRented}</td>
-                    <td>{booking.guestName}</td>
-                    <td>{booking.hostName}</td>
-                    <td>{booking.rentalDates}</td>
-                    <td>${booking.totalPrice}</td>
+                    <td>{booking.bookingId}</td>
+                    <td>{booking.carNo}</td>
+                    <td>{booking.bookedBy}</td>
+                    <td>{booking.pickUpLoc}</td>
+                    <td>{booking.pickUpType}</td>
+                    <td>{booking.dropOffLoc}</td>
+                    <td>{booking.dropOffType}</td>
+                    <td>{booking.startDatetime}</td>
+                    <td>{booking.endDatetime}</td>
+                    <td>{booking.driveType}</td>
+                    <td>{booking.insure ? "Yes" : "No"}</td>
+                    <td>{booking.payment}</td>
                     <td>
                       <span
                         className={`status ${getStatusClass(booking.status)}`}
@@ -305,6 +279,7 @@ export default function BookingManagement() {
                         {getStatusIcon(booking.status)} {booking.status}
                       </span>
                     </td>
+                    <td>{booking.ratings.toFixed(1)}</td>
                     <td>
                       <div className="actions">
                         <button className="icon-btn" title="View Details">
@@ -322,7 +297,7 @@ export default function BookingManagement() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8}>
+                  <td colSpan={15}>
                     <div className="empty">
                       <h3>No bookings found</h3>
                       <p>Try adjusting your search criteria or filters</p>
@@ -343,17 +318,16 @@ export default function BookingManagement() {
                 Page {page} of {totalPages || 1}
               </span>
             </div>
-
             <div className="pagination-btns">
               <button
                 disabled={page === 1}
-                onClick={() => setPage((prev) => prev - 1)}
+                onClick={() => setPage((p) => p - 1)}
               >
                 ← Previous
               </button>
               <button
                 disabled={page === totalPages || totalPages === 0}
-                onClick={() => setPage((prev) => prev + 1)}
+                onClick={() => setPage((p) => p + 1)}
               >
                 Next →
               </button>

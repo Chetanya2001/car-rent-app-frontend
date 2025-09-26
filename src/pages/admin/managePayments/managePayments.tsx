@@ -1,112 +1,61 @@
 import { useState, useMemo } from "react";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
 import "./managePayments.css";
+
 interface Payment {
-  id: string;
-  bookingId: string;
-  amount: number;
+  id: string; // Payment ID
+  bookingId: string; // Booking No
+  guest: string;
+  host: string;
+  car: string;
+  driver: string;
+  insurance: boolean;
+  service: string;
+  gst: number;
+  totalAmount: number;
   paymentMethod: "Credit Card" | "PayPal" | "Bank Transfer" | "Cash";
   date: string;
   status: "Completed" | "Pending" | "Failed" | "Refunded";
+  action?: string;
+  ratings: number;
 }
 
 const paymentData: Payment[] = [
   {
     id: "PAY2023001",
     bookingId: "BK2023001",
-    amount: 150.0,
+    guest: "Ethan Carter",
+    host: "Olivia Bennett",
+    car: "Tesla Model S",
+    driver: "Self",
+    insurance: true,
+    service: "Premium",
+    gst: 15.0,
+    totalAmount: 165.0,
     paymentMethod: "Credit Card",
     date: "2023-01-15",
     status: "Completed",
+    action: "",
+    ratings: 4.5,
   },
   {
     id: "PAY2023002",
     bookingId: "BK2023002",
-    amount: 200.0,
+    guest: "Sophia Clark",
+    host: "Noah Davis",
+    car: "BMW X5",
+    driver: "Chauffeur",
+    insurance: false,
+    service: "Standard",
+    gst: 12.0,
+    totalAmount: 212.0,
     paymentMethod: "PayPal",
     date: "2023-01-20",
     status: "Completed",
+    action: "",
+    ratings: 5,
   },
-  {
-    id: "PAY2023003",
-    bookingId: "BK2023003",
-    amount: 100.0,
-    paymentMethod: "Credit Card",
-    date: "2023-02-05",
-    status: "Completed",
-  },
-  {
-    id: "PAY2023004",
-    bookingId: "BK2023004",
-    amount: 180.0,
-    paymentMethod: "Credit Card",
-    date: "2023-02-10",
-    status: "Completed",
-  },
-  {
-    id: "PAY2023005",
-    bookingId: "BK2023005",
-    amount: 250.0,
-    paymentMethod: "PayPal",
-    date: "2023-03-15",
-    status: "Completed",
-  },
-  {
-    id: "PAY2023006",
-    bookingId: "BK2023006",
-    amount: 120.0,
-    paymentMethod: "Credit Card",
-    date: "2023-03-20",
-    status: "Completed",
-  },
-  {
-    id: "PAY2023007",
-    bookingId: "BK2023007",
-    amount: 160.0,
-    paymentMethod: "Credit Card",
-    date: "2023-04-05",
-    status: "Completed",
-  },
-  {
-    id: "PAY2023008",
-    bookingId: "BK2023008",
-    amount: 220.0,
-    paymentMethod: "PayPal",
-    date: "2023-04-10",
-    status: "Pending",
-  },
-  {
-    id: "PAY2023009",
-    bookingId: "BK2023009",
-    amount: 190.0,
-    paymentMethod: "Credit Card",
-    date: "2023-05-15",
-    status: "Completed",
-  },
-  {
-    id: "PAY2023010",
-    bookingId: "BK2023010",
-    amount: 140.0,
-    paymentMethod: "Credit Card",
-    date: "2023-05-20",
-    status: "Failed",
-  },
-  {
-    id: "PAY2023011",
-    bookingId: "BK2023011",
-    amount: 175.0,
-    paymentMethod: "Bank Transfer",
-    date: "2023-06-10",
-    status: "Completed",
-  },
-  {
-    id: "PAY2023012",
-    bookingId: "BK2023012",
-    amount: 320.0,
-    paymentMethod: "Credit Card",
-    date: "2023-07-22",
-    status: "Refunded",
-  },
+  // Add other entries similarly...
 ];
 
 const months = [
@@ -148,7 +97,12 @@ export default function PaymentManagement() {
       const matchesSearch =
         payment.id.toLowerCase().includes(search.toLowerCase()) ||
         payment.bookingId.toLowerCase().includes(search.toLowerCase()) ||
-        payment.paymentMethod.toLowerCase().includes(search.toLowerCase());
+        payment.paymentMethod.toLowerCase().includes(search.toLowerCase()) ||
+        payment.guest.toLowerCase().includes(search.toLowerCase()) ||
+        payment.host.toLowerCase().includes(search.toLowerCase()) ||
+        payment.car.toLowerCase().includes(search.toLowerCase()) ||
+        payment.driver.toLowerCase().includes(search.toLowerCase()) ||
+        payment.service.toLowerCase().includes(search.toLowerCase());
 
       const matchesMethod =
         methodFilter === "All Methods" ||
@@ -231,7 +185,7 @@ export default function PaymentManagement() {
   };
 
   const totalAmount = filteredPayments.reduce(
-    (sum, payment) => sum + payment.amount,
+    (sum, payment) => sum + payment.totalAmount,
     0
   );
 
@@ -279,7 +233,7 @@ export default function PaymentManagement() {
           </div>
 
           <div className="summary-section">
-            <div className="total-amount">{totalAmount.toFixed(2)}</div>
+            <div className="total-amount">Total: ${totalAmount.toFixed(2)}</div>
             <div className="payment-count">
               {filteredPayments.length} payment
               {filteredPayments.length !== 1 ? "s" : ""} found
@@ -289,7 +243,7 @@ export default function PaymentManagement() {
           <div className="toolbar">
             <input
               type="text"
-              placeholder="🔍 Search payments by ID, booking ID, or method..."
+              placeholder="🔍 Search payments by any field..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="search"
@@ -332,11 +286,20 @@ export default function PaymentManagement() {
             <thead>
               <tr>
                 <th>Payment ID</th>
-                <th>Booking ID</th>
-                <th>Amount</th>
+                <th>Booking No</th>
+                <th>Guest</th>
+                <th>Host</th>
+                <th>Car</th>
+                <th>Driver</th>
+                <th>Insurance</th>
+                <th>Service</th>
+                <th>GST</th>
+                <th>Total Amount</th>
                 <th>Payment Method</th>
                 <th>Date</th>
                 <th>Status</th>
+                <th>Ratings</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -346,26 +309,25 @@ export default function PaymentManagement() {
                     key={payment.id}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <td data-label="Payment ID">
-                      <span className="payment-id">{payment.id}</span>
+                    <td data-label="Payment ID">{payment.id}</td>
+                    <td data-label="Booking No">{payment.bookingId}</td>
+                    <td data-label="Guest">{payment.guest}</td>
+                    <td data-label="Host">{payment.host}</td>
+                    <td data-label="Car">{payment.car}</td>
+                    <td data-label="Driver">{payment.driver}</td>
+                    <td data-label="Insurance">
+                      {payment.insurance ? "Yes" : "No"}
                     </td>
-                    <td data-label="Booking ID">
-                      <span className="booking-id">{payment.bookingId}</span>
-                    </td>
-                    <td data-label="Amount">
-                      <span className="amount">
-                        {payment.amount.toFixed(2)}
-                      </span>
+                    <td data-label="Service">{payment.service}</td>
+                    <td data-label="GST">{payment.gst.toFixed(2)}</td>
+                    <td data-label="Total Amount">
+                      {payment.totalAmount.toFixed(2)}
                     </td>
                     <td data-label="Payment Method">
-                      <span className="payment-method">
-                        {getMethodIcon(payment.paymentMethod)}{" "}
-                        {payment.paymentMethod}
-                      </span>
+                      {getMethodIcon(payment.paymentMethod)}{" "}
+                      {payment.paymentMethod}
                     </td>
-                    <td data-label="Date">
-                      <span className="date">{formatDate(payment.date)}</span>
-                    </td>
+                    <td data-label="Date">{formatDate(payment.date)}</td>
                     <td data-label="Status">
                       <span
                         className={`status ${getStatusClass(payment.status)}`}
@@ -373,11 +335,13 @@ export default function PaymentManagement() {
                         {getStatusIcon(payment.status)} {payment.status}
                       </span>
                     </td>
+                    <td data-label="Ratings">{payment.ratings.toFixed(1)}</td>
+                    <td data-label="Action">{payment.action || ""}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={15}>
                     <div className="empty">
                       <h3>No payments found</h3>
                       <p>Try adjusting your search criteria or filters</p>

@@ -4,84 +4,94 @@ import "./manageHosts.css";
 
 interface Host {
   id: number;
-  name: string;
-  contact: string;
-  carsListed: number;
+  firstName: string;
+  lastName: string;
+  address: string;
+  city: string;
+  id1Verified: boolean; // ID 1 verified
   status: "Active" | "Inactive" | "Pending";
   joinDate: string;
-  location: string;
   rating: number;
+  // old fields removed to avoid duplication: name, contact, carsListed, location
+  action?: string; // For UI action placeholders if needed
 }
 
 const hostData: Host[] = [
   {
     id: 1,
-    name: "Ethan Carter",
-    contact: "ethan.carter@email.com",
-    carsListed: 3,
+    firstName: "Ethan",
+    lastName: "Carter",
+    address: "123 Main St",
+    city: "Downtown",
+    id1Verified: true,
     status: "Active",
     joinDate: "2024-01-15",
-    location: "Downtown",
     rating: 4.8,
   },
   {
     id: 2,
-    name: "Olivia Bennett",
-    contact: "olivia.bennett@email.com",
-    carsListed: 5,
+    firstName: "Olivia",
+    lastName: "Bennett",
+    address: "456 Ocean Dr",
+    city: "Marina",
+    id1Verified: true,
     status: "Active",
     joinDate: "2023-11-22",
-    location: "Marina",
     rating: 4.9,
   },
   {
     id: 3,
-    name: "Noah Thompson",
-    contact: "noah.thompson@email.com",
-    carsListed: 2,
+    firstName: "Noah",
+    lastName: "Thompson",
+    address: "789 Maple Ave",
+    city: "Suburbs",
+    id1Verified: false,
     status: "Inactive",
     joinDate: "2024-02-08",
-    location: "Suburbs",
     rating: 4.2,
   },
   {
     id: 4,
-    name: "Ava Harper",
-    contact: "ava.harper@email.com",
-    carsListed: 4,
+    firstName: "Ava",
+    lastName: "Harper",
+    address: "321 Center Blvd",
+    city: "City Center",
+    id1Verified: true,
     status: "Active",
     joinDate: "2023-12-10",
-    location: "City Center",
     rating: 4.7,
   },
   {
     id: 5,
-    name: "Liam Foster",
-    contact: "liam.foster@email.com",
-    carsListed: 1,
+    firstName: "Liam",
+    lastName: "Foster",
+    address: "654 Airport Rd",
+    city: "Airport",
+    id1Verified: false,
     status: "Pending",
     joinDate: "2024-03-01",
-    location: "Airport",
     rating: 4.0,
   },
   {
     id: 6,
-    name: "Emma Wilson",
-    contact: "emma.wilson@email.com",
-    carsListed: 6,
+    firstName: "Emma",
+    lastName: "Wilson",
+    address: "987 Central St",
+    city: "Downtown",
+    id1Verified: true,
     status: "Active",
     joinDate: "2023-10-15",
-    location: "Downtown",
     rating: 4.9,
   },
   {
     id: 7,
-    name: "Mason Davis",
-    contact: "mason.davis@email.com",
-    carsListed: 3,
+    firstName: "Mason",
+    lastName: "Davis",
+    address: "741 Bayview Dr",
+    city: "Marina",
+    id1Verified: false,
     status: "Inactive",
     joinDate: "2024-01-28",
-    location: "Marina",
     rating: 3.8,
   },
 ];
@@ -98,9 +108,11 @@ export default function ManageHosts() {
   const filteredHosts = useMemo(() => {
     return hostData.filter((host) => {
       const matchesSearch =
-        host.name.toLowerCase().includes(search.toLowerCase()) ||
-        host.contact.toLowerCase().includes(search.toLowerCase()) ||
-        host.location.toLowerCase().includes(search.toLowerCase());
+        host.firstName.toLowerCase().includes(search.toLowerCase()) ||
+        host.lastName.toLowerCase().includes(search.toLowerCase()) ||
+        host.address.toLowerCase().includes(search.toLowerCase()) ||
+        host.city.toLowerCase().includes(search.toLowerCase());
+
       const matchesFilter = filter === "All" || host.status === filter;
 
       let matchesDateFilter = true;
@@ -127,14 +139,6 @@ export default function ManageHosts() {
   const totalPages = Math.ceil(filteredHosts.length / pageSize);
 
   const dateOptions = ["All Dates", "This Year", "Last Year"];
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
 
   const renderStars = (rating: number) => {
     const stars = [];
@@ -169,7 +173,7 @@ export default function ManageHosts() {
           <div className="zipd-mc-toolbar_5832">
             <input
               type="text"
-              placeholder="🔍 Search hosts by name, email, or location..."
+              placeholder="🔍 Search hosts by first name, last name, address or city..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="zipd-mc-search_5832"
@@ -214,12 +218,13 @@ export default function ManageHosts() {
           <table className="zipd-mc-table_5832">
             <thead>
               <tr>
-                <th>Host Details</th>
-                <th>Cars Listed</th>
-                <th>Location</th>
-                <th>Join Date</th>
-                <th>Rating</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Address</th>
+                <th>City</th>
+                <th>ID 1 Verified</th>
                 <th>Status</th>
+                <th>Ratings</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -230,34 +235,12 @@ export default function ManageHosts() {
                     key={host.id}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <td data-label="Host">
-                      <div>
-                        <div className="zipd-mc-hostname_5832">{host.name}</div>
-                        <div className="zipd-mc-hostcontact_5832">
-                          {host.contact}
-                        </div>
-                      </div>
-                    </td>
-                    <td data-label="Cars">
-                      <span className="zipd-mc-carslisted_5832">
-                        {host.carsListed}
-                      </span>
-                    </td>
-                    <td data-label="Location">
-                      <span className="zipd-mc-location_5832">
-                        {host.location}
-                      </span>
-                    </td>
-                    <td data-label="Join Date">
-                      <span className="zipd-mc-joindate_5832">
-                        {formatDate(host.joinDate)}
-                      </span>
-                    </td>
-                    <td data-label="Rating">
-                      <div className="zipd-mc-rating_5832">
-                        {renderStars(host.rating)}
-                        <span>({host.rating})</span>
-                      </div>
+                    <td data-label="First Name">{host.firstName}</td>
+                    <td data-label="Last Name">{host.lastName}</td>
+                    <td data-label="Address">{host.address}</td>
+                    <td data-label="City">{host.city}</td>
+                    <td data-label="ID 1 Verified">
+                      {host.id1Verified ? "✅" : "❌"}
                     </td>
                     <td data-label="Status">
                       <span
@@ -265,6 +248,12 @@ export default function ManageHosts() {
                       >
                         {host.status}
                       </span>
+                    </td>
+                    <td data-label="Ratings">
+                      <div className="zipd-mc-rating_5832">
+                        {renderStars(host.rating)}
+                        <span>({host.rating.toFixed(1)})</span>
+                      </div>
                     </td>
                     <td data-label="Actions">
                       <div className="zipd-mc-actions_5832">
@@ -292,7 +281,7 @@ export default function ManageHosts() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7}>
+                  <td colSpan={8}>
                     <div className="zipd-mc-empty_5832">
                       <h3>No hosts found</h3>
                       <p>Try adjusting your search criteria or filters</p>

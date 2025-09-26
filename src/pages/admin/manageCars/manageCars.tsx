@@ -3,19 +3,26 @@ import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
 import "./manageCars.css";
 
 interface Car {
-  id: number;
-  name: string;
-  type: string;
-  price: number;
+  id: number; // Car ID
+  carNo: string; // Car No
+  name: string; // Make / Model
+  type: string; // Type (e.g., Sedan)
+  price: number; // Hourly price
   status: "Available" | "Rented";
   location: string;
-  year: number;
-  month: string; // e.g., "January", "February"
+  year: number; // Year of make
+  month: string;
+  fuelType: string; // Fuel Type
+  seatingCapacity: number; // Seating capacity
+  hostedBy: string; // Hosted by
+  isVerified: boolean; // Is Verified
+  ratings: number; // Ratings (e.g., 1-5)
 }
 
 const carData: Car[] = [
   {
     id: 1,
+    carNo: "ABC123",
     name: "Tesla Model S",
     type: "Electric Sedan",
     price: 120,
@@ -23,9 +30,15 @@ const carData: Car[] = [
     location: "Downtown",
     year: 2025,
     month: "January",
+    fuelType: "Electric",
+    seatingCapacity: 5,
+    hostedBy: "John Doe",
+    isVerified: true,
+    ratings: 4.9,
   },
   {
     id: 2,
+    carNo: "XYZ789",
     name: "BMW X5",
     type: "Luxury SUV",
     price: 95,
@@ -33,9 +46,15 @@ const carData: Car[] = [
     location: "Airport",
     year: 2024,
     month: "December",
+    fuelType: "Petrol",
+    seatingCapacity: 7,
+    hostedBy: "Alice Smith",
+    isVerified: false,
+    ratings: 4.5,
   },
   {
     id: 3,
+    carNo: "LMN456",
     name: "Mercedes C-Class",
     type: "Premium Sedan",
     price: 85,
@@ -43,9 +62,15 @@ const carData: Car[] = [
     location: "City Center",
     year: 2025,
     month: "February",
+    fuelType: "Diesel",
+    seatingCapacity: 5,
+    hostedBy: "David Lee",
+    isVerified: true,
+    ratings: 4.7,
   },
   {
     id: 4,
+    carNo: "PQR234",
     name: "Audi Q7",
     type: "Luxury SUV",
     price: 110,
@@ -53,9 +78,15 @@ const carData: Car[] = [
     location: "Marina",
     year: 2023,
     month: "November",
+    fuelType: "Petrol",
+    seatingCapacity: 7,
+    hostedBy: "Emily Clark",
+    isVerified: false,
+    ratings: 4.3,
   },
   {
     id: 5,
+    carNo: "JKL890",
     name: "Honda Civic",
     type: "Compact Car",
     price: 45,
@@ -63,6 +94,11 @@ const carData: Car[] = [
     location: "Suburbs",
     year: 2025,
     month: "January",
+    fuelType: "Petrol",
+    seatingCapacity: 5,
+    hostedBy: "Raj Mehta",
+    isVerified: true,
+    ratings: 4.2,
   },
 ];
 
@@ -75,7 +111,7 @@ export default function ManageCars() {
   const [page, setPage] = useState(1);
   const pageSize = 5;
 
-  // ✅ unique dropdown values
+  // Unique dropdown values
   const uniqueTypes = ["All Types", ...new Set(carData.map((car) => car.type))];
   const uniqueYears = [
     "All Years",
@@ -202,12 +238,19 @@ export default function ManageCars() {
           <table className="zipd-mc-table_5832">
             <thead>
               <tr>
-                <th>Vehicle Details</th>
-                <th>Daily Rate</th>
-                <th>Location</th>
-                <th>Status</th>
+                <th>Car ID</th>
+                <th>Car No</th>
+                <th>Make / Model</th>
+                <th>Fuel Type</th>
+                <th>Seating</th>
                 <th>Year</th>
                 <th>Month</th>
+                <th>Hourly Price</th>
+                <th>Location</th>
+                <th>Hosted by</th>
+                <th>Verified</th>
+                <th>Status</th>
+                <th>Ratings</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -218,12 +261,18 @@ export default function ManageCars() {
                     key={car.id}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
+                    <td>{car.id}</td>
+                    <td>{car.carNo}</td>
                     <td>
                       <div>
                         <div className="zipd-mc-carname_5832">{car.name}</div>
                         <div className="zipd-mc-cartype_5832">{car.type}</div>
                       </div>
                     </td>
+                    <td>{car.fuelType}</td>
+                    <td>{car.seatingCapacity}</td>
+                    <td>{car.year}</td>
+                    <td>{car.month}</td>
                     <td>
                       <span className="zipd-mc-price_5832">{car.price}</span>
                     </td>
@@ -231,6 +280,10 @@ export default function ManageCars() {
                       <span className="zipd-mc-location_5832">
                         {car.location}
                       </span>
+                    </td>
+                    <td>{car.hostedBy}</td>
+                    <td>
+                      {car.isVerified ? <span>✅</span> : <span>❌</span>}
                     </td>
                     <td>
                       <span
@@ -243,8 +296,7 @@ export default function ManageCars() {
                         {car.status}
                       </span>
                     </td>
-                    <td>{car.year}</td>
-                    <td>{car.month}</td>
+                    <td>{car.ratings.toFixed(1)}</td>
                     <td>
                       <div className="zipd-mc-actions_5832">
                         <button
@@ -271,7 +323,7 @@ export default function ManageCars() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7}>
+                  <td colSpan={14}>
                     <div className="zipd-mc-empty_5832">
                       <h3>No vehicles found</h3>
                       <p>Try adjusting your search criteria or filters</p>

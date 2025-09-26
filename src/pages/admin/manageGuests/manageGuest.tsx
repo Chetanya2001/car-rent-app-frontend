@@ -1,49 +1,68 @@
 import { useState, useMemo, useEffect } from "react";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
 import { getAllUsers } from "./../../../services/admin";
-import type { User } from "./../../../services/admin";
 import "./manageGuest.css";
 
+interface Guest {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  id1Verified: boolean;
+  id2Verified: boolean;
+  isVerified: boolean; // corresponds to existing verified status
+  ratings: number;
+  action?: string;
+}
+
 export default function ManageGuests() {
-  const [guests, setGuests] = useState<User[]>([]);
+  const [guests, setGuests] = useState<Guest[]>([]);
   const [filter, setFilter] = useState<"All" | "Active" | "Inactive">("All");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 5;
 
-  // ✅ Fetch guest users
   useEffect(() => {
     const fetchGuests = async () => {
       try {
-        const users = await getAllUsers(); // no need to pass token manually
+        const users = await getAllUsers();
         const onlyGuests = users.filter((u) => u.role === "guest");
-        setGuests(onlyGuests);
+        const mappedGuests: Guest[] = onlyGuests.map((guest) => ({
+          id: guest.id,
+          firstName: guest.first_name,
+          lastName: guest.last_name,
+          email: guest.email,
+          phone: guest.phone || "N/A",
+          id1Verified: false, // temporary default, set later
+          id2Verified: false, // temporary default, set later
+          isVerified: guest.is_verified,
+          ratings: 0, // temporary default, set later
+        }));
+        setGuests(mappedGuests);
       } catch (error) {
         console.error("Failed to load guests:", error);
       }
     };
-
     fetchGuests();
   }, []);
 
-  // ✅ Filter guests
   const filteredGuests = useMemo(() => {
     return guests.filter((guest) => {
       const matchesSearch =
-        guest.first_name.toLowerCase().includes(search.toLowerCase()) ||
-        guest.last_name.toLowerCase().includes(search.toLowerCase()) ||
+        guest.firstName.toLowerCase().includes(search.toLowerCase()) ||
+        guest.lastName.toLowerCase().includes(search.toLowerCase()) ||
         guest.email.toLowerCase().includes(search.toLowerCase());
 
       const matchesFilter =
         filter === "All" ||
-        (filter === "Active" && guest.is_verified) ||
-        (filter === "Inactive" && !guest.is_verified);
+        (filter === "Active" && guest.isVerified) ||
+        (filter === "Inactive" && !guest.isVerified);
 
       return matchesSearch && matchesFilter;
     });
   }, [search, filter, guests]);
 
-  // ✅ Paginate
   const paginatedGuests = useMemo(() => {
     const start = (page - 1) * pageSize;
     return filteredGuests.slice(start, start + pageSize);
@@ -64,7 +83,6 @@ export default function ManageGuests() {
         </div>
 
         <div className="content-card">
-          {/* Search & Filter */}
           <div className="filters">
             <input
               type="text"
@@ -89,14 +107,18 @@ export default function ManageGuests() {
             </div>
           </div>
 
-          {/* Table */}
           <div className="table-container">
             <table className="guest-table">
               <thead>
                 <tr>
-                  <th>Guest Name</th>
-                  <th>Contact Information</th>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Email</th>
+                  <th>Phone no</th>
+                  <th>ID 1 Verified</th>
+                  <th>ID 2 Verified</th>
                   <th>Status</th>
+                  <th>Ratings</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -107,24 +129,22 @@ export default function ManageGuests() {
                       key={guest.id}
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
-                      <td>
-                        <div className="guest-name">
-                          {guest.first_name} {guest.last_name}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="guest-contact">{guest.email}</div>
-                        <div className="guest-contact">{guest.phone}</div>
-                      </td>
+                      <td>{guest.firstName}</td>
+                      <td>{guest.lastName}</td>
+                      <td>{guest.email}</td>
+                      <td>{guest.phone}</td>
+                      <td>{guest.id1Verified ? "✅" : "❌"}</td>
+                      <td>{guest.id2Verified ? "✅" : "❌"}</td>
                       <td>
                         <span
                           className={`status ${
-                            guest.is_verified ? "active" : "inactive"
+                            guest.isVerified ? "active" : "inactive"
                           }`}
                         >
-                          {guest.is_verified ? "Active" : "Inactive"}
+                          {guest.isVerified ? "Active" : "Inactive"}
                         </span>
                       </td>
+                      <td>{guest.ratings.toFixed(1)}</td>
                       <td>
                         <div className="actions">
                           <button className="edit" title="Edit Guest">
@@ -139,7 +159,7 @@ export default function ManageGuests() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5}>
+                    <td colSpan={9}>
                       <div className="no-data">
                         <div>No guests found matching your criteria</div>
                       </div>
@@ -150,7 +170,6 @@ export default function ManageGuests() {
             </table>
           </div>
 
-          {/* Pagination */}
           <div className="pagination">
             <div className="pagination-info">
               <div className="results-count">

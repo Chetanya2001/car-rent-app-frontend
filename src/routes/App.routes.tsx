@@ -11,6 +11,7 @@ import ManageGuests from "../pages/admin/manageGuests/manageGuest";
 import ManageHosts from "../pages/admin/manageHosts/manageHosts";
 import ManageBookings from "../pages/admin/manageBookings/manageBookings";
 import ManagePayments from "../pages/admin/managePayments/managePayments";
+import ManageSupport from "../pages/admin/manageSupport/manageSupport";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -27,6 +28,7 @@ const AppRoutes = () => (
       <Route path="/admin/manage-hosts" element={<ManageHosts />} />
       <Route path="/admin/manage-bookings" element={<ManageBookings />} />
       <Route path="/admin/manage-payments" element={<ManagePayments />} />
+      <Route path="/admin/manage-support" element={<ManageSupport />} />
     </Routes>
   </BrowserRouter>
 );
