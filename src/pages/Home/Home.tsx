@@ -29,7 +29,7 @@ import {
 import { searchCars } from "../../services/carService"; // ✅ Import API
 
 type TokenPayload = {
-  role: "host" | "guest";
+  role: "host" | "guest" | "admin";
 };
 
 export default function Home() {
@@ -40,7 +40,7 @@ export default function Home() {
   const [user, setUser] = useState<{ name?: string; avatar?: string } | null>(
     null
   );
-  const [role, setRole] = useState<"host" | "guest" | null>(null);
+  const [role, setRole] = useState<"host" | "guest" | "admin" | null>(null);
   const [showMenu, setShowMenu] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
 
@@ -143,7 +143,22 @@ export default function Home() {
     "Support",
     "Logout",
   ];
-  const menuItems = role === "host" ? hostMenu : guestMenu;
+  const AdminMenu = [
+    "Manage-Cars",
+    "Manage-Bookings",
+    "Manage-Guests",
+    "Manage-Hosts",
+    "Manage-Payments",
+    "Manage-Support",
+  ];
+  const menuItems =
+    role === "host"
+      ? hostMenu
+      : role === "guest"
+      ? guestMenu
+      : role === "admin"
+      ? AdminMenu
+      : [];
 
   const iconMap: Record<string, any> = {
     "Add a Car": faPlus,
@@ -215,7 +230,16 @@ export default function Home() {
                   {menuItems.map((item, idx) => {
                     if (item === "Logout") {
                       return (
-                        <li key={idx} onClick={handleLogout}>
+                        <li
+                          key={idx}
+                          onClick={handleLogout}
+                          tabIndex={0}
+                          role="menuitem"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ")
+                              handleLogout();
+                          }}
+                        >
                           <FontAwesomeIcon
                             icon={iconMap[item]}
                             className="menu-icon"
@@ -225,9 +249,39 @@ export default function Home() {
                       );
                     }
 
-                    if (item === "Add a Car") {
+                    // Map admin menu items and others to their navigation routes
+                    const adminNavMap: Record<string, string> = {
+                      "Manage-Cars": "/admin/manage-cars",
+                      "Manage-Bookings": "/admin/manage-bookings",
+                      "Manage-Guests": "/admin/manage-guests",
+                      "Manage-Hosts": "/admin/manage-hosts",
+                      "Manage-Payments": "/admin/manage-payments",
+                      "Manage-Support": "/admin/manage-support",
+                    };
+
+                    if (
+                      item === "Add a Car" ||
+                      item === "My Cars" ||
+                      adminNavMap[item]
+                    ) {
+                      const path =
+                        item === "Add a Car"
+                          ? "/add-car"
+                          : item === "My Cars"
+                          ? "/my-cars"
+                          : adminNavMap[item];
+
                       return (
-                        <li key={idx} onClick={() => navigate("/add-car")}>
+                        <li
+                          key={idx}
+                          onClick={() => navigate(path)}
+                          tabIndex={0}
+                          role="menuitem"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ")
+                              navigate(path);
+                          }}
+                        >
                           <FontAwesomeIcon
                             icon={iconMap[item]}
                             className="menu-icon"
@@ -237,20 +291,18 @@ export default function Home() {
                       );
                     }
 
-                    if (item === "My Cars") {
-                      return (
-                        <li key={idx} onClick={() => navigate("/my-cars")}>
-                          <FontAwesomeIcon
-                            icon={iconMap[item]}
-                            className="menu-icon"
-                          />{" "}
-                          {item}
-                        </li>
-                      );
-                    }
-
+                    // For other menu items without custom navigation, just render them (you can extend if needed)
                     return (
-                      <li key={idx}>
+                      <li
+                        key={idx}
+                        tabIndex={0}
+                        role="menuitem"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            // Add any needed behavior here, or ignore
+                          }
+                        }}
+                      >
                         <FontAwesomeIcon
                           icon={iconMap[item]}
                           className="menu-icon"
