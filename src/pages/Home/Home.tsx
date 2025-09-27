@@ -24,6 +24,7 @@ import {
   faLifeRing,
   faDoorOpen,
   faPlus,
+  faFile, // Document icon added
 } from "@fortawesome/free-solid-svg-icons";
 
 import { searchCars } from "../../services/carService"; // ✅ Import API
@@ -143,6 +144,7 @@ export default function Home() {
     "My Payments",
     "Notifications",
     "Support",
+    "My Documents", // Added here
     "Logout",
   ];
   const AdminMenu = [
@@ -172,6 +174,7 @@ export default function Home() {
     Support: faLifeRing,
     Logout: faDoorOpen,
     "Book a Car": faCar,
+    "My Documents": faFile, // icon for documents added
   };
 
   return (
@@ -264,13 +267,16 @@ export default function Home() {
                     if (
                       item === "Add a Car" ||
                       item === "My Cars" ||
-                      adminNavMap[item]
+                      adminNavMap[item] ||
+                      item === "My Documents"
                     ) {
                       const path =
                         item === "Add a Car"
                           ? "/add-car"
                           : item === "My Cars"
                           ? "/my-cars"
+                          : item === "My Documents"
+                          ? "/my-documents" // Path for documents
                           : adminNavMap[item];
 
                       return (

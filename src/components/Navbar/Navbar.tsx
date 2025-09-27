@@ -18,6 +18,7 @@ import {
   faPlus,
   faBars,
   faTimes,
+  faFile,
 } from "@fortawesome/free-solid-svg-icons";
 import type { User } from "../../types/user";
 
@@ -64,6 +65,7 @@ const iconMap: Record<string, any> = {
   Support: faLifeRing,
   Logout: faDoorOpen,
   "Book a Car": faCar,
+  "My Documents": faFile,
 };
 
 export default function Navbar() {

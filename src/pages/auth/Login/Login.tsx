@@ -57,8 +57,8 @@ export default function Login({
       onLoginSuccess(userData);
 
       if (decoded.role === "admin") navigate("/admin/manage-cars");
-      else if (decoded.role === "host") navigate("/host/dashboard");
-      else if (decoded.role === "guest") navigate("/guest/dashboard");
+      else if (decoded.role === "host") navigate("/");
+      else if (decoded.role === "guest") navigate("/");
 
       onClose();
     } catch (err: any) {
