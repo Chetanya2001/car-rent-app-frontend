@@ -41,6 +41,7 @@ const guestMenu = [
   "My Payments",
   "Notifications",
   "Support",
+  "My Documents",
   "Logout",
 ];
 
@@ -181,7 +182,6 @@ export default function Navbar() {
           navigate("/support");
         }
         break;
-      // Admin menu navigation
       case "Cars":
         navigate("/admin/manage-cars");
         break;
@@ -196,6 +196,9 @@ export default function Navbar() {
         break;
       case "Payments":
         navigate("/admin/manage-payments");
+        break;
+      case "My Documents":
+        navigate("/my-documents");
         break;
       default:
         break;
@@ -263,6 +266,17 @@ export default function Navbar() {
               Support
             </a>
           </li>
+          {role === "guest" && (
+            <li>
+              <NavLink
+                to="/my-documents"
+                className={({ isActive }) => (isActive ? "active" : "")}
+                onClick={() => setNavOpen(false)}
+              >
+                My Documents
+              </NavLink>
+            </li>
+          )}
         </ul>
 
         {/* Login/Profile */}
