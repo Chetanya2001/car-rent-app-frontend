@@ -1,4 +1,5 @@
 import React, { useState, type ChangeEvent, type FormEvent } from "react";
+import Navbar from "../../components/Navbar/Navbar";
 
 const idTypes: string[] = [
   "Passport",
@@ -44,100 +45,103 @@ function DocumentSection({
   };
 
   return (
-    <div className="doc-block" style={{ flex: 1, minWidth: 280 }}>
-      <h3>{label}</h3>
-      <label>ID Type</label>
-      <select
-        value={idType}
-        onChange={handleTypeChange}
-        className="doc-dropdown"
-        style={{ width: "100%", marginBottom: 8 }}
-      >
-        <option value="">Select ID type</option>
-        {idTypes.map((type) => (
-          <option key={type} value={type}>
-            {type}
-          </option>
-        ))}
-      </select>
-      <span
-        className={`doc-status ${
-          verificationStatus === "Verified" ? "verified" : ""
-        }`}
-        style={{ display: "inline-block", marginBottom: 12 }}
-      >
-        Verification status: {verificationStatus}
-      </span>
-      {file ? (
-        <div
-          className="file-display"
-          style={{
-            background: "#eaffea",
-            borderRadius: "8px",
-            padding: "10px",
-            marginTop: "12px",
-            position: "relative",
-          }}
+    <>
+      <Navbar />
+      <div className="doc-block" style={{ flex: 1, minWidth: 280 }}>
+        <h3>{label}</h3>
+        <label>ID Type</label>
+        <select
+          value={idType}
+          onChange={handleTypeChange}
+          className="doc-dropdown"
+          style={{ width: "100%", marginBottom: 8 }}
         >
-          <b>{file.name}</b>
-          <br />
-          Uploaded on {new Date().toLocaleDateString()}
-          <button
-            style={{
-              position: "absolute",
-              right: 8,
-              top: 8,
-              background: "transparent",
-              border: "none",
-              color: "#bb0000",
-              fontSize: "16px",
-              cursor: "pointer",
-            }}
-            onClick={handleRemoveFile}
-            aria-label={`Remove file for ${label}`}
-          >
-            🗑️
-          </button>
-        </div>
-      ) : (
-        <div
-          style={{
-            border: "2px dashed #aaa",
-            borderRadius: "8px",
-            padding: "20px",
-            textAlign: "center",
-            marginTop: "12px",
-            cursor: "pointer",
-            userSelect: "none",
-          }}
+          <option value="">Select ID type</option>
+          {idTypes.map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
+        </select>
+        <span
+          className={`doc-status ${
+            verificationStatus === "Verified" ? "verified" : ""
+          }`}
+          style={{ display: "inline-block", marginBottom: 12 }}
         >
-          <label
-            htmlFor={`upload-${label}`}
+          Verification status: {verificationStatus}
+        </span>
+        {file ? (
+          <div
+            className="file-display"
             style={{
-              cursor: "pointer",
-              display: "inline-block",
-              padding: "8px 22px",
-              backgroundColor: "#01d28e",
-              color: "#fff",
-              borderRadius: "6px",
-              fontWeight: 500,
-              marginTop: "8px",
+              background: "#eaffea",
+              borderRadius: "8px",
+              padding: "10px",
+              marginTop: "12px",
+              position: "relative",
             }}
           >
-            Browse
-          </label>
-          <input
-            type="file"
-            id={`upload-${label}`}
-            style={{ display: "none" }}
-            onChange={handleFileChange}
-          />
-          <div style={{ marginTop: "12px", fontWeight: "600" }}>
-            Upload document
+            <b>{file.name}</b>
+            <br />
+            Uploaded on {new Date().toLocaleDateString()}
+            <button
+              style={{
+                position: "absolute",
+                right: 8,
+                top: 8,
+                background: "transparent",
+                border: "none",
+                color: "#bb0000",
+                fontSize: "16px",
+                cursor: "pointer",
+              }}
+              onClick={handleRemoveFile}
+              aria-label={`Remove file for ${label}`}
+            >
+              🗑️
+            </button>
           </div>
-        </div>
-      )}
-    </div>
+        ) : (
+          <div
+            style={{
+              border: "2px dashed #aaa",
+              borderRadius: "8px",
+              padding: "20px",
+              textAlign: "center",
+              marginTop: "12px",
+              cursor: "pointer",
+              userSelect: "none",
+            }}
+          >
+            <label
+              htmlFor={`upload-${label}`}
+              style={{
+                cursor: "pointer",
+                display: "inline-block",
+                padding: "8px 22px",
+                backgroundColor: "#01d28e",
+                color: "#fff",
+                borderRadius: "6px",
+                fontWeight: 500,
+                marginTop: "8px",
+              }}
+            >
+              Browse
+            </label>
+            <input
+              type="file"
+              id={`upload-${label}`}
+              style={{ display: "none" }}
+              onChange={handleFileChange}
+            />
+            <div style={{ marginTop: "12px", fontWeight: "600" }}>
+              Upload document
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
