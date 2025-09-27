@@ -46,7 +46,6 @@ function DocumentSection({
 
   return (
     <>
-      <Navbar />
       <div className="doc-block" style={{ flex: 1, minWidth: 280 }}>
         <h3>{label}</h3>
         <label>ID Type</label>
@@ -162,66 +161,70 @@ export default function MyDocumentsPage() {
   };
 
   return (
-    <form
-      className="verify-identity-page"
-      onSubmit={handleSubmit}
-      style={{
-        maxWidth: "650px",
-        margin: "40px auto",
-        background: "#fff",
-        borderRadius: "12px",
-        boxShadow: "0 0 10px #eee",
-        padding: "30px 40px",
-      }}
-    >
-      <h2 style={{ fontWeight: "800" }}>Verify Your Identity</h2>
-      <p style={{ marginBottom: "24px", color: "#555" }}>
-        To ensure the security of your account, we need to verify your identity.
-        Please upload two forms of identification from the options below.
-      </p>
-      <div
+    <>
+      <Navbar />
+      <form
+        className="verify-identity-page"
+        onSubmit={handleSubmit}
         style={{
-          display: "flex",
-          gap: "28px",
-          flexWrap: "wrap",
-          marginBottom: "30px",
+          maxWidth: "650px",
+          margin: "40px auto",
+          background: "#fff",
+          borderRadius: "12px",
+          boxShadow: "0 0 10px #eee",
+          padding: "30px 40px",
         }}
       >
-        <DocumentSection
-          label="ID 1"
-          idType={id1Type}
-          setIdType={setId1Type}
-          file={id1File}
-          setFile={setId1File}
-          verificationStatus={id1Status}
-          setVerificationStatus={setId1Status}
-        />
-        <DocumentSection
-          label="ID 2"
-          idType={id2Type}
-          setIdType={setId2Type}
-          file={id2File}
-          setFile={setId2File}
-          verificationStatus={id2File ? "Verified" : "Pending"}
-          // no setVerificationStatus passed here since unused
-        />
-      </div>
-      <button
-        type="submit"
-        style={{
-          background: "#01d28e",
-          color: "#fff",
-          border: "none",
-          fontWeight: "700",
-          fontSize: "1.08em",
-          borderRadius: "7px",
-          padding: "13px 35px",
-          float: "right",
-          cursor: "pointer",
-        }}
-      >
-        Submit for Verification
-      </button>
-    </form>
+        <h2 style={{ fontWeight: "800" }}>Verify Your Identity</h2>
+        <p style={{ marginBottom: "24px", color: "#555" }}>
+          To ensure the security of your account, we need to verify your
+          identity. Please upload two forms of identification from the options
+          below.
+        </p>
+        <div
+          style={{
+            display: "flex",
+            gap: "28px",
+            flexWrap: "wrap",
+            marginBottom: "30px",
+          }}
+        >
+          <DocumentSection
+            label="ID 1"
+            idType={id1Type}
+            setIdType={setId1Type}
+            file={id1File}
+            setFile={setId1File}
+            verificationStatus={id1Status}
+            setVerificationStatus={setId1Status}
+          />
+          <DocumentSection
+            label="ID 2"
+            idType={id2Type}
+            setIdType={setId2Type}
+            file={id2File}
+            setFile={setId2File}
+            verificationStatus={id2File ? "Verified" : "Pending"}
+            // no setVerificationStatus passed here since unused
+          />
+        </div>
+        <button
+          type="submit"
+          style={{
+            background: "#01d28e",
+            color: "#fff",
+            border: "none",
+            fontWeight: "700",
+            fontSize: "1.08em",
+            borderRadius: "7px",
+            padding: "13px 35px",
+            float: "right",
+            cursor: "pointer",
+          }}
+        >
+          Submit for Verification
+        </button>
+      </form>
+    </>
   );
 }
