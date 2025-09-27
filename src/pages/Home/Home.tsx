@@ -60,6 +60,7 @@ export default function Home() {
     setUser(null);
     setRole(null);
     setShowMenu(false);
+    navigate("/"); // Redirect on logout
   };
 
   const handleSearch = async () => {
@@ -103,6 +104,7 @@ export default function Home() {
       alert("Failed to fetch cars. Try again.");
     }
   };
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -150,6 +152,7 @@ export default function Home() {
     "Hosts",
     "Payments",
     "Support",
+    "Logout",
   ];
   const menuItems =
     role === "host"
@@ -249,7 +252,6 @@ export default function Home() {
                       );
                     }
 
-                    // Map admin menu items and others to their navigation routes
                     const adminNavMap: Record<string, string> = {
                       Cars: "/admin/manage-cars",
                       Bookings: "/admin/manage-bookings",
@@ -291,7 +293,6 @@ export default function Home() {
                       );
                     }
 
-                    // For other menu items without custom navigation, just render them (you can extend if needed)
                     return (
                       <li
                         key={idx}
@@ -299,7 +300,7 @@ export default function Home() {
                         role="menuitem"
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
-                            // Add any needed behavior here, or ignore
+                            // No-op or extend if needed
                           }
                         }}
                       >
@@ -333,7 +334,7 @@ export default function Home() {
                   try {
                     const decoded = jwtDecode<TokenPayload>(token);
                     setRole(decoded.role);
-                  } catch (err) {
+                  } catch {
                     console.error("Invalid token after login");
                   }
                 }
@@ -351,7 +352,7 @@ export default function Home() {
                   try {
                     const decoded = jwtDecode<TokenPayload>(token);
                     setRole(decoded.role);
-                  } catch (err) {
+                  } catch {
                     console.error("Invalid token after register");
                   }
                 }

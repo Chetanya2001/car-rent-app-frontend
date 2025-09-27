@@ -12,6 +12,7 @@ const adminMenu = [
   { name: "Bookings", path: "/admin/manage-bookings" },
   { name: "Payments", path: "/admin/manage-payments" },
   { name: "Support", path: "/admin/manage-support" },
+  { name: "Logout", path: "/" },
 ];
 
 export default function AdminNavBar() {
@@ -34,6 +35,13 @@ export default function AdminNavBar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setMenuOpen(false);
+    setMobileOpen(false);
+    navigate("/");
+  };
 
   return (
     <nav className="zipd-nav-container_9214">
@@ -67,13 +75,7 @@ export default function AdminNavBar() {
         />
         {menuOpen && (
           <div className="zipd-nav-profilemenu_9214">
-            <div
-              className="zipd-nav-profileitem_9214"
-              onClick={() => {
-                navigate("/");
-                setMenuOpen(false);
-              }}
-            >
+            <div className="zipd-nav-profileitem_9214" onClick={handleLogout}>
               Logout
             </div>
           </div>
@@ -107,13 +109,7 @@ export default function AdminNavBar() {
               {item.name}
             </div>
           ))}
-          <div
-            className="zipd-nav-mobileitem_9214"
-            onClick={() => {
-              navigate("/");
-              setMobileOpen(false);
-            }}
-          >
+          <div className="zipd-nav-mobileitem_9214" onClick={handleLogout}>
             Logout
           </div>
         </div>

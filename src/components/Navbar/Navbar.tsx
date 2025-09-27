@@ -22,7 +22,7 @@ import {
 import type { User } from "../../types/user";
 
 interface TokenPayload {
-  role: "host" | "guest";
+  role: "host" | "guest" | "admin";
 }
 
 const hostMenu = [
@@ -43,6 +43,7 @@ const guestMenu = [
   "Support",
   "Logout",
 ];
+
 const AdminMenu = [
   "Cars",
   "Bookings",
@@ -50,7 +51,9 @@ const AdminMenu = [
   "Hosts",
   "Payments",
   "Support",
+  "Logout",
 ];
+
 const iconMap: Record<string, any> = {
   "Add a Car": faPlus,
   "My Cars": faCar,
@@ -65,7 +68,7 @@ const iconMap: Record<string, any> = {
 export default function Navbar() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<"host" | "guest" | null>(null);
+  const [role, setRole] = useState<"host" | "guest" | "admin" | null>(null);
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null
   );
@@ -172,7 +175,11 @@ export default function Navbar() {
         navigate("/notifications");
         break;
       case "Support":
-        navigate("/support");
+        if (role === "admin") {
+          navigate("/admin/manage-support");
+        } else {
+          navigate("/support");
+        }
         break;
       // Admin menu navigation
       case "Cars":
@@ -189,9 +196,6 @@ export default function Navbar() {
         break;
       case "Payments":
         navigate("/admin/manage-payments");
-        break;
-      case "Support":
-        navigate("/admin/manage-support");
         break;
       default:
         break;
