@@ -111,36 +111,30 @@ function DocumentSection({
             userSelect: "none",
           }}
         >
-          <label htmlFor={`upload-${label}`} style={{ cursor: "pointer" }}>
-            <input
-              type="file"
-              id={`upload-${label}`}
-              style={{ display: "none" }}
-              onChange={handleFileChange}
-            />
-            <div>
-              <span role="img" aria-label="upload">
-                ⛅
-              </span>{" "}
-              Upload document
-              <br />
-              <button
-                type="button"
-                style={{
-                  margin: "8px 0 0",
-                  background: "#1774da",
-                  color: "#fff",
-                  border: "none",
-                  padding: "5px 22px",
-                  borderRadius: "6px",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                }}
-              >
-                Browse
-              </button>
-            </div>
+          <label
+            htmlFor={`upload-${label}`}
+            style={{
+              cursor: "pointer",
+              display: "inline-block",
+              padding: "8px 22px",
+              backgroundColor: "#01d28e",
+              color: "#fff",
+              borderRadius: "6px",
+              fontWeight: 500,
+              marginTop: "8px",
+            }}
+          >
+            Browse
           </label>
+          <input
+            type="file"
+            id={`upload-${label}`}
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+          />
+          <div style={{ marginTop: "12px", fontWeight: "600" }}>
+            Upload document
+          </div>
         </div>
       )}
     </div>
@@ -211,7 +205,7 @@ export default function MyDocumentsPage() {
       <button
         type="submit"
         style={{
-          background: "#1774da",
+          background: "#01d28e",
           color: "#fff",
           border: "none",
           fontWeight: "700",
