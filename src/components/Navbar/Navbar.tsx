@@ -43,7 +43,14 @@ const guestMenu = [
   "Support",
   "Logout",
 ];
-
+const AdminMenu = [
+  "Manage-Cars",
+  "Manage-Bookings",
+  "Manage-Guests",
+  "Manage-Hosts",
+  "Manage-Payments",
+  "Manage-Support",
+];
 const iconMap: Record<string, any> = {
   "Add a Car": faPlus,
   "My Cars": faCar,
@@ -132,7 +139,14 @@ export default function Navbar() {
     setActiveModal(null);
   };
 
-  const menuItems = role === "host" ? hostMenu : guestMenu;
+  const menuItems =
+    role === "host"
+      ? hostMenu
+      : role === "guest"
+      ? guestMenu
+      : role === "admin"
+      ? AdminMenu
+      : [];
 
   const handleMenuClick = (item: string) => {
     switch (item) {
@@ -159,6 +173,25 @@ export default function Navbar() {
         break;
       case "Support":
         navigate("/support");
+        break;
+      // Admin menu navigation
+      case "Manage-Cars":
+        navigate("/admin/manage-cars");
+        break;
+      case "Manage-Bookings":
+        navigate("/admin/manage-bookings");
+        break;
+      case "Manage-Guests":
+        navigate("/admin/manage-guests");
+        break;
+      case "Manage-Hosts":
+        navigate("/admin/manage-hosts");
+        break;
+      case "Manage-Payments":
+        navigate("/admin/manage-payments");
+        break;
+      case "Manage-Support":
+        navigate("/admin/manage-support");
         break;
       default:
         break;
