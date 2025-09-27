@@ -1,3 +1,4 @@
+// src/routes/AppRoutes.tsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "../pages/Home/Home";
 import Cars from "../pages/Cars/Cars";
@@ -12,6 +13,7 @@ import ManageHosts from "../pages/admin/manageHosts/manageHosts";
 import ManageBookings from "../pages/admin/manageBookings/manageBookings";
 import ManagePayments from "../pages/admin/managePayments/managePayments";
 import ManageSupport from "../pages/admin/manageSupport/manageSupport";
+import AdminRoute from "../components/AdminRoute/AdminRoute"; // Make sure path is correct
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -23,12 +25,54 @@ const AppRoutes = () => (
       <Route path="/my-cars" element={<MyCars />} />
       <Route path="/car-details/:id" element={<CarDetails />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
-      <Route path="/admin/manage-cars" element={<ManageCars />} />
-      <Route path="/admin/manage-guests" element={<ManageGuests />} />
-      <Route path="/admin/manage-hosts" element={<ManageHosts />} />
-      <Route path="/admin/manage-bookings" element={<ManageBookings />} />
-      <Route path="/admin/manage-payments" element={<ManagePayments />} />
-      <Route path="/admin/manage-support" element={<ManageSupport />} />
+      <Route
+        path="/admin/manage-cars"
+        element={
+          <AdminRoute>
+            <ManageCars />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/manage-guests"
+        element={
+          <AdminRoute>
+            <ManageGuests />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/manage-hosts"
+        element={
+          <AdminRoute>
+            <ManageHosts />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/manage-bookings"
+        element={
+          <AdminRoute>
+            <ManageBookings />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/manage-payments"
+        element={
+          <AdminRoute>
+            <ManagePayments />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/manage-support"
+        element={
+          <AdminRoute>
+            <ManageSupport />
+          </AdminRoute>
+        }
+      />
     </Routes>
   </BrowserRouter>
 );
