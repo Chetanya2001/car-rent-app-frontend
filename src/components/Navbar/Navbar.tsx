@@ -39,10 +39,10 @@ const hostMenu = [
 const guestMenu = [
   "Book a Car",
   "My Bookings",
+  "My Documents",
   "My Payments",
   "Notifications",
   "Support",
-  "My Documents",
   "Logout",
 ];
 

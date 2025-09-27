@@ -141,10 +141,10 @@ export default function Home() {
   const guestMenu = [
     "Book a Car",
     "My Bookings",
+    "My Documents",
     "My Payments",
     "Notifications",
     "Support",
-    "My Documents", // Added here
     "Logout",
   ];
   const AdminMenu = [
