@@ -144,12 +144,12 @@ export default function Home() {
     "Logout",
   ];
   const AdminMenu = [
-    "Manage-Cars",
-    "Manage-Bookings",
-    "Manage-Guests",
-    "Manage-Hosts",
-    "Manage-Payments",
-    "Manage-Support",
+    "Cars",
+    "Bookings",
+    "Guests",
+    "Hosts",
+    "Payments",
+    "Support",
   ];
   const menuItems =
     role === "host"
@@ -251,12 +251,12 @@ export default function Home() {
 
                     // Map admin menu items and others to their navigation routes
                     const adminNavMap: Record<string, string> = {
-                      "Manage-Cars": "/admin/manage-cars",
-                      "Manage-Bookings": "/admin/manage-bookings",
-                      "Manage-Guests": "/admin/manage-guests",
-                      "Manage-Hosts": "/admin/manage-hosts",
-                      "Manage-Payments": "/admin/manage-payments",
-                      "Manage-Support": "/admin/manage-support",
+                      Cars: "/admin/manage-cars",
+                      Bookings: "/admin/manage-bookings",
+                      Guests: "/admin/manage-guests",
+                      Hosts: "/admin/manage-hosts",
+                      Payments: "/admin/manage-payments",
+                      Support: "/admin/manage-support",
                     };
 
                     if (

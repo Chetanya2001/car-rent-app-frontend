@@ -44,12 +44,12 @@ const guestMenu = [
   "Logout",
 ];
 const AdminMenu = [
-  "Manage-Cars",
-  "Manage-Bookings",
-  "Manage-Guests",
-  "Manage-Hosts",
-  "Manage-Payments",
-  "Manage-Support",
+  "Cars",
+  "Bookings",
+  "Guests",
+  "Hosts",
+  "Payments",
+  "Support",
 ];
 const iconMap: Record<string, any> = {
   "Add a Car": faPlus,
@@ -175,22 +175,22 @@ export default function Navbar() {
         navigate("/support");
         break;
       // Admin menu navigation
-      case "Manage-Cars":
+      case "Cars":
         navigate("/admin/manage-cars");
         break;
-      case "Manage-Bookings":
+      case "Bookings":
         navigate("/admin/manage-bookings");
         break;
-      case "Manage-Guests":
+      case "Guests":
         navigate("/admin/manage-guests");
         break;
-      case "Manage-Hosts":
+      case "Hosts":
         navigate("/admin/manage-hosts");
         break;
-      case "Manage-Payments":
+      case "Payments":
         navigate("/admin/manage-payments");
         break;
-      case "Manage-Support":
+      case "Support":
         navigate("/admin/manage-support");
         break;
       default:
