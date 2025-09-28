@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { CarFormData } from "../../types/Cars";
 import { uploadImages } from "../../services/carService";
 import "./Step5Images.css";
+
 interface Props {
   onNext: (data: Partial<CarFormData>) => void;
   onBack: () => void;
@@ -22,6 +23,10 @@ export default function Step5Images({
     if (files) {
       setImages(Array.from(files));
     }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleUpload = async () => {
@@ -53,7 +58,6 @@ export default function Step5Images({
         onChange={(e) => handleFileChange(e.target.files)}
         className="w-full border p-2 rounded mb-4"
       />
-      {/* ✅ Preview Section */}
       {images.length > 0 && (
         <div className="image-preview-container">
           {images.map((file, idx) => (
@@ -68,11 +72,18 @@ export default function Step5Images({
                   );
                 }}
               />
+              <button
+                type="button"
+                className="remove-image-btn"
+                onClick={() => handleRemoveImage(idx)}
+                aria-label={`Remove image ${idx + 1}`}
+              >
+                &times;
+              </button>
             </div>
           ))}
         </div>
       )}
-      &nbsp;&nbsp;
       <div className="flex justify-between mt-6">
         <button
           onClick={onBack}
@@ -81,7 +92,6 @@ export default function Step5Images({
         >
           ← Back
         </button>
-        &nbsp;&nbsp;&nbsp;
         <button
           onClick={handleUpload}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
