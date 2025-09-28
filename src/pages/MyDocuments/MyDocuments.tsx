@@ -1,4 +1,4 @@
-import React, { useState, type ChangeEvent, type FormEvent } from "react";
+import React, { useState, type ChangeEvent } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import { uploadUserDocument } from "../../services/userDocuments";
 
@@ -30,6 +30,13 @@ function DocumentSection({
   verificationStatus,
   setVerificationStatus,
 }: DocumentSectionProps) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+
+  // Retrieve token from auth or storage
+  const userToken = localStorage.getItem("token") || "";
+
   const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) =>
     setIdType(e.target.value);
 
@@ -37,12 +44,40 @@ function DocumentSection({
     if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
       if (setVerificationStatus) setVerificationStatus("Pending");
+      setMessage(null);
+      setError(null);
     }
   };
 
   const handleRemoveFile = () => {
     setFile(null);
     if (setVerificationStatus) setVerificationStatus("Pending");
+    setMessage(null);
+    setError(null);
+  };
+
+  const uploadDocument = async () => {
+    setLoading(true);
+    setError(null);
+    setMessage(null);
+
+    if (!idType || !file) {
+      setError("Please select ID type and upload a file before submitting.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await uploadUserDocument(file, idType, userToken);
+      if (!res.success) throw new Error(res.message);
+
+      if (setVerificationStatus) setVerificationStatus("Pending");
+      setMessage("Document uploaded successfully. Pending verification.");
+    } catch (err: any) {
+      setError(err.message || "Upload failed.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -141,6 +176,30 @@ function DocumentSection({
             </div>
           </div>
         )}
+        <div style={{ marginTop: 12 }}>
+          <button
+            type="button"
+            onClick={uploadDocument}
+            disabled={loading}
+            style={{
+              background: "#01d28e",
+              color: "#fff",
+              border: "none",
+              fontWeight: "700",
+              fontSize: "1em",
+              borderRadius: "7px",
+              padding: "10px 25px",
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.6 : 1,
+            }}
+          >
+            {loading ? "Uploading..." : `Upload ${label}`}
+          </button>
+        </div>
+        {error && <div style={{ color: "#bb0000", marginTop: 8 }}>{error}</div>}
+        {message && (
+          <div style={{ color: "#008800", marginTop: 8 }}>{message}</div>
+        )}
       </div>
     </>
   );
@@ -153,58 +212,13 @@ export default function MyDocumentsPage() {
 
   const [id2Type, setId2Type] = useState<string>("");
   const [id2File, setId2File] = useState<File | null>(null);
-
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  // Retrieve token from auth or storage
-  const userToken = localStorage.getItem("token") || "";
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage(null);
-    setError(null);
-
-    if (!id1Type || !id1File) {
-      setError("Please select ID type and upload a file for ID 1.");
-      setLoading(false);
-      return;
-    }
-    if (!id2Type || !id2File) {
-      setError("Please select ID type and upload a file for ID 2.");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      // Upload first document
-      const res1 = await uploadUserDocument(id1File, id1Type, userToken);
-      if (!res1.success) throw new Error(res1.message);
-
-      setId1Status("Pending");
-
-      // Upload second document
-      const res2 = await uploadUserDocument(id2File, id2Type, userToken);
-      if (!res2.success) throw new Error(res2.message);
-
-      setMessage("Documents uploaded successfully. Pending verification.");
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || "Upload failed");
-      setMessage(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [id2Status, setId2Status] = useState<string>("No file selected");
 
   return (
     <>
       <Navbar />
-      <form
+      <div
         className="verify-identity-page"
-        onSubmit={handleSubmit}
         style={{
           maxWidth: "650px",
           margin: "40px auto",
@@ -243,39 +257,11 @@ export default function MyDocumentsPage() {
             setIdType={setId2Type}
             file={id2File}
             setFile={setId2File}
-            verificationStatus={id2File ? "Pending" : "No file selected"}
+            verificationStatus={id2Status}
+            setVerificationStatus={setId2Status}
           />
         </div>
-
-        {error && (
-          <div style={{ color: "#bb0000", marginBottom: "12px" }}>{error}</div>
-        )}
-
-        {message && (
-          <div style={{ color: "#008800", marginBottom: "12px" }}>
-            {message}
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            background: "#01d28e",
-            color: "#fff",
-            border: "none",
-            fontWeight: "700",
-            fontSize: "1.08em",
-            borderRadius: "7px",
-            padding: "13px 35px",
-            float: "right",
-            cursor: loading ? "not-allowed" : "pointer",
-            opacity: loading ? 0.6 : 1,
-          }}
-        >
-          {loading ? "Uploading..." : "Submit for Verification"}
-        </button>
-      </form>
+      </div>
     </>
   );
 }
