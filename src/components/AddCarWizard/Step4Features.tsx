@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { addCarFeatures } from "../../services/carFeatures"; // ✅ Import API call
+import { addCarFeatures } from "../../services/carFeatures";
+import { addCarStandards } from "../../services/carStandard";
 import type { CarFormData } from "../../types/Cars";
 import "./Step4Features.css";
 
@@ -7,7 +8,7 @@ interface Props {
   onNext: (data: Partial<CarFormData>) => void;
   onBack: () => void;
   defaultValues: CarFormData;
-  carId: number; // ✅ carId passed from wizard
+  carId: number;
 }
 
 export default function Step4Features({
@@ -16,12 +17,21 @@ export default function Step4Features({
   defaultValues,
   carId,
 }: Props) {
+  // Standards: seater, fuelType, mileage, range (strings for input control)
+  const [seater, setSeater] = useState(defaultValues.seater ?? 4);
+  const [fuelType, setFuelType] = useState(defaultValues.fuelType ?? "");
+  const [mileage, setMileage] = useState(
+    defaultValues.mileage !== undefined ? String(defaultValues.mileage) : ""
+  );
+  const [range, setRange] = useState(
+    defaultValues.range !== undefined ? String(defaultValues.range) : ""
+  );
+
+  // Features as booleans
   const [fastTag, setFastTag] = useState(defaultValues.fastTag ?? false);
   const [airconditions, setAirconditions] = useState(
     defaultValues.airconditions ?? false
   );
-  const [seater, setSeater] = useState(defaultValues.seater ?? 4);
-  const [fuelType, setFuelType] = useState(defaultValues.fuelType ?? "");
   const [gps, setGps] = useState(defaultValues.gps ?? false);
   const [geofencing, setGeofencing] = useState(
     defaultValues.geofencing ?? false
@@ -98,14 +108,27 @@ export default function Step4Features({
     },
   ];
 
-  // Split features into two columns
   const midPoint = Math.ceil(features.length / 2);
   const leftColumn = features.slice(0, midPoint);
   const rightColumn = features.slice(midPoint);
 
   const handleNext = async () => {
     try {
-      // Data for the backend CarFeatures model
+      // Convert mileage and range to numbers or undefined
+      const mileageNumber =
+        mileage !== "" && !isNaN(Number(mileage)) ? Number(mileage) : undefined;
+      const rangeNumber =
+        range !== "" && !isNaN(Number(range)) ? Number(range) : undefined;
+
+      const carStandardsData = {
+        car_id: carId,
+        seater,
+        fuel_type: fuelType,
+        mileage: mileageNumber,
+        range: rangeNumber,
+      };
+      await addCarStandards(carStandardsData);
+
       const carFeaturesData = {
         car_id: carId,
         airconditions,
@@ -124,40 +147,18 @@ export default function Step4Features({
         remote_central_locking: remoteCentralLocking,
         climate_control: climateControl,
       };
-
-      // Call backend API to save CarFeatures
       await addCarFeatures(carFeaturesData);
 
-      // Data for the wizard (includes all fields)
-      const featureData = {
-        car_id: carId,
+      onNext({
+        ...carStandardsData,
+        ...carFeaturesData,
         fastTag,
-        airconditions,
-        seater,
-        fuelType,
-        gps,
         geofencing,
         antiTheft,
-        child_seat: childSeat,
-        luggage,
-        music,
-        seat_belt: seatBelt,
-        sleeping_bed: sleepingBed,
-        water,
-        bluetooth,
-        onboard_computer: onboardComputer,
-        audio_input: audioInput,
-        long_term_trips: longTermTrips,
-        car_kit: carKit,
-        remote_central_locking: remoteCentralLocking,
-        climate_control: climateControl,
-      };
-
-      // Pass all data to the next step in the wizard
-      onNext(featureData);
+      });
     } catch (error) {
-      console.error("❌ Error saving features:", error);
-      alert("Failed to save car features. Please try again.");
+      console.error("❌ Error saving car standards/features:", error);
+      alert("Failed to save car data. Please try again.");
     }
   };
 
@@ -169,7 +170,7 @@ export default function Step4Features({
         value={seater}
         onChange={(e) => setSeater(Number(e.target.value))}
         className="w-full border p-2 rounded mb-4"
-        min="1"
+        min={1}
       />
 
       <label className="block mb-2 font-semibold">Fuel Type</label>
@@ -181,8 +182,32 @@ export default function Step4Features({
         <option value="">Select Fuel</option>
         <option value="Petrol">Petrol</option>
         <option value="Diesel">Diesel</option>
-        <option value="EV">EV</option>
+        <option value="EV">Electric</option>
       </select>
+
+      <label className="block mb-2 font-semibold">Mileage (Rs / km)</label>
+      <input
+        type="number"
+        value={mileage}
+        onChange={(e) => setMileage(e.target.value)}
+        className="w-full border p-2 rounded mb-4"
+        min={0}
+        step="any"
+        placeholder="e.g. 12"
+      />
+
+      <label className="block mb-2 font-semibold">
+        Range (in km, full tank/charge)
+      </label>
+      <input
+        type="number"
+        value={range}
+        onChange={(e) => setRange(e.target.value)}
+        className="w-full border p-2 rounded mb-4"
+        min={0}
+        step="any"
+        placeholder="e.g. 420"
+      />
 
       <div className="features-grid">
         <div className="features-column">

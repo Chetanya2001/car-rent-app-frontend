@@ -33,6 +33,8 @@ export interface Car {
 }
 
 export interface CarFormData {
+  mileage?: number;
+  range?: number;
   make?: string;
   model?: string;
   year?: number;

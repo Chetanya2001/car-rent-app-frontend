@@ -90,7 +90,7 @@ export default function Step2Registration({
         className="w-full border p-2 rounded mb-4"
       />
 
-      <label className="block mb-2">City of Registration</label>
+      <label className="block mb-2">Car Location</label>
       <select
         value={cityOfRegistration}
         onChange={(e) => setCityOfRegistration(e.target.value)}
