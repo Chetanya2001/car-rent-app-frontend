@@ -17,14 +17,14 @@ export default function Step4Features({
   defaultValues,
   carId,
 }: Props) {
-  // Standards: seater, fuelType, mileage, range (strings for input control)
-  const [seater, setSeater] = useState(defaultValues.seater ?? 4);
-  const [fuelType, setFuelType] = useState(defaultValues.fuelType ?? "");
+  // Standards: seats, fuel, mileage, car_range (strings for input control)
+  const [seats, setSeats] = useState(defaultValues.seats ?? 4);
+  const [fuel, setFuel] = useState(defaultValues.fuel ?? "");
   const [mileage, setMileage] = useState(
     defaultValues.mileage !== undefined ? String(defaultValues.mileage) : ""
   );
-  const [range, setRange] = useState(
-    defaultValues.range !== undefined ? String(defaultValues.range) : ""
+  const [carRange, setCarRange] = useState(
+    defaultValues.car_range !== undefined ? String(defaultValues.car_range) : ""
   );
 
   // Features as booleans
@@ -114,18 +114,20 @@ export default function Step4Features({
 
   const handleNext = async () => {
     try {
-      // Convert mileage and range to numbers or undefined
+      // Convert mileage and carRange to numbers or undefined
       const mileageNumber =
         mileage !== "" && !isNaN(Number(mileage)) ? Number(mileage) : undefined;
-      const rangeNumber =
-        range !== "" && !isNaN(Number(range)) ? Number(range) : undefined;
+      const carRangeNumber =
+        carRange !== "" && !isNaN(Number(carRange))
+          ? Number(carRange)
+          : undefined;
 
       const carStandardsData = {
         car_id: carId,
-        seater,
-        fuel_type: fuelType,
+        seats,
+        fuel,
         mileage: mileageNumber,
-        range: rangeNumber,
+        car_range: carRangeNumber,
       };
       await addCarStandards(carStandardsData);
 
@@ -164,19 +166,19 @@ export default function Step4Features({
 
   return (
     <div className="p-4">
-      <label className="block mb-2 font-semibold">Seater</label>
+      <label className="block mb-2 font-semibold">Seats</label>
       <input
         type="number"
-        value={seater}
-        onChange={(e) => setSeater(Number(e.target.value))}
+        value={seats}
+        onChange={(e) => setSeats(Number(e.target.value))}
         className="w-full border p-2 rounded mb-4"
         min={1}
       />
 
-      <label className="block mb-2 font-semibold">Fuel Type</label>
+      <label className="block mb-2 font-semibold">Fuel</label>
       <select
-        value={fuelType}
-        onChange={(e) => setFuelType(e.target.value)}
+        value={fuel}
+        onChange={(e) => setFuel(e.target.value)}
         className="w-full border p-2 rounded mb-4"
       >
         <option value="">Select Fuel</option>
@@ -201,8 +203,8 @@ export default function Step4Features({
       </label>
       <input
         type="number"
-        value={range}
-        onChange={(e) => setRange(e.target.value)}
+        value={carRange}
+        onChange={(e) => setCarRange(e.target.value)}
         className="w-full border p-2 rounded mb-4"
         min={0}
         step="any"

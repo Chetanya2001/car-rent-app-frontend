@@ -34,7 +34,7 @@ export interface Car {
 
 export interface CarFormData {
   mileage?: number;
-  range?: number;
+  car_range?: number;
   make?: string;
   model?: string;
   year?: number;
@@ -51,8 +51,8 @@ export interface CarFormData {
   insurance_image?: File;
   fastTag?: boolean;
   airconditions?: boolean;
-  seater?: number;
-  fuelType?: string;
+  seats?: number;
+  fuel?: string;
   gps?: boolean;
   geofencing?: boolean;
   antiTheft?: boolean;

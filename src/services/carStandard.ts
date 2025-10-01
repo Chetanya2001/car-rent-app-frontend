@@ -8,7 +8,7 @@ export interface CarStandards {
   seats?: number;
   luggage?: number;
   fuel?: string;
-  range?: number;
+  car_range?: number;
 }
 
 // Use env variable for base URL
