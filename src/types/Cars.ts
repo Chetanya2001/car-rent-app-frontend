@@ -39,6 +39,8 @@ export interface CarFormData {
   model?: string;
   year?: number;
   description?: string;
+  handType: "First" | "Second";
+  registrationType: "Private" | "Commercial";
   ownerName?: string;
   registrationNo?: string;
   cityOfRegistration?: string;

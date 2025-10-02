@@ -35,6 +35,8 @@ export const uploadRC = async (rcData: {
   city_of_registration: string;
   rc_image_front: File;
   rc_image_back: File;
+  hand_type: "First" | "Second";
+  registration_type: "Private" | "Commercial";
 }) => {
   const token = localStorage.getItem("token");
   const formData = new FormData();
@@ -46,6 +48,8 @@ export const uploadRC = async (rcData: {
   formData.append("city_of_registration", rcData.city_of_registration);
   formData.append("rc_image_front", rcData.rc_image_front);
   formData.append("rc_image_back", rcData.rc_image_back);
+  formData.append("hand_type", rcData.hand_type);
+  formData.append("registration_type", rcData.registration_type);
 
   console.log("📤 Sending RC Data:");
   formData.forEach((value, key) => console.log(`${key}:`, value));

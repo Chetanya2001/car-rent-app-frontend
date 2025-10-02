@@ -1,3 +1,4 @@
+// Step2Registration.tsx
 import { useState } from "react";
 import type { CarFormData } from "../../types/Cars";
 import { uploadRC } from "../../services/carService";
@@ -6,7 +7,7 @@ interface Props {
   onNext: (data: Partial<CarFormData>) => void;
   onBack: () => void;
   defaultValues: CarFormData;
-  carId: number; // ✅ make sure you pass this down from the wizard (step1 response)
+  carId: number;
 }
 
 export default function Step2Registration({
@@ -33,6 +34,14 @@ export default function Step2Registration({
   );
   const [loading, setLoading] = useState(false);
 
+  const [handType, setHandType] = useState<"First" | "Second">(
+    defaultValues.handType || "First"
+  );
+
+  const [registrationType, setRegistrationType] = useState<
+    "Private" | "Commercial"
+  >(defaultValues.registrationType || "Private");
+
   const handleNext = async () => {
     if (!rcFrontFile || !rcBackFile) {
       alert("Please upload both RC front and back images.");
@@ -42,7 +51,6 @@ export default function Step2Registration({
     try {
       setLoading(true);
 
-      // ✅ Call backend API
       const response = await uploadRC({
         car_id: carId,
         owner_name: ownerName,
@@ -51,11 +59,12 @@ export default function Step2Registration({
         city_of_registration: cityOfRegistration,
         rc_image_front: rcFrontFile,
         rc_image_back: rcBackFile,
+        hand_type: handType,
+        registration_type: registrationType,
       });
 
       console.log("✅ RC Upload Response:", response);
 
-      // ✅ Pass data forward in wizard
       onNext({
         ownerName,
         registrationNo,
@@ -63,6 +72,8 @@ export default function Step2Registration({
         rcValidTill,
         rcFrontFile,
         rcBackFile,
+        handType,
+        registrationType,
       });
     } catch (err) {
       console.error("❌ Error uploading RC:", err);
@@ -81,7 +92,6 @@ export default function Step2Registration({
         onChange={(e) => setOwnerName(e.target.value)}
         className="w-full border p-2 rounded mb-4"
       />
-
       <label className="block mb-2">Registration No</label>
       <input
         type="text"
@@ -89,7 +99,6 @@ export default function Step2Registration({
         onChange={(e) => setRegistrationNo(e.target.value)}
         className="w-full border p-2 rounded mb-4"
       />
-
       <label className="block mb-2">Car Location</label>
       <select
         value={cityOfRegistration}
@@ -101,7 +110,6 @@ export default function Step2Registration({
         <option value="Agra">Agra</option>
         <option value="Mumbai">Mumbai</option>
       </select>
-
       <label className="block mb-2">RC Valid Till</label>
       <input
         type="date"
@@ -109,14 +117,44 @@ export default function Step2Registration({
         onChange={(e) => setRcValidTill(e.target.value)}
         className="w-full border p-2 rounded mb-4"
       />
-
+      <label className="block mb-2">Car Hand Type</label>
+      <div className="flex gap-4 mb-4">
+        <button
+          type="button"
+          className={`px-4 py-2 rounded border ${
+            handType === "First" ? "bg-green-500 text-white" : "bg-white"
+          }`}
+          onClick={() => setHandType("First")}
+        >
+          First Hand
+        </button>
+        <button
+          type="button"
+          className={`px-4 py-2 rounded border ${
+            handType === "Second" ? "bg-green-500 text-white" : "bg-white"
+          }`}
+          onClick={() => setHandType("Second")}
+        >
+          Second Hand
+        </button>
+      </div>
+      <label className="block mb-2">Registration Type</label>
+      <select
+        value={registrationType}
+        onChange={(e) =>
+          setRegistrationType(e.target.value as "Private" | "Commercial")
+        }
+        className="w-full border p-2 rounded mb-4"
+      >
+        <option value="Private">Private</option>
+        <option value="Commercial">Commercial</option>
+      </select>
       <label className="block mb-2">Upload RC Front</label>
       <input
         type="file"
         onChange={(e) => setRcFrontFile(e.target.files?.[0])}
         className="w-full border p-2 rounded mb-4"
       />
-
       <label className="block mb-2">Upload RC Back</label>
       <input
         type="file"
