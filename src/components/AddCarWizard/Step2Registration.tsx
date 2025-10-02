@@ -119,19 +119,17 @@ export default function Step2Registration({
         className="w-full border p-2 rounded mb-4"
       />
       <label className="block mb-2">Car Hand Type</label>
-      <div className="mb-4">
-        <label className="inline-flex items-center cursor-pointer">
-          <span className="mr-3 text-gray-700">First Hand</span>
-          <input
-            type="checkbox"
-            className="toggle-switch"
-            checked={handType === "Second"}
-            onChange={() =>
-              setHandType((prev) => (prev === "First" ? "Second" : "First"))
-            }
-          />
-          <span className="ml-3 text-gray-700">Second Hand</span>
-        </label>
+      <div className="toggle-switch-wrapper mb-4">
+        <span className="toggle-label">First Hand</span>
+        <input
+          type="checkbox"
+          className="toggle-switch"
+          checked={handType === "Second"}
+          onChange={() =>
+            setHandType((prev) => (prev === "First" ? "Second" : "First"))
+          }
+        />
+        <span className="toggle-label">Second Hand</span>
       </div>
 
       <label className="block mb-2">Registration Type</label>
