@@ -2,6 +2,7 @@
 import { useState } from "react";
 import type { CarFormData } from "../../types/Cars";
 import { uploadRC } from "../../services/carService";
+import "./Step2Registration.css";
 
 interface Props {
   onNext: (data: Partial<CarFormData>) => void;
@@ -118,26 +119,21 @@ export default function Step2Registration({
         className="w-full border p-2 rounded mb-4"
       />
       <label className="block mb-2">Car Hand Type</label>
-      <div className="flex gap-4 mb-4">
-        <button
-          type="button"
-          className={`px-4 py-2 rounded border ${
-            handType === "First" ? "bg-green-500 text-white" : "bg-white"
-          }`}
-          onClick={() => setHandType("First")}
-        >
-          First Hand
-        </button>
-        <button
-          type="button"
-          className={`px-4 py-2 rounded border ${
-            handType === "Second" ? "bg-green-500 text-white" : "bg-white"
-          }`}
-          onClick={() => setHandType("Second")}
-        >
-          Second Hand
-        </button>
+      <div className="mb-4">
+        <label className="inline-flex items-center cursor-pointer">
+          <span className="mr-3 text-gray-700">First Hand</span>
+          <input
+            type="checkbox"
+            className="toggle-switch"
+            checked={handType === "Second"}
+            onChange={() =>
+              setHandType((prev) => (prev === "First" ? "Second" : "First"))
+            }
+          />
+          <span className="ml-3 text-gray-700">Second Hand</span>
+        </label>
       </div>
+
       <label className="block mb-2">Registration Type</label>
       <select
         value={registrationType}
