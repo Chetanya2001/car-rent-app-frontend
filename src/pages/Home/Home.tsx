@@ -14,6 +14,8 @@ import Login from "../auth/Login/Login";
 import Register from "../auth/Register/Register";
 import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
 import { Link, useNavigate } from "react-router-dom";
+import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
+import LocationPicker from "../../components/Map/LocationPicker";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -44,6 +46,9 @@ export default function Home() {
   const [role, setRole] = useState<"host" | "guest" | "admin" | null>(null);
   const [showMenu, setShowMenu] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [showPickupMap, setShowPickupMap] = useState(false);
+  const [showDropMap, setShowDropMap] = useState(false);
+  const [dropCity, setDropCity] = useState("");
 
   // Booking form state
   const [city, setCity] = useState("");
@@ -393,12 +398,20 @@ export default function Home() {
         <div className="booking-box">
           <h2>Zip your Trip</h2>
           <label>Pick-up Location</label>
-          <input
-            type="text"
-            placeholder="City, Airport, Station, etc"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-          />
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <input
+              type="text"
+              placeholder="City, Airport, Station, etc"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+            />
+            <FontAwesomeIcon
+              icon={faMapMarkerAlt}
+              style={{ marginLeft: "8px", cursor: "pointer" }}
+              onClick={() => setShowPickupMap(true)}
+            />
+          </div>
+
           <div className="date-time">
             <div>
               <label>Pick-up Date</label>
@@ -463,6 +476,25 @@ export default function Home() {
               <span className="slider round"></span>
             </label>
           </div>
+
+          {differentDrop && (
+            <>
+              <label>Drop-off Location</label>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <input
+                  type="text"
+                  placeholder="Drop-off City"
+                  value={dropCity}
+                  onChange={(e) => setDropCity(e.target.value)}
+                />
+                <FontAwesomeIcon
+                  icon={faMapMarkerAlt}
+                  style={{ marginLeft: "8px", cursor: "pointer" }}
+                  onClick={() => setShowDropMap(true)}
+                />
+              </div>
+            </>
+          )}
 
           <button className="search-btn" onClick={handleSearch}>
             Search
@@ -578,6 +610,28 @@ export default function Home() {
 
       {/* Footer */}
       <Footer />
+      {/* Pickup Map Modal */}
+      {showPickupMap && (
+        <ModalWrapper onClose={() => setShowPickupMap(false)}>
+          <LocationPicker
+            onSelect={(loc: any) => {
+              setCity(`${loc.lat}, ${loc.lng}`); // Save lat/lng instead of address
+              setShowPickupMap(false);
+            }}
+          />
+        </ModalWrapper>
+      )}
+
+      {showDropMap && (
+        <ModalWrapper onClose={() => setShowDropMap(false)}>
+          <LocationPicker
+            onSelect={(loc: any) => {
+              setDropCity(`${loc.lat}, ${loc.lng}`);
+              setShowDropMap(false);
+            }}
+          />
+        </ModalWrapper>
+      )}
     </div>
   );
 }
