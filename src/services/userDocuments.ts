@@ -16,6 +16,10 @@ export interface UploadDocumentResponse {
   message: string;
   data: UserDocument;
 }
+export interface UploadProfilePicResponse {
+  message: string;
+  profile_pic: string;
+}
 
 export interface GetDocumentsResponse {
   success: boolean;
@@ -67,5 +71,26 @@ export async function getUserDocumentsByUserId(
       },
     }
   );
+  return response.data;
+}
+
+export async function uploadProfilePicture(
+  file: File,
+  token: string
+): Promise<UploadProfilePicResponse> {
+  const formData = new FormData();
+  formData.append("profile_pic", file);
+
+  const response = await axios.post<UploadProfilePicResponse>(
+    `${API_URL}/upload-profile-pic`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
   return response.data;
 }

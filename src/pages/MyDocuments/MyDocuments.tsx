@@ -1,9 +1,9 @@
 import React, { useState, type ChangeEvent } from "react";
 import Navbar from "../../components/Navbar/Navbar";
-import { uploadUserDocument } from "../../services/userDocuments";
-
-// ✅ You can later create a dedicated service for profile pic upload
-// import { uploadProfilePicture } from "../../services/profile";
+import {
+  uploadUserDocument,
+  uploadProfilePicture,
+} from "../../services/userDocuments";
 
 const idTypes: string[] = [
   "Passport",
@@ -213,7 +213,7 @@ function ProfilePicSection() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // const userToken = localStorage.getItem("token") || "";
+  const userToken = localStorage.getItem("token") || "";
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -235,8 +235,8 @@ function ProfilePicSection() {
     setMessage(null);
 
     try {
-      // const res = await uploadProfilePicture(file, userToken);
-      // if (!res.success) throw new Error(res.message);
+      const res = await uploadProfilePicture(file, userToken);
+      if (!res) throw new Error(res);
       setMessage("Profile picture uploaded successfully!");
     } catch (err: any) {
       setError(err.message || "Upload failed.");
