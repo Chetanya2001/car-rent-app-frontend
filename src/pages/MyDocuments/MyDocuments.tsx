@@ -34,7 +34,6 @@ function DocumentSection({
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  // Retrieve token from auth or storage
   const userToken = localStorage.getItem("token") || "";
 
   const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) =>
@@ -107,30 +106,12 @@ function DocumentSection({
           Verification status: {verificationStatus}
         </span>
         {file ? (
-          <div
-            className="file-display"
-            style={{
-              background: "#eaffea",
-              borderRadius: "8px",
-              padding: "10px",
-              marginTop: "12px",
-              position: "relative",
-            }}
-          >
+          <div className="file-display">
             <b>{file.name}</b>
             <br />
             Uploaded on {new Date().toLocaleDateString()}
             <button
-              style={{
-                position: "absolute",
-                right: 8,
-                top: 8,
-                background: "transparent",
-                border: "none",
-                color: "#bb0000",
-                fontSize: "16px",
-                cursor: "pointer",
-              }}
+              className="doc-delete-btn"
               onClick={handleRemoveFile}
               aria-label={`Remove file for ${label}`}
             >
@@ -138,29 +119,11 @@ function DocumentSection({
             </button>
           </div>
         ) : (
-          <div
-            style={{
-              border: "2px dashed #aaa",
-              borderRadius: "8px",
-              padding: "20px",
-              textAlign: "center",
-              marginTop: "12px",
-              cursor: "pointer",
-              userSelect: "none",
-            }}
-          >
+          <div className="doc-upload-area">
             <label
               htmlFor={`upload-${label}`}
-              style={{
-                cursor: "pointer",
-                display: "inline-block",
-                padding: "8px 22px",
-                backgroundColor: "#01d28e",
-                color: "#fff",
-                borderRadius: "6px",
-                fontWeight: 500,
-                marginTop: "8px",
-              }}
+              className="browse-btn"
+              style={{ marginTop: 0 }}
             >
               Browse
             </label>
@@ -171,7 +134,7 @@ function DocumentSection({
               onChange={handleFileChange}
               accept="image/*"
             />
-            <div style={{ marginTop: "12px", fontWeight: "600" }}>
+            <div style={{ marginTop: "12px", fontWeight: 600 }}>
               Upload document
             </div>
           </div>
@@ -181,17 +144,8 @@ function DocumentSection({
             type="button"
             onClick={uploadDocument}
             disabled={loading}
-            style={{
-              background: "#01d28e",
-              color: "#fff",
-              border: "none",
-              fontWeight: "700",
-              fontSize: "1em",
-              borderRadius: "7px",
-              padding: "10px 25px",
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.6 : 1,
-            }}
+            className="verify-btn"
+            style={{ float: "none" }}
           >
             {loading ? "Uploading..." : `Upload ${label}`}
           </button>
@@ -202,6 +156,131 @@ function DocumentSection({
         )}
       </div>
     </>
+  );
+}
+
+// PROFILE PICTURE SECTION COMPONENT
+function ProfilePicSection() {
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const userToken = localStorage.getItem("token") || "";
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFile(e.target.files[0]);
+      setPreview(URL.createObjectURL(e.target.files[0]));
+      setMessage(null);
+      setError(null);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setFile(null);
+    setPreview(null);
+    setMessage(null);
+    setError(null);
+  };
+
+  const uploadProfilePic = async () => {
+    setLoading(true);
+    setError(null);
+    setMessage(null);
+
+    if (!file) {
+      setError("Please select a profile image before submitting.");
+      setLoading(false);
+      return;
+    }
+    try {
+      // Upload as type "Profile Picture"
+      const res = await uploadUserDocument(file, "Profile Picture", userToken);
+      if (!res.success) throw new Error(res.message);
+      setMessage("Profile picture uploaded successfully.");
+    } catch (err: any) {
+      setError(err?.message || "Profile upload failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="doc-block profile-block" style={{ flex: 1, minWidth: 280 }}>
+      <h3>Profile Picture</h3>
+      {preview ? (
+        <div
+          className="file-display"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <img
+            src={preview}
+            alt="Profile Preview"
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: "50%",
+              objectFit: "cover",
+              border: "2px solid #01d28e",
+              marginRight: 6,
+            }}
+          />
+          <div style={{ flex: 1 }}>
+            <b>{file?.name}</b>
+            <br />
+            Selected on {new Date().toLocaleDateString()}
+          </div>
+          <button
+            className="doc-delete-btn"
+            onClick={handleRemoveFile}
+            aria-label="Remove profile picture"
+          >
+            🗑️
+          </button>
+        </div>
+      ) : (
+        <div className="doc-upload-area">
+          <label
+            htmlFor="upload-profile-pic"
+            className="browse-btn"
+            style={{ marginTop: 0 }}
+          >
+            Browse
+          </label>
+          <input
+            type="file"
+            id="upload-profile-pic"
+            style={{ display: "none" }}
+            accept="image/*"
+            onChange={handleFileChange}
+          />
+          <div style={{ marginTop: 12, fontWeight: 600 }}>
+            Upload a clear profile image
+          </div>
+        </div>
+      )}
+      <div style={{ marginTop: 12 }}>
+        <button
+          type="button"
+          onClick={uploadProfilePic}
+          disabled={loading}
+          className="verify-btn"
+          style={{ float: "none" }}
+        >
+          {loading ? "Uploading..." : "Upload Profile Picture"}
+        </button>
+      </div>
+      {error && <div style={{ color: "#bb0000", marginTop: 8 }}>{error}</div>}
+      {message && (
+        <div style={{ color: "#008800", marginTop: 8 }}>{message}</div>
+      )}
+    </div>
   );
 }
 
@@ -217,31 +296,17 @@ export default function MyDocumentsPage() {
   return (
     <>
       <Navbar />
-      <div
-        className="verify-identity-page"
-        style={{
-          maxWidth: "650px",
-          margin: "40px auto",
-          background: "#fff",
-          borderRadius: "12px",
-          boxShadow: "0 0 10px #eee",
-          padding: "30px 40px",
-        }}
-      >
-        <h2 style={{ fontWeight: "800" }}>Verify Your Identity</h2>
-        <p style={{ marginBottom: "24px", color: "#555" }}>
+      <div className="verify-identity-page">
+        <h2>Verify Your Identity</h2>
+        <p>
           To ensure the security of your account, we need to verify your
-          identity. Please upload two forms of identification from the options
-          below.
+          identity. Please upload two forms of identification and your profile
+          picture.
         </p>
-        <div
-          style={{
-            display: "flex",
-            gap: "28px",
-            flexWrap: "wrap",
-            marginBottom: "30px",
-          }}
-        >
+        <div className="docs-flex-row">
+          <ProfilePicSection />
+        </div>
+        <div className="docs-flex-row">
           <DocumentSection
             label="ID 1"
             idType={id1Type}
