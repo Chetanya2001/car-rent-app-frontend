@@ -26,8 +26,8 @@ function VerifyEmail() {
         if (data.success) {
           setStatus("success");
           setMessage("Your email has been verified successfully!");
-          // Auto redirect after 3 seconds
-          setTimeout(() => navigate("/login"), 3000);
+          // ✅ Auto redirect after 3 seconds to home with login popup
+          setTimeout(() => navigate("/?showLogin=true"), 3000);
         } else {
           setStatus("error");
           setMessage(data.message || "Email verification failed.");
@@ -55,7 +55,7 @@ function VerifyEmail() {
         <>
           <p>{message}</p>
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/?showLogin=true")}
             style={{
               marginTop: 20,
               padding: "10px 20px",

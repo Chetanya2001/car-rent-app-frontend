@@ -16,7 +16,7 @@ import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
 import { Link, useNavigate } from "react-router-dom";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import LocationPicker from "../../components/Map/LocationPicker";
-
+import { useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCar,
@@ -60,6 +60,17 @@ export default function Home() {
   const [driverRequired, setDriverRequired] = useState(false);
   const [differentDrop, setDifferentDrop] = useState(false);
 
+  const location = useLocation();
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const showLogin = params.get("showLogin");
+
+    if (showLogin === "true") {
+      setActiveModal("login"); // opens login modal automatically
+      // Clean the URL so it doesn't stay in address bar
+      navigate("/", { replace: true });
+    }
+  }, [location, navigate]);
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
