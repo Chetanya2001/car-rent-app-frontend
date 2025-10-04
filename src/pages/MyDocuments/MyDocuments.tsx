@@ -24,7 +24,7 @@ interface DocumentSectionProps {
   verificationStatus: string;
   setVerificationStatus?: React.Dispatch<React.SetStateAction<string>>;
   previewUrl?: string | null;
-  refreshDocuments: () => void;
+  onUploadSuccess?: () => void;
 }
 
 function DocumentSection({
@@ -36,15 +36,11 @@ function DocumentSection({
   verificationStatus,
   setVerificationStatus,
   previewUrl,
-  refreshDocuments,
+  onUploadSuccess,
 }: DocumentSectionProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [localPreview, setLocalPreview] = useState<string | null>(
-    previewUrl || null
-  );
-
   const userToken = localStorage.getItem("token") || "";
 
   const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) =>
@@ -52,21 +48,11 @@ function DocumentSection({
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const selected = e.target.files[0];
-      setFile(selected);
-      setLocalPreview(URL.createObjectURL(selected));
+      setFile(e.target.files[0]);
       if (setVerificationStatus) setVerificationStatus("Pending");
       setMessage(null);
       setError(null);
     }
-  };
-
-  const handleRemoveFile = () => {
-    setFile(null);
-    setLocalPreview(previewUrl || null);
-    if (setVerificationStatus) setVerificationStatus("Pending");
-    setMessage(null);
-    setError(null);
   };
 
   const uploadDocument = async () => {
@@ -80,9 +66,9 @@ function DocumentSection({
     try {
       const res = await uploadUserDocument(file, idType, userToken);
       if (!res.success) throw new Error(res.message || "Upload failed");
+      if (setVerificationStatus) setVerificationStatus("Pending");
       setMessage("✅ Document uploaded successfully. Pending verification.");
-      setFile(null);
-      refreshDocuments(); // ✅ Refresh after upload
+      if (onUploadSuccess) onUploadSuccess();
     } catch (err: any) {
       setError(err.message || "Upload failed.");
     } finally {
@@ -109,115 +95,87 @@ function DocumentSection({
       </select>
 
       <span
-        className={`doc-status ${
-          verificationStatus === "Verified" ? "verified" : ""
-        }`}
-        style={{ display: "inline-block", marginBottom: 12 }}
+        style={{
+          display: "inline-block",
+          marginBottom: 12,
+          color:
+            verificationStatus === "Verified"
+              ? "green"
+              : verificationStatus === "Rejected"
+              ? "red"
+              : "#555",
+        }}
       >
         Verification status: {verificationStatus}
       </span>
 
-      {/* ✅ Always show preview (existing or new) */}
-      {localPreview ? (
+      {/* Document Preview Section */}
+      {previewUrl && !file && (
         <div
           style={{
-            background: "#f9f9f9",
+            background: "#eaffea",
             borderRadius: "8px",
             padding: "10px",
             marginTop: "12px",
-            position: "relative",
             textAlign: "center",
           }}
         >
           <img
-            src={localPreview}
-            alt={`Preview for ${label}`}
-            style={{
-              maxWidth: 160,
-              borderRadius: 8,
-              marginBottom: 8,
-              objectFit: "cover",
-            }}
+            src={previewUrl}
+            alt={`Uploaded document for ${label}`}
+            style={{ maxWidth: 200, borderRadius: 8, marginBottom: 8 }}
           />
-          <div style={{ fontWeight: 500 }}>{idType || "No type selected"}</div>
-          <div style={{ marginTop: 10 }}>
-            <label
-              htmlFor={`reupload-${label}`}
-              style={{
-                cursor: "pointer",
-                display: "inline-block",
-                padding: "6px 14px",
-                backgroundColor: "#007bff",
-                color: "#fff",
-                borderRadius: "6px",
-                fontWeight: 500,
-                marginRight: 8,
-              }}
-            >
-              Reupload
-            </label>
-            <input
-              type="file"
-              id={`reupload-${label}`}
-              style={{ display: "none" }}
-              onChange={handleFileChange}
-              accept="image/*"
-            />
-            {file && (
-              <button
-                onClick={handleRemoveFile}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "#bb0000",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                }}
-              >
-                ❌ Remove
-              </button>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div
-          style={{
-            border: "2px dashed #aaa",
-            borderRadius: "8px",
-            padding: "20px",
-            textAlign: "center",
-            marginTop: "12px",
-            cursor: "pointer",
-            userSelect: "none",
-          }}
-        >
-          <label
-            htmlFor={`upload-${label}`}
-            style={{
-              cursor: "pointer",
-              display: "inline-block",
-              padding: "8px 22px",
-              backgroundColor: "#01d28e",
-              color: "#fff",
-              borderRadius: "6px",
-              fontWeight: 500,
-              marginTop: "8px",
-            }}
-          >
-            Browse
-          </label>
-          <input
-            type="file"
-            id={`upload-${label}`}
-            style={{ display: "none" }}
-            onChange={handleFileChange}
-            accept="image/*"
-          />
-          <div style={{ marginTop: "12px", fontWeight: "600" }}>
-            Upload document
-          </div>
+          <p style={{ margin: 0 }}>{idType}</p>
+          <p style={{ fontSize: "0.9em", color: "#777" }}>
+            (You can reupload a new file below)
+          </p>
         </div>
       )}
+
+      {/* Upload or Reupload Section */}
+      <div
+        style={{
+          border: "2px dashed #aaa",
+          borderRadius: "8px",
+          padding: "20px",
+          textAlign: "center",
+          marginTop: "12px",
+          cursor: "pointer",
+        }}
+      >
+        <label
+          htmlFor={`upload-${label}`}
+          style={{
+            cursor: "pointer",
+            display: "inline-block",
+            padding: "8px 22px",
+            backgroundColor: "#01d28e",
+            color: "#fff",
+            borderRadius: "6px",
+            fontWeight: 500,
+            marginBottom: "8px",
+          }}
+        >
+          {file ? "Change File" : previewUrl ? "Reupload Document" : "Browse"}
+        </label>
+        <input
+          type="file"
+          id={`upload-${label}`}
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+          accept="image/*"
+        />
+
+        {file && (
+          <div style={{ marginTop: 10 }}>
+            <img
+              src={URL.createObjectURL(file)}
+              alt="Preview"
+              style={{ maxWidth: 180, borderRadius: 8 }}
+            />
+          </div>
+        )}
+      </div>
 
       <div style={{ marginTop: 12 }}>
         <button
@@ -236,20 +194,13 @@ function DocumentSection({
             opacity: loading ? 0.6 : 1,
           }}
         >
-          {loading ? "Uploading..." : `Upload / Reupload ${label}`}
+          {loading ? "Uploading..." : `Upload ${label}`}
         </button>
       </div>
 
       {error && <div style={{ color: "#bb0000", marginTop: 8 }}>{error}</div>}
       {message && (
-        <div
-          style={{
-            color: "green",
-            marginTop: 8,
-            fontWeight: 600,
-            transition: "opacity 0.3s ease",
-          }}
-        >
+        <div style={{ color: "green", marginTop: 8, fontWeight: 600 }}>
           {message}
         </div>
       )}
@@ -296,7 +247,6 @@ function ProfilePicSection() {
 
   return (
     <div
-      className="profile-pic-section"
       style={{
         textAlign: "center",
         marginBottom: "30px",
@@ -396,7 +346,7 @@ export default function MyDocumentsPage() {
 
   const [id2Type, setId2Type] = useState<string>("");
   const [id2File, setId2File] = useState<File | null>(null);
-  const [id2Status, setId2Status] = useState<string>("No file selected");
+  const [id2Status, setId2Status] = useState<string>("Pending");
   const [id2Url, setId2Url] = useState<string | null>(null);
 
   const userToken = localStorage.getItem("token") || "";
@@ -404,22 +354,17 @@ export default function MyDocumentsPage() {
   const fetchDocuments = async () => {
     try {
       const data = await getUserDocumentsByUserId(userToken);
-      const sortedDocs = data.documents
-        .filter((doc: { doc_type: string }) => idTypes.includes(doc.doc_type))
-        .sort(
-          (a: { createdAt: string }, b: { createdAt: string }) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
+      const docs = data.documents || [];
 
-      if (sortedDocs[0]) {
-        setId1Type(sortedDocs[0].doc_type);
-        setId1Url(sortedDocs[0].image);
-        setId1Status(sortedDocs[0].verification_status);
+      if (docs[0]) {
+        setId1Type(docs[0].doc_type);
+        setId1Url(docs[0].image);
+        setId1Status(docs[0].verification_status);
       }
-      if (sortedDocs[1]) {
-        setId2Type(sortedDocs[1].doc_type);
-        setId2Url(sortedDocs[1].image);
-        setId2Status(sortedDocs[1].verification_status);
+      if (docs[1]) {
+        setId2Type(docs[1].doc_type);
+        setId2Url(docs[1].image);
+        setId2Status(docs[1].verification_status);
       }
     } catch (error) {
       console.error("Failed to fetch documents:", error);
@@ -434,7 +379,6 @@ export default function MyDocumentsPage() {
     <>
       <Navbar />
       <div
-        className="verify-identity-page"
         style={{
           maxWidth: "650px",
           margin: "40px auto",
@@ -446,21 +390,13 @@ export default function MyDocumentsPage() {
       >
         <h2 style={{ fontWeight: "800" }}>Verify Your Identity</h2>
         <p style={{ marginBottom: "24px", color: "#555" }}>
-          Please upload your profile picture and two forms of identification.
+          Please upload your profile picture and 2 ID documents. If already
+          uploaded, you can preview and reupload new ones.
         </p>
 
-        {/* Profile Picture */}
         <ProfilePicSection />
 
-        {/* ID Documents */}
-        <div
-          style={{
-            display: "flex",
-            gap: "28px",
-            flexWrap: "wrap",
-            marginBottom: "30px",
-          }}
-        >
+        <div style={{ display: "flex", gap: "28px", flexWrap: "wrap" }}>
           <DocumentSection
             label="ID 1"
             idType={id1Type}
@@ -470,7 +406,7 @@ export default function MyDocumentsPage() {
             verificationStatus={id1Status}
             setVerificationStatus={setId1Status}
             previewUrl={id1Url}
-            refreshDocuments={fetchDocuments}
+            onUploadSuccess={fetchDocuments}
           />
           <DocumentSection
             label="ID 2"
@@ -481,7 +417,7 @@ export default function MyDocumentsPage() {
             verificationStatus={id2Status}
             setVerificationStatus={setId2Status}
             previewUrl={id2Url}
-            refreshDocuments={fetchDocuments}
+            onUploadSuccess={fetchDocuments}
           />
         </div>
       </div>
