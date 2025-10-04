@@ -25,7 +25,7 @@ export default function Footer() {
             <a href="#">
               <FaTwitter />
             </a>
-            <a href="#">
+            <a href="https://www.facebook.com/profile.php?id=61581919191896">
               <FaFacebookF />
             </a>
             <a href="#">
