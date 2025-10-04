@@ -98,15 +98,17 @@
   position: absolute;
   top: 55px;
   right: 0;
-  width: 200px;
-  background: white;
+  min-width: 230px; /* Increased width for long text */
+  max-width: 90vw; /* Keeps responsive on mobile */
+  background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-  padding: 8px 0;
+  padding: 10px 0;
   list-style: none;
   z-index: 999;
   animation: fadeIn 0.2s ease-in-out;
+  overflow-x: hidden;
 }
 
 .profile-menu-outside::before {
@@ -122,11 +124,12 @@
 .profile-menu-outside li {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 20px;
+  gap: 12px;
+  padding: 12px 22px;
   cursor: pointer;
   font-weight: 500;
   color: #333;
+  white-space: nowrap; /* Prevents breaking into 2 lines */
   transition: background 0.15s;
 }
 
@@ -234,10 +237,10 @@
 @media (max-width: 550px) {
   .profile-menu-outside {
     right: 5px;
-    width: 92vw;
-    min-width: 120px;
-    max-width: 99vw;
-    padding: 6px 0.5rem;
+    width: 94vw; /* Full width for small screens */
+    min-width: unset;
+    max-width: 98vw;
+    padding: 8px 0.7rem;
   }
   .profile-avatar {
     width: 32px;

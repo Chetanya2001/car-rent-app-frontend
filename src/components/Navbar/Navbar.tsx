@@ -268,17 +268,6 @@ export default function Navbar() {
               Support
             </a>
           </li>
-          {role === "guest" && (
-            <li>
-              <NavLink
-                to="/my-documents"
-                className={({ isActive }) => (isActive ? "active" : "")}
-                onClick={() => setNavOpen(false)}
-              >
-                My Documents
-              </NavLink>
-            </li>
-          )}
         </ul>
 
         {/* Login/Profile */}
