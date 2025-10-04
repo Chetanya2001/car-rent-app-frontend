@@ -22,10 +22,10 @@ export default function Footer() {
             reliable and fearless mobility needs.
           </p>
           <div className="footer-socials">
-            <a href="#">
+            <a href="https://www.x.com/">
               <FaTwitter />
             </a>
-            <a href="#">
+            <a href="https://www.facebook.com/profile.php?id=61581919191896">
               <FaFacebookF />
             </a>
             <a href="#">
