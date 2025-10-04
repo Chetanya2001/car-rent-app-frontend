@@ -42,7 +42,6 @@ const guestMenu = [
   "My Documents",
   "My Payments",
   "Notifications",
-  "Support",
   "Logout",
 ];
 
