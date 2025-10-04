@@ -6,7 +6,7 @@ export default function LocationPicker({
 }: {
   onSelect?: (loc: any) => void;
 }) {
-  const [position, setPosition] = useState({ lat: 28.6139, lng: 77.209 }); // Default location
+  const [position, setPosition] = useState({ lat: 28.6139, lng: 77.209 }); // Default: New Delhi
   const [address, setAddress] = useState<{
     city: string;
     state: string;
@@ -21,29 +21,40 @@ export default function LocationPicker({
     lng: 77.209,
   });
 
-  // Function to get address from coordinates
+  // ✅ Use token from .env
+  const LOCATIONIQ_KEY = import.meta.env.VITE_LOCATIONIQ_TOKEN;
+
+  // Fetch address from coordinates using LocationIQ Reverse Geocoding
   const fetchAddress = async (lat: number, lng: number) => {
     console.log("Latitude:", lat, "Longitude:", lng);
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+        `https://us1.locationiq.com/v1/reverse?key=${LOCATIONIQ_KEY}&lat=${lat}&lon=${lng}&format=json`
       );
       const data = await res.json();
-      // Example: return city, state, country
-      return {
+
+      const addr = {
         city:
-          data.address.city || data.address.town || data.address.village || "",
+          data.address.city ||
+          data.address.town ||
+          data.address.village ||
+          data.address.hamlet ||
+          "",
         state: data.address.state || "",
         country: data.address.country || "",
         lat,
         lng,
       };
+
+      console.log("📍 City:", addr.city, "| State:", addr.state);
+      return addr;
     } catch (err) {
       console.error("Error fetching address:", err);
       return { city: "", state: "", country: "", lat, lng };
     }
   };
 
+  // Map click and drag handlers
   const MarkerHandler = () => {
     useMapEvents({
       click: async (e) => {
@@ -51,9 +62,10 @@ export default function LocationPicker({
         setPosition(latlng);
         const addr = await fetchAddress(latlng.lat, latlng.lng);
         setAddress(addr);
-        onSelect && onSelect(addr); // Send address to parent
+        onSelect && onSelect(addr);
       },
     });
+
     return (
       <Marker
         draggable
@@ -79,15 +91,19 @@ export default function LocationPicker({
         zoom={13}
         style={{ height: "400px", width: "100%" }}
       >
+        {/* OpenStreetMap Tiles (free) */}
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         />
+
         <MarkerHandler />
       </MapContainer>
+
       {address.city && (
         <div style={{ marginTop: "10px" }}>
-          Selected Location: {address.city}, {address.state}, {address.country}
+          <strong>Selected Location:</strong> {address.city}, {address.state},{" "}
+          {address.country}
         </div>
       )}
     </div>

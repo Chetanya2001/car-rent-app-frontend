@@ -615,7 +615,14 @@ export default function Home() {
         <ModalWrapper onClose={() => setShowPickupMap(false)}>
           <LocationPicker
             onSelect={(loc: any) => {
-              setCity(`${loc.lat}, ${loc.lng}`); // Save lat/lng instead of address
+              console.log("Selected:", loc);
+              // Use city + state or fallback to country
+              const locationName =
+                loc.city && loc.state
+                  ? `${loc.city}, ${loc.state}`
+                  : loc.city || loc.state || loc.country || "";
+
+              setCity(locationName);
               setShowPickupMap(false);
             }}
           />
@@ -626,7 +633,12 @@ export default function Home() {
         <ModalWrapper onClose={() => setShowDropMap(false)}>
           <LocationPicker
             onSelect={(loc: any) => {
-              setDropCity(`${loc.lat}, ${loc.lng}`);
+              const locationName =
+                loc.city && loc.state
+                  ? `${loc.city}, ${loc.state}`
+                  : loc.city || loc.state || loc.country || "";
+
+              setDropCity(locationName);
               setShowDropMap(false);
             }}
           />
