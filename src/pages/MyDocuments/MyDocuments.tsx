@@ -24,6 +24,7 @@ interface DocumentSectionProps {
   verificationStatus: string;
   setVerificationStatus?: React.Dispatch<React.SetStateAction<string>>;
   previewUrl?: string | null;
+  refreshDocuments: () => void;
 }
 
 function DocumentSection({
@@ -35,10 +36,15 @@ function DocumentSection({
   verificationStatus,
   setVerificationStatus,
   previewUrl,
+  refreshDocuments,
 }: DocumentSectionProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [localPreview, setLocalPreview] = useState<string | null>(
+    previewUrl || null
+  );
+
   const userToken = localStorage.getItem("token") || "";
 
   const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) =>
@@ -46,7 +52,9 @@ function DocumentSection({
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
+      const selected = e.target.files[0];
+      setFile(selected);
+      setLocalPreview(URL.createObjectURL(selected));
       if (setVerificationStatus) setVerificationStatus("Pending");
       setMessage(null);
       setError(null);
@@ -55,6 +63,7 @@ function DocumentSection({
 
   const handleRemoveFile = () => {
     setFile(null);
+    setLocalPreview(previewUrl || null);
     if (setVerificationStatus) setVerificationStatus("Pending");
     setMessage(null);
     setError(null);
@@ -71,8 +80,9 @@ function DocumentSection({
     try {
       const res = await uploadUserDocument(file, idType, userToken);
       if (!res.success) throw new Error(res.message || "Upload failed");
-      if (setVerificationStatus) setVerificationStatus("Pending");
       setMessage("✅ Document uploaded successfully. Pending verification.");
+      setFile(null);
+      refreshDocuments(); // ✅ Refresh after upload
     } catch (err: any) {
       setError(err.message || "Upload failed.");
     } finally {
@@ -107,61 +117,67 @@ function DocumentSection({
         Verification status: {verificationStatus}
       </span>
 
-      {file ? (
+      {/* ✅ Always show preview (existing or new) */}
+      {localPreview ? (
         <div
-          className="file-display"
           style={{
-            background: "#eaffea",
+            background: "#f9f9f9",
             borderRadius: "8px",
             padding: "10px",
             marginTop: "12px",
             position: "relative",
-          }}
-        >
-          <b>{file.name}</b>
-          <br />
-          Uploaded on {new Date().toLocaleDateString()}
-          <button
-            style={{
-              position: "absolute",
-              right: 8,
-              top: 8,
-              background: "transparent",
-              border: "none",
-              color: "#bb0000",
-              fontSize: "16px",
-              cursor: "pointer",
-            }}
-            onClick={handleRemoveFile}
-            aria-label={`Remove file for ${label}`}
-          >
-            🗑️
-          </button>
-          <div style={{ marginTop: 10 }}>
-            <img
-              src={URL.createObjectURL(file)}
-              alt="Preview"
-              style={{ maxWidth: 160, borderRadius: 8, marginTop: 6 }}
-            />
-          </div>
-        </div>
-      ) : previewUrl ? (
-        <div
-          style={{
-            background: "#eaffea",
-            borderRadius: "8px",
-            padding: "10px",
-            marginTop: "12px",
             textAlign: "center",
-            position: "relative",
           }}
         >
           <img
-            src={previewUrl}
+            src={localPreview}
             alt={`Preview for ${label}`}
-            style={{ maxWidth: 160, borderRadius: 8, marginBottom: 8 }}
+            style={{
+              maxWidth: 160,
+              borderRadius: 8,
+              marginBottom: 8,
+              objectFit: "cover",
+            }}
           />
-          <div style={{ fontWeight: 500 }}>{idType}</div>
+          <div style={{ fontWeight: 500 }}>{idType || "No type selected"}</div>
+          <div style={{ marginTop: 10 }}>
+            <label
+              htmlFor={`reupload-${label}`}
+              style={{
+                cursor: "pointer",
+                display: "inline-block",
+                padding: "6px 14px",
+                backgroundColor: "#007bff",
+                color: "#fff",
+                borderRadius: "6px",
+                fontWeight: 500,
+                marginRight: 8,
+              }}
+            >
+              Reupload
+            </label>
+            <input
+              type="file"
+              id={`reupload-${label}`}
+              style={{ display: "none" }}
+              onChange={handleFileChange}
+              accept="image/*"
+            />
+            {file && (
+              <button
+                onClick={handleRemoveFile}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#bb0000",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                }}
+              >
+                ❌ Remove
+              </button>
+            )}
+          </div>
         </div>
       ) : (
         <div
@@ -220,7 +236,7 @@ function DocumentSection({
             opacity: loading ? 0.6 : 1,
           }}
         >
-          {loading ? "Uploading..." : `Upload ${label}`}
+          {loading ? "Uploading..." : `Upload / Reupload ${label}`}
         </button>
       </div>
 
@@ -385,31 +401,32 @@ export default function MyDocumentsPage() {
 
   const userToken = localStorage.getItem("token") || "";
 
-  useEffect(() => {
-    async function fetchDocuments() {
-      try {
-        const data = await getUserDocumentsByUserId(userToken); // only token used
-        const sortedDocs = data.documents
-          .filter((doc: { doc_type: string }) => idTypes.includes(doc.doc_type))
-          .sort(
-            (a: { createdAt: string }, b: { createdAt: string }) =>
-              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
+  const fetchDocuments = async () => {
+    try {
+      const data = await getUserDocumentsByUserId(userToken);
+      const sortedDocs = data.documents
+        .filter((doc: { doc_type: string }) => idTypes.includes(doc.doc_type))
+        .sort(
+          (a: { createdAt: string }, b: { createdAt: string }) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
 
-        if (sortedDocs[0]) {
-          setId1Type(sortedDocs[0].doc_type);
-          setId1Url(sortedDocs[0].image);
-          setId1Status(sortedDocs[0].verification_status);
-        }
-        if (sortedDocs[1]) {
-          setId2Type(sortedDocs[1].doc_type);
-          setId2Url(sortedDocs[1].image);
-          setId2Status(sortedDocs[1].verification_status);
-        }
-      } catch (error) {
-        console.error("Failed to fetch documents:", error);
+      if (sortedDocs[0]) {
+        setId1Type(sortedDocs[0].doc_type);
+        setId1Url(sortedDocs[0].image);
+        setId1Status(sortedDocs[0].verification_status);
       }
+      if (sortedDocs[1]) {
+        setId2Type(sortedDocs[1].doc_type);
+        setId2Url(sortedDocs[1].image);
+        setId2Status(sortedDocs[1].verification_status);
+      }
+    } catch (error) {
+      console.error("Failed to fetch documents:", error);
     }
+  };
+
+  useEffect(() => {
     fetchDocuments();
   }, [userToken]);
 
@@ -429,13 +446,13 @@ export default function MyDocumentsPage() {
       >
         <h2 style={{ fontWeight: "800" }}>Verify Your Identity</h2>
         <p style={{ marginBottom: "24px", color: "#555" }}>
-          To ensure the security of your account, please upload your profile
-          picture and two forms of identification.
+          Please upload your profile picture and two forms of identification.
         </p>
 
-        {/* Profile Picture Upload */}
+        {/* Profile Picture */}
         <ProfilePicSection />
 
+        {/* ID Documents */}
         <div
           style={{
             display: "flex",
@@ -453,6 +470,7 @@ export default function MyDocumentsPage() {
             verificationStatus={id1Status}
             setVerificationStatus={setId1Status}
             previewUrl={id1Url}
+            refreshDocuments={fetchDocuments}
           />
           <DocumentSection
             label="ID 2"
@@ -463,6 +481,7 @@ export default function MyDocumentsPage() {
             verificationStatus={id2Status}
             setVerificationStatus={setId2Status}
             previewUrl={id2Url}
+            refreshDocuments={fetchDocuments}
           />
         </div>
       </div>
