@@ -1,8 +1,9 @@
-import React, { useState, type ChangeEvent } from "react";
+import React, { useState, useEffect, type ChangeEvent } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import {
   uploadUserDocument,
   uploadProfilePicture,
+  getUserDocumentsByUserId,
 } from "../../services/userDocuments";
 
 const idTypes: string[] = [
@@ -22,6 +23,7 @@ interface DocumentSectionProps {
   setFile: React.Dispatch<React.SetStateAction<File | null>>;
   verificationStatus: string;
   setVerificationStatus?: React.Dispatch<React.SetStateAction<string>>;
+  previewUrl?: string | null;
 }
 
 function DocumentSection({
@@ -32,11 +34,11 @@ function DocumentSection({
   setFile,
   verificationStatus,
   setVerificationStatus,
+  previewUrl,
 }: DocumentSectionProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-
   const userToken = localStorage.getItem("token") || "";
 
   const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) =>
@@ -59,20 +61,16 @@ function DocumentSection({
   };
 
   const uploadDocument = async () => {
+    if (!idType || !file) {
+      setError("Please select ID type and upload a file before submitting.");
+      return;
+    }
     setLoading(true);
     setError(null);
     setMessage(null);
-
-    if (!idType || !file) {
-      setError("Please select ID type and upload a file before submitting.");
-      setLoading(false);
-      return;
-    }
-
     try {
       const res = await uploadUserDocument(file, idType, userToken);
-      if (!res.success) throw new Error(res.message);
-
+      if (!res.success) throw new Error(res.message || "Upload failed");
       if (setVerificationStatus) setVerificationStatus("Pending");
       setMessage("Document uploaded successfully. Pending verification.");
     } catch (err: any) {
@@ -99,6 +97,7 @@ function DocumentSection({
           </option>
         ))}
       </select>
+
       <span
         className={`doc-status ${
           verificationStatus === "Verified" ? "verified" : ""
@@ -107,6 +106,7 @@ function DocumentSection({
       >
         Verification status: {verificationStatus}
       </span>
+
       {file ? (
         <div
           className="file-display"
@@ -137,6 +137,31 @@ function DocumentSection({
           >
             🗑️
           </button>
+          <div style={{ marginTop: 10 }}>
+            <img
+              src={URL.createObjectURL(file)}
+              alt="Preview"
+              style={{ maxWidth: 160, borderRadius: 8, marginTop: 6 }}
+            />
+          </div>
+        </div>
+      ) : previewUrl ? (
+        <div
+          style={{
+            background: "#eaffea",
+            borderRadius: "8px",
+            padding: "10px",
+            marginTop: "12px",
+            textAlign: "center",
+            position: "relative",
+          }}
+        >
+          <img
+            src={previewUrl}
+            alt={`Preview for ${label}`}
+            style={{ maxWidth: 160, borderRadius: 8, marginBottom: 8 }}
+          />
+          <div style={{ fontWeight: 500 }}>{idType}</div>
         </div>
       ) : (
         <div
@@ -177,6 +202,7 @@ function DocumentSection({
           </div>
         </div>
       )}
+
       <div style={{ marginTop: 12 }}>
         <button
           type="button"
@@ -197,6 +223,7 @@ function DocumentSection({
           {loading ? "Uploading..." : `Upload ${label}`}
         </button>
       </div>
+
       {error && <div style={{ color: "#bb0000", marginTop: 8 }}>{error}</div>}
       {message && (
         <div style={{ color: "#008800", marginTop: 8 }}>{message}</div>
@@ -205,14 +232,12 @@ function DocumentSection({
   );
 }
 
-// ✅ Profile Picture Upload Section
 function ProfilePicSection() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
   const userToken = localStorage.getItem("token") || "";
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -233,10 +258,9 @@ function ProfilePicSection() {
     setLoading(true);
     setError(null);
     setMessage(null);
-
     try {
       const res = await uploadProfilePicture(file, userToken);
-      if (!res) throw new Error(res);
+      if (!res) throw new Error(res || "Upload failed");
       setMessage("Profile picture uploaded successfully!");
     } catch (err: any) {
       setError(err.message || "Upload failed.");
@@ -341,10 +365,45 @@ export default function MyDocumentsPage() {
   const [id1Type, setId1Type] = useState<string>("");
   const [id1File, setId1File] = useState<File | null>(null);
   const [id1Status, setId1Status] = useState<string>("Pending");
+  const [id1Url, setId1Url] = useState<string | null>(null);
 
   const [id2Type, setId2Type] = useState<string>("");
   const [id2File, setId2File] = useState<File | null>(null);
   const [id2Status, setId2Status] = useState<string>("No file selected");
+  const [id2Url, setId2Url] = useState<string | null>(null);
+
+  const userToken = localStorage.getItem("token") || "";
+
+  useEffect(() => {
+    async function fetchDocuments() {
+      try {
+        const data = await getUserDocumentsByUserId(userToken); // token only
+        const sortedDocs = data.documents
+          .filter((doc: { doc_type: string }) => idTypes.includes(doc.doc_type))
+          .sort(
+            (
+              a: { createdAt: string | number | Date },
+              b: { createdAt: string | number | Date }
+            ) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+
+        if (sortedDocs[0]) {
+          setId1Type(sortedDocs[0].doc_type);
+          setId1Url(sortedDocs[0].image);
+          setId1Status(sortedDocs[0].verification_status);
+        }
+        if (sortedDocs[1]) {
+          setId2Type(sortedDocs[1].doc_type);
+          setId2Url(sortedDocs[1].image);
+          setId2Status(sortedDocs[1].verification_status);
+        }
+      } catch (error) {
+        console.error("Failed to fetch documents:", error);
+      }
+    }
+    fetchDocuments();
+  }, [userToken]);
 
   return (
     <>
@@ -366,7 +425,7 @@ export default function MyDocumentsPage() {
           picture and two forms of identification.
         </p>
 
-        {/* ✅ Profile Picture Upload */}
+        {/* Profile Picture Upload */}
         <ProfilePicSection />
 
         <div
@@ -385,6 +444,7 @@ export default function MyDocumentsPage() {
             setFile={setId1File}
             verificationStatus={id1Status}
             setVerificationStatus={setId1Status}
+            previewUrl={id1Url}
           />
           <DocumentSection
             label="ID 2"
@@ -394,6 +454,7 @@ export default function MyDocumentsPage() {
             setFile={setId2File}
             verificationStatus={id2Status}
             setVerificationStatus={setId2Status}
+            previewUrl={id2Url}
           />
         </div>
       </div>

@@ -22,14 +22,18 @@ export interface UploadProfilePicResponse {
 }
 
 export interface GetDocumentsResponse {
-  success: boolean;
-  data: {
-    user: {
-      id: number;
-      email: string;
-    };
-    documents: UserDocument[];
+  user: {
+    id: number;
+    email: string;
   };
+  documents: Array<{
+    id: number;
+    doc_type: string;
+    image: string;
+    verification_status: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
 }
 
 // Upload user document (with image file)
@@ -57,7 +61,6 @@ export async function uploadUserDocument(
 
 // Get user documents by userId (admin only)
 export async function getUserDocumentsByUserId(
-  userId: number,
   token: string
 ): Promise<GetDocumentsResponse> {
   const response = await axios.get<GetDocumentsResponse>(
@@ -65,9 +68,6 @@ export async function getUserDocumentsByUserId(
     {
       headers: {
         Authorization: `Bearer ${token}`,
-      },
-      params: {
-        userId,
       },
     }
   );
