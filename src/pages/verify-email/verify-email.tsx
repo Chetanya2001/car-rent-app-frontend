@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function VerifyEmail() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [status, setStatus] = useState("loading"); // loading, success, error
   const [message, setMessage] = useState("");
 
@@ -25,6 +26,8 @@ function VerifyEmail() {
         if (data.success) {
           setStatus("success");
           setMessage("Your email has been verified successfully!");
+          // Auto redirect after 3 seconds
+          setTimeout(() => navigate("/login"), 3000);
         } else {
           setStatus("error");
           setMessage(data.message || "Email verification failed.");
@@ -32,11 +35,10 @@ function VerifyEmail() {
       })
       .catch(() => {
         setStatus("error");
-        setMessage("Something went wrong. Please Try again.");
+        setMessage("Something went wrong. Please try again.");
       });
-  }, [location]);
+  }, [location, navigate]);
 
-  // Simple dialog UI
   return (
     <div
       style={{
@@ -52,6 +54,20 @@ function VerifyEmail() {
       {(status === "success" || status === "error") && (
         <>
           <p>{message}</p>
+          <button
+            onClick={() => navigate("/login")}
+            style={{
+              marginTop: 20,
+              padding: "10px 20px",
+              backgroundColor: "#007bff",
+              color: "white",
+              border: "none",
+              borderRadius: 5,
+              cursor: "pointer",
+            }}
+          >
+            Go to Login
+          </button>
         </>
       )}
     </div>
