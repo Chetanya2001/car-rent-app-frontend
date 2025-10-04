@@ -72,7 +72,7 @@ function DocumentSection({
       const res = await uploadUserDocument(file, idType, userToken);
       if (!res.success) throw new Error(res.message || "Upload failed");
       if (setVerificationStatus) setVerificationStatus("Pending");
-      setMessage("Document uploaded successfully. Pending verification.");
+      setMessage("✅ Document uploaded successfully. Pending verification.");
     } catch (err: any) {
       setError(err.message || "Upload failed.");
     } finally {
@@ -226,7 +226,16 @@ function DocumentSection({
 
       {error && <div style={{ color: "#bb0000", marginTop: 8 }}>{error}</div>}
       {message && (
-        <div style={{ color: "#008800", marginTop: 8 }}>{message}</div>
+        <div
+          style={{
+            color: "green",
+            marginTop: 8,
+            fontWeight: 600,
+            transition: "opacity 0.3s ease",
+          }}
+        >
+          {message}
+        </div>
       )}
     </div>
   );
@@ -260,8 +269,8 @@ function ProfilePicSection() {
     setMessage(null);
     try {
       const res = await uploadProfilePicture(file, userToken);
-      if (!res) throw new Error(res || "Upload failed");
-      setMessage("Profile picture uploaded successfully!");
+      if (!res) throw new Error("Upload failed");
+      setMessage("✅ Profile picture uploaded successfully!");
     } catch (err: any) {
       setError(err.message || "Upload failed.");
     } finally {
@@ -355,7 +364,9 @@ function ProfilePicSection() {
       </div>
       {error && <div style={{ color: "#bb0000", marginTop: 8 }}>{error}</div>}
       {message && (
-        <div style={{ color: "#008800", marginTop: 8 }}>{message}</div>
+        <div style={{ color: "green", marginTop: 8, fontWeight: 600 }}>
+          {message}
+        </div>
       )}
     </div>
   );
@@ -377,14 +388,11 @@ export default function MyDocumentsPage() {
   useEffect(() => {
     async function fetchDocuments() {
       try {
-        const data = await getUserDocumentsByUserId(userToken); // token only
+        const data = await getUserDocumentsByUserId(userToken); // only token used
         const sortedDocs = data.documents
           .filter((doc: { doc_type: string }) => idTypes.includes(doc.doc_type))
           .sort(
-            (
-              a: { createdAt: string | number | Date },
-              b: { createdAt: string | number | Date }
-            ) =>
+            (a: { createdAt: string }, b: { createdAt: string }) =>
               new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
           );
 
