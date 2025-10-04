@@ -198,7 +198,7 @@ function DocumentSection({
         </button>
       </div>
 
-      {error && <div style={{ color: "#bb0000", marginTop: 8 }}>{error}</div>}
+      {error && <div style={{ color: "#01d28e", marginTop: 8 }}>{error}</div>}
       {message && (
         <div style={{ color: "green", marginTop: 8, fontWeight: 600 }}>
           {message}
@@ -328,7 +328,7 @@ function ProfilePicSection() {
           {loading ? "Uploading..." : "Upload Profile Picture"}
         </button>
       </div>
-      {error && <div style={{ color: "#bb0000", marginTop: 8 }}>{error}</div>}
+      {error && <div style={{ color: "#01d28e", marginTop: 8 }}>{error}</div>}
       {message && (
         <div style={{ color: "green", marginTop: 8, fontWeight: 600 }}>
           {message}
