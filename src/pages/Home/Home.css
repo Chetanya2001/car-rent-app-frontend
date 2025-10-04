@@ -704,31 +704,39 @@ input:checked + .slider:before {
 
 /* ---------- Dropdown Menu ---------- */
 .profile-menu {
-  position: absolute;
-  top: 50px; /* below the avatar */
-  right: 0;
-  width: 14rem;
+  display: flex;
+  flex-direction: column;
+  width: 220px;
+  min-width: 180px;
   background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-  list-style: none;
-  padding: 8px 0;
-  z-index: 1001;
-  animation: fadeIn 0.2s ease-in-out;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  gap: 2px;
+  padding: 12px 0;
+  transition: width 0.2s;
 }
-
 .profile-menu li {
-  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  padding: 13px 25px 13px 22px;
   cursor: pointer;
+  font-size: 16px;
+  color: #232323;
   font-weight: 500;
-  color: #333;
-  transition: background 0.15s ease;
+  border-radius: 8px;
+  background: transparent;
+  transition: background 0.15s, color 0.18s;
+  user-select: none;
+  border: none;
+  outline: none;
+  letter-spacing: 0.01em;
 }
 
-.profile-menu li:hover {
-  background-color: #f7f7f7;
-  color: #000;
+.profile-menu li:hover,
+.profile-menu li.active {
+  background: #f3fdfa;
+  color: #01d28e;
 }
 .profile-avatar {
   width: 40px; /* adjust as needed */
