@@ -165,7 +165,7 @@ export default function Navbar() {
         handleLogout();
         break;
       case "Book a Car":
-        navigate("/cars");
+        navigate("/searched-cars");
         break;
       case "My Bookings":
         navigate("/my-bookings");
