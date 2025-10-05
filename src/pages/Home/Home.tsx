@@ -160,7 +160,6 @@ export default function Home() {
     "My Documents",
     "My Payments",
     "Notifications",
-    "Support",
     "Logout",
   ];
   const AdminMenu = [
@@ -283,6 +282,7 @@ export default function Home() {
                     if (
                       item === "Add a Car" ||
                       item === "My Cars" ||
+                      item === "Book a Car" ||
                       adminNavMap[item] ||
                       item === "My Documents"
                     ) {
@@ -292,7 +292,9 @@ export default function Home() {
                           : item === "My Cars"
                           ? "/my-cars"
                           : item === "My Documents"
-                          ? "/my-documents" // Path for documents
+                          ? "/my-documents"
+                          : item === "Book a Car" // ✅ route guest here
+                          ? "/searched-cars"
                           : adminNavMap[item];
 
                       return (
