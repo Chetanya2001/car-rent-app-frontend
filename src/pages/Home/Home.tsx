@@ -151,7 +151,6 @@ export default function Home() {
     "My Bookings",
     "My Payments",
     "Notifications",
-    "Support",
     "Logout",
   ];
   const guestMenu = [
