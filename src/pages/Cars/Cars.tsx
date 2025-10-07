@@ -54,7 +54,10 @@ const Cars: React.FC = () => {
                     INR {car.price} <small>/hour</small>
                   </p>
                   <div className="mt-auto d-flex gap-2">
-                    <button className="btn btn-primary flex-fill">
+                    <button
+                      className="btn btn-primary flex-fill"
+                      onClick={() => handleDetailsClick(car.id)}
+                    >
                       Book now
                     </button>
                     <button
