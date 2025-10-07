@@ -148,17 +148,17 @@ export default function Home() {
   const hostMenu = [
     "Add a Car",
     "My Cars",
-    "My Bookings",
-    "My Payments",
-    "Notifications",
+    // "My Bookings",
+    // "My Payments",
+    // "Notifications",
     "Logout",
   ];
   const guestMenu = [
     "Book a Car",
-    "My Bookings",
+    // "My Bookings",
     "My Documents",
-    "My Payments",
-    "Notifications",
+    // "My Payments",
+    // "Notifications",
     "Logout",
   ];
   const AdminMenu = [

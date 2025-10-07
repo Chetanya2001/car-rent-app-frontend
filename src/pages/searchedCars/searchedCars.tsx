@@ -236,7 +236,25 @@ export default function SearchedCars() {
                   </p>
                 </div>
                 <div className="searched-car-actions">
-                  <button className="searched-btn-book">Book now</button>
+                  <button
+                    className="searched-btn-book"
+                    onClick={() =>
+                      navigate(`/car-details/${car.id}`, {
+                        state: {
+                          pickup_datetime:
+                            filters.pickupDate + "T" + filters.pickupTime,
+                          dropoff_datetime:
+                            filters.dropDate + "T" + filters.dropTime,
+                          insurance: filters.insureTrip,
+                          driver: filters.driverRequired,
+                          differentDrop: filters.differentDrop,
+                          price_per_hour: car.price_per_hour,
+                        },
+                      })
+                    }
+                  >
+                    Book now
+                  </button>
                   <button
                     className="searched-btn-details"
                     onClick={() =>
