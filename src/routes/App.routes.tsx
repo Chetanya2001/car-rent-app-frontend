@@ -15,6 +15,7 @@ import ManagePayments from "../pages/admin/managePayments/managePayments";
 import ManageSupport from "../pages/admin/manageSupport/manageSupport";
 import AdminRoute from "../components/AdminRoute/AdminRoute"; // Make sure path is correct
 import MyDocumentsPage from "../pages/MyDocuments/MyDocuments";
+import BookACar from "../pages/BookACar/BookACar";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -27,6 +28,7 @@ const AppRoutes = () => (
       <Route path="/car-details/:id" element={<CarDetails />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/my-documents" element={<MyDocumentsPage />} />
+      <Route path="/bookAcar" element={<BookACar />} />
       <Route
         path="/admin/manage-cars"
         element={
