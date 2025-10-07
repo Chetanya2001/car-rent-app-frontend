@@ -257,12 +257,18 @@ export default function Navbar() {
             </NavLink>
           </li>
           <li>
-            <a href="#services" onClick={() => setNavOpen(false)}>
+            <a
+              href="https://zipdrive.in/community.html"
+              onClick={() => setNavOpen(false)}
+            >
               Community
             </a>
           </li>
           <li>
-            <a href="#contact" onClick={() => setNavOpen(false)}>
+            <a
+              href="https://zipdrive.in/support.html"
+              onClick={() => setNavOpen(false)}
+            >
               Support
             </a>
           </li>
