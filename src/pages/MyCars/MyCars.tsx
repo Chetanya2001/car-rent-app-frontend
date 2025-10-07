@@ -12,7 +12,7 @@ export default function MyCars() {
   useEffect(() => {
     const fetchCars = async () => {
       try {
-        const data = await getHostCars(); // data = { cars: [...] }
+        const data = await getHostCars();
 
         if (!Array.isArray(data.cars)) {
           console.error("Invalid response from backend:", data);
@@ -41,58 +41,100 @@ export default function MyCars() {
     <>
       <Navbar />
       <div className="my-cars-page">
-        <h2>My Listed Cars</h2>
+        <div className="page-header">
+          <h2>My Listed Cars</h2>
+          <p className="subtitle">Manage and view all your listed vehicles</p>
+        </div>
+
         <div className="cars-grid">
-          {cars.length === 0 && <p>No cars found.</p>}
+          {cars.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-icon">🚗</div>
+              <p>No cars found.</p>
+              <p className="empty-subtitle">
+                Start by adding your first vehicle
+              </p>
+            </div>
+          )}
 
           {cars.map((car) => {
-            // ✅ Only use the first car photo
             const mainImage = car.photos?.[0] || "";
 
             return (
               <div key={car.id} className="car-card">
-                {mainImage ? (
-                  <img
-                    src={mainImage}
-                    alt={`${car.make} ${car.model}`}
-                    className="car-img"
-                  />
-                ) : (
-                  <div className="car-img placeholder">No Image</div>
-                )}
-
-                <div className="car-info">
-                  <h3>
-                    {car.make} {car.model}
-                  </h3>
-                  <p>Year: {car.year}</p>
-                  <p>
-                    Price:{" "}
-                    {car.price_per_hour
-                      ? `₹${car.price_per_hour}/hr`
-                      : "Not set"}
-                  </p>
-                  {car.available_from && car.available_till && (
-                    <p>
-                      Available:{" "}
-                      {new Date(car.available_from).toLocaleDateString()} -{" "}
-                      {new Date(car.available_till).toLocaleDateString()}
-                    </p>
+                <div className="car-image-container">
+                  {mainImage ? (
+                    <img
+                      src={mainImage}
+                      alt={`${car.make} ${car.model}`}
+                      className="car-img"
+                    />
+                  ) : (
+                    <div className="car-img placeholder">
+                      <span>📷</span>
+                      <span>No Image</span>
+                    </div>
                   )}
-                  <p>RC Number: {car.documents?.rc_number}</p>
-                  <p>Owner: {car.documents?.owner_name}</p>
                 </div>
 
-                {/* Action Buttons */}
+                <div className="car-info">
+                  <h3 className="car-title">
+                    {car.make} {car.model}
+                  </h3>
+
+                  <div className="car-details-grid">
+                    <div className="detail-item">
+                      <span className="detail-label">Year</span>
+                      <span className="detail-value">{car.year}</span>
+                    </div>
+
+                    <div className="detail-item price-item">
+                      <span className="detail-label">Price</span>
+                      <span className="detail-value price">
+                        {car.price_per_hour
+                          ? `₹${car.price_per_hour}/hr`
+                          : "Not set"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {car.available_from && car.available_till && (
+                    <div className="availability-box">
+                      <span className="availability-label">Available</span>
+                      <span className="availability-dates">
+                        {new Date(car.available_from).toLocaleDateString()} -{" "}
+                        {new Date(car.available_till).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+
+                  {car.documents && (
+                    <div className="document-info">
+                      <div className="doc-item">
+                        <span className="doc-label">RC Number:</span>
+                        <span className="doc-value">
+                          {car.documents.rc_number}
+                        </span>
+                      </div>
+                      <div className="doc-item">
+                        <span className="doc-label">Owner:</span>
+                        <span className="doc-value">
+                          {car.documents.owner_name}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="car-actions">
                   <button
-                    className="details-btn"
+                    className="action-btn details-btn"
                     onClick={() => handleDetails(car.id)}
                   >
-                    Details
+                    View Details
                   </button>
                   <button
-                    className="update-btn"
+                    className="action-btn update-btn"
                     onClick={() => handleUpdate(car.id)}
                   >
                     Update
