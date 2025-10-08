@@ -21,6 +21,10 @@ const Cars: React.FC = () => {
     };
     fetchCars();
   }, []);
+  const handleBookNowClick = (car: Car) => {
+    // Go to BookACar route, pass carId as state
+    navigate("/book-a-car", { state: { carId: car.id } });
+  };
 
   const handleDetailsClick = (id: number) => {
     navigate(`/car-details/${id}`); // navigate to car details page with id
@@ -56,7 +60,7 @@ const Cars: React.FC = () => {
                   <div className="mt-auto d-flex gap-2">
                     <button
                       className="btn btn-primary flex-fill"
-                      onClick={() => handleDetailsClick(car.id)}
+                      onClick={() => handleBookNowClick(car)}
                     >
                       Book now
                     </button>
