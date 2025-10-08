@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./searchedCars.css";
 import Navbar from "../../components/Navbar/Navbar";
-import { searchCars } from "../../services/carService"; // ✅ Import your API
+import { searchCars } from "../../services/carService";
 
 interface Car {
   id: number;
@@ -12,23 +12,44 @@ interface Car {
   price_per_hour: number;
   photos: string[];
   city?: string;
-  availableFrom: string; // e.g. "2025-09-22T09:00"
-  availableTo: string; // e.g. "2025-09-25T18:00"
+  availableFrom: string;
+  availableTo: string;
+}
+
+// Helper to format date and time to YYYY-MM-DD and HH:MM
+function getDateAndTime(dateObj: Date) {
+  const pad = (num: number) => num.toString().padStart(2, "0");
+  const yyyy = dateObj.getFullYear();
+  const mm = pad(dateObj.getMonth() + 1);
+  const dd = pad(dateObj.getDate());
+  const date = `${yyyy}-${mm}-${dd}`;
+  const hh = pad(dateObj.getHours());
+  const mins = pad(dateObj.getMinutes());
+  const time = `${hh}:${mins}`;
+  return { date, time };
 }
 
 export default function SearchedCars() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Current date and time (IST): 2025-10-08 14:59
+  const now = new Date(2025, 9, 8, 14, 59); // JS months are 0-based
+
+  // Get default pickup (today now) and dropoff (tomorrow same time)
+  const { date: todayDate, time: nowTime } = getDateAndTime(now);
+  const dropDefault = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const { date: tomorrowDate, time: dropTime } = getDateAndTime(dropDefault);
+
   const [cars, setCars] = useState<Car[]>(location.state?.cars || []);
   const bookingDetails = location.state?.bookingDetails || {};
 
   const [filters, setFilters] = useState({
     city: bookingDetails.city || "Delhi",
-    pickupDate: bookingDetails.pickupDate || "",
-    pickupTime: bookingDetails.pickupTime || "",
-    dropDate: bookingDetails.dropDate || "",
-    dropTime: bookingDetails.dropTime || "",
+    pickupDate: bookingDetails.pickupDate || todayDate,
+    pickupTime: bookingDetails.pickupTime || nowTime,
+    dropDate: bookingDetails.dropDate || tomorrowDate,
+    dropTime: bookingDetails.dropTime || dropTime,
     insureTrip: bookingDetails.insureTrip ?? false,
     driverRequired: bookingDetails.driverRequired ?? false,
     differentDrop: bookingDetails.differentDrop ?? false,
@@ -51,10 +72,9 @@ export default function SearchedCars() {
     try {
       const data = await searchCars({
         city: filters.city,
-        pickup_datetime: filters.pickupDate,
-        dropoff_datetime: filters.dropDate,
+        pickup_datetime: filters.pickupDate + "T" + filters.pickupTime,
+        dropoff_datetime: filters.dropDate + "T" + filters.dropTime,
       });
-
       setCars(data.cars || []);
     } catch (err) {
       console.error("❌ Error searching cars:", err);
