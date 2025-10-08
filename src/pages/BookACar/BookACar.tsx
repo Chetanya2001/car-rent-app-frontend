@@ -11,7 +11,7 @@ const BookACar: React.FC = () => {
   // Get navigation state
   const location = useLocation();
   const navigate = useNavigate();
-  const { carId } = location.state || {};
+  const { carId, pricePerHour: routedPricePerHour } = location.state || {};
 
   // Car details state
   const [car, setCar] = useState<CarDetailsType | null>(null);
@@ -52,7 +52,7 @@ const BookACar: React.FC = () => {
   }, [carId, navigate]);
 
   // Calculation for pricing
-  const pricePerHour = car?.price_per_hour || 100;
+  const pricePerHour = car?.price_per_hour ?? routedPricePerHour ?? 100;
   let carCharges = 0,
     insuranceCharges = 0,
     driverCharges = 0,

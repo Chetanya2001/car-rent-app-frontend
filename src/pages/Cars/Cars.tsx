@@ -7,13 +7,12 @@ import { useNavigate } from "react-router-dom";
 
 const Cars: React.FC = () => {
   const [cars, setCars] = useState<Car[]>([]);
-  const navigate = useNavigate(); // hook to navigate programmatically
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCars = async () => {
       try {
         const data = await getCars();
-        console.log("🚗 Fetched cars:", data);
         setCars(data);
       } catch (error) {
         console.error("❌ Error fetching cars:", error);
@@ -21,13 +20,16 @@ const Cars: React.FC = () => {
     };
     fetchCars();
   }, []);
+
   const handleBookNowClick = (car: Car) => {
-    // Go to BookACar route, pass carId as state
-    navigate("/bookAcar", { state: { carId: car.id } });
+    // Pass price per hour along with carId
+    navigate("/bookAcar", {
+      state: { carId: car.id, pricePerHour: car.price },
+    });
   };
 
   const handleDetailsClick = (id: number) => {
-    navigate(`/car-details/${id}`); // navigate to car details page with id
+    navigate(`/car-details/${id}`);
   };
 
   return (
