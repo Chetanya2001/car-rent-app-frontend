@@ -23,7 +23,7 @@ const Cars: React.FC = () => {
   }, []);
   const handleBookNowClick = (car: Car) => {
     // Go to BookACar route, pass carId as state
-    navigate("/book-a-car", { state: { carId: car.id } });
+    navigate("/bookAcar", { state: { carId: car.id } });
   };
 
   const handleDetailsClick = (id: number) => {
