@@ -2,6 +2,10 @@ import React, { useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./searchedCars.css";
 import Navbar from "../../components/Navbar/Navbar";
+import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
+import LocationPicker from "../../components/Map/LocationPicker";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import { searchCars } from "../../services/carService";
 
 interface Car {
@@ -55,12 +59,23 @@ export default function SearchedCars() {
     differentDrop: bookingDetails.differentDrop ?? false,
   });
 
+  // New state for dropCity and drop map modal visibility
+  const [dropCity, setDropCity] = useState(
+    location.state?.bookingDetails?.dropCity || ""
+  );
+  const [showDropMap, setShowDropMap] = useState(false);
+
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, type, checked, value } = e.target;
     setFilters((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+  };
+
+  // Separate handler for dropCity input to avoid mixing into filters
+  const handleDropCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDropCity(e.target.value);
   };
 
   const handleSearch = async () => {
@@ -70,6 +85,8 @@ export default function SearchedCars() {
     }
 
     try {
+      // Construct city param: if differentDrop true, use dropCity as 'dropoff' city if you want
+      // but current API expects pickup city; pass dropCity separately if required.
       const data = await searchCars({
         city: filters.city,
         pickup_datetime: filters.pickupDate + "T" + filters.pickupTime,
@@ -206,6 +223,27 @@ export default function SearchedCars() {
           </span>
         </label>
 
+        {/* Conditionally show dropCity input and map icon */}
+        {filters.differentDrop && (
+          <label>
+            Drop-off Location:
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <input
+                name="dropCity"
+                value={dropCity}
+                onChange={handleDropCityChange}
+                placeholder="Drop-off City"
+                autoComplete="off"
+              />
+              <FontAwesomeIcon
+                icon={faMapMarkerAlt}
+                style={{ marginLeft: 8, cursor: "pointer" }}
+                onClick={() => setShowDropMap(true)}
+              />
+            </div>
+          </label>
+        )}
+
         <button className="searched-search-btn" onClick={handleSearch}>
           Search
         </button>
@@ -271,6 +309,7 @@ export default function SearchedCars() {
                             insureTrip: filters.insureTrip,
                             driverRequired: filters.driverRequired,
                             differentDrop: filters.differentDrop,
+                            dropCity: dropCity,
                           },
                         },
                       })
@@ -290,6 +329,7 @@ export default function SearchedCars() {
                           insurance: filters.insureTrip,
                           driver: filters.driverRequired,
                           differentDrop: filters.differentDrop,
+                          dropCity: dropCity,
                           price_per_hour: car.price_per_hour,
                         },
                       })
@@ -303,6 +343,23 @@ export default function SearchedCars() {
           </div>
         )}
       </div>
+
+      {/* Drop-off Map Modal */}
+      {showDropMap && (
+        <ModalWrapper onClose={() => setShowDropMap(false)}>
+          <LocationPicker
+            onSelect={(loc: any) => {
+              const locationName =
+                loc.city && loc.state
+                  ? `${loc.city}, ${loc.state}`
+                  : loc.city || loc.state || loc.country || "";
+
+              setDropCity(locationName);
+              setShowDropMap(false);
+            }}
+          />
+        </ModalWrapper>
+      )}
     </>
   );
 }
