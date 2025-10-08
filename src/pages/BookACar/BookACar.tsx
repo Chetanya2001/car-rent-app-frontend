@@ -6,31 +6,60 @@ import Footer from "../../components/Footer/Footer";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getCarDetails } from "../../services/carDetails";
 import type { CarDetailsType } from "../../types/CarDetails";
+import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
+import LocationPicker from "../../components/Map/LocationPicker";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 
 const BookACar: React.FC = () => {
   // Get navigation state
   const location = useLocation();
   const navigate = useNavigate();
-  const { carId, pricePerHour: routedPricePerHour } = location.state || {};
+  const {
+    carId,
+    pricePerHour: routedPricePerHour,
+    bookingDetails,
+  } = location.state || {};
 
   // Car details state
   const [car, setCar] = useState<CarDetailsType | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Trip details state
+  // Trip details state - initialize from bookingDetails or defaults
   const now = new Date();
   const pad = (num: string | number) => (Number(num) < 10 ? "0" + num : num);
   const currentDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
     now.getDate()
   )}`;
   const currentTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  const [pickupDate, setPickupDate] = useState(currentDate);
-  const [pickupTime, setPickupTime] = useState(currentTime);
-  const [dropDate, setDropDate] = useState(currentDate);
-  const [dropTime, setDropTime] = useState(currentTime);
-  const [insureTrip, setInsureTrip] = useState(false);
-  const [driverRequired, setDriverRequired] = useState(false);
-  const [differentDrop, setDifferentDrop] = useState(false);
+
+  const [pickupDate, setPickupDate] = useState(
+    bookingDetails?.pickupDate || currentDate
+  );
+  const [pickupTime, setPickupTime] = useState(
+    bookingDetails?.pickupTime || currentTime
+  );
+  const [dropDate, setDropDate] = useState(
+    bookingDetails?.dropDate || currentDate
+  );
+  const [dropTime, setDropTime] = useState(
+    bookingDetails?.dropTime || currentTime
+  );
+  const [insureTrip, setInsureTrip] = useState(
+    bookingDetails?.insureTrip ?? false
+  );
+  const [driverRequired, setDriverRequired] = useState(
+    bookingDetails?.driverRequired ?? false
+  );
+  const [differentDrop, setDifferentDrop] = useState(
+    bookingDetails?.differentDrop ?? false
+  );
+
+  // New state for the different drop-off location input and modal
+  const [dropCity, setDropCity] = useState<string>(
+    bookingDetails?.dropCity || ""
+  );
+  const [showDropMap, setShowDropMap] = useState(false);
 
   // Fetch car details when carId changes
   useEffect(() => {
@@ -83,6 +112,11 @@ const BookACar: React.FC = () => {
   const nextImage = () => setCurrentImageIndex((i) => (i + 1) % photos.length);
   const prevImage = () =>
     setCurrentImageIndex((i) => (i - 1 + photos.length) % photos.length);
+
+  // Handler for dropCity input change
+  const handleDropCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDropCity(e.target.value);
+  };
 
   if (loading)
     return (
@@ -208,6 +242,28 @@ const BookACar: React.FC = () => {
                 </label>
               </div>
             </div>
+
+            {/* Drop-off Location input and map icon if differentDrop is true */}
+            {differentDrop && (
+              <div style={{ marginTop: "1rem" }}>
+                <label>Drop-off Location</label>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <input
+                    type="text"
+                    value={dropCity}
+                    onChange={handleDropCityChange}
+                    placeholder="Drop-off City"
+                    style={{ flex: 1 }}
+                  />
+                  <FontAwesomeIcon
+                    icon={faMapMarkerAlt}
+                    style={{ marginLeft: 8, cursor: "pointer" }}
+                    onClick={() => setShowDropMap(true)}
+                    title="Select location on map"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
         {/* Right Section: Charges Summary */}
@@ -223,6 +279,23 @@ const BookACar: React.FC = () => {
         </div>
       </div>
       <Footer />
+
+      {/* Drop-off Map Modal */}
+      {showDropMap && (
+        <ModalWrapper onClose={() => setShowDropMap(false)}>
+          <LocationPicker
+            onSelect={(loc: any) => {
+              const locationName =
+                loc.city && loc.state
+                  ? `${loc.city}, ${loc.state}`
+                  : loc.city || loc.state || loc.country || "";
+
+              setDropCity(locationName);
+              setShowDropMap(false);
+            }}
+          />
+        </ModalWrapper>
+      )}
     </>
   );
 };
