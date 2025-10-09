@@ -198,12 +198,12 @@ export default function Support() {
               <MapContainer
                 center={fixedPosition}
                 zoom={13}
-                style={{ height: "400px", width: "100%" }}
-                dragging={false}
-                zoomControl={false}
-                doubleClickZoom={false}
-                scrollWheelZoom={false}
-                keyboard={false}
+                style={{ height: "600px", width: "100%" }} // increased height for big map
+                dragging={true} // enable dragging
+                zoomControl={true} // enable zoom control UI
+                doubleClickZoom={true} // enable zoom by double click
+                scrollWheelZoom={true} // enable zoom by scroll
+                keyboard={true} // enable keyboard navigation
               >
                 <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
