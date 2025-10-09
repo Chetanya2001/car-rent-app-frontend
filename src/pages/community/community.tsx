@@ -1,6 +1,10 @@
+import React from "react";
 import Footer from "../../components/Footer/Footer";
 import Navbar from "../../components/Navbar/Navbar";
 import "./community.css";
+
+// Import images to fix display issue
+import smartTransportationImg from "../../assets/smart-transportation.png";
 
 type CommunityPost = {
   id: number;
@@ -11,13 +15,13 @@ type CommunityPost = {
   title: string;
   excerpt: string;
   buttonText?: string;
-  link: string; // added link field
+  link: string; // link to open on continue
 };
 
 const posts: CommunityPost[] = [
   {
     id: 1,
-    image: "../../assets/smart-transportation.png",
+    image: smartTransportationImg,
     date: "Dec. 29, 2024",
     author: "Admin",
     comments: 3,
@@ -25,11 +29,11 @@ const posts: CommunityPost[] = [
     excerpt:
       "A good amount of planning and attention is required before renting a self driven car anywhere in the world. In India, it gets all the more important.",
     buttonText: "Continue ➡",
-    link: "/tips-to-rent-a-self-drive-car", // example internal link or path
+    link: "https://traveltriangle.com/blog/road-trips-in-india/",
   },
   {
     id: 2,
-    image: "../../assets/smart-transportation.png",
+    image: smartTransportationImg,
     date: "Jan. 29, 2025",
     author: "Admin",
     comments: 3,
@@ -37,11 +41,11 @@ const posts: CommunityPost[] = [
     excerpt:
       "Here you find a checklist in printable format. It is a good idea to adhere to this checklist before taking over a rental car.",
     buttonText: "Continue ➡",
-    link: "/checklist-self-drive",
+    link: "https://traveltriangle.com/blog/road-trips-in-india/",
   },
   {
     id: 3,
-    image: "../../assets/smart-transportation.png",
+    image: smartTransportationImg,
     date: "Dec. 12, 2024",
     author: "Travel Triangle",
     comments: 3,
@@ -49,13 +53,13 @@ const posts: CommunityPost[] = [
     excerpt:
       "Road trips are perhaps the best way to satiate your craving for adventure and escape monotony. Here’s a list of popular road trips in India that you strongly need to take in order to get a break from monotony.",
     buttonText: "Continue ➡",
-    link: "/self-drive-routes",
+    link: "https://traveltriangle.com/blog/road-trips-in-india/",
   },
 ];
 
 export default function Community() {
   const handleContinue = (link: string) => {
-    window.location.href = link; // navigates in same tab
+    window.location.href = link; // open link in same tab
   };
 
   return (
