@@ -1,25 +1,71 @@
 import React, { useState } from "react";
 import Navbar from "../../components/Navbar/Navbar";
+import {
+  sendSupportMessage,
+  type SupportFormData,
+} from "../../services/support";
+import LocationPicker from "../../components/Map/LocationPicker";
 import "./support.css";
-// Add your CSS according to your design system
 
 export default function Support() {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<SupportFormData>({
     name: "",
     email: "",
     subject: "",
     message: "",
   });
 
+  const [location, setLocation] = useState({
+    city: "",
+    state: "",
+    country: "",
+    lat: null as number | null,
+    lng: null as number | null,
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  // Update form state on inputs
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // On location selection from map
+  const handleLocationSelect = (loc: typeof location) => {
+    setLocation(loc);
+  };
+
+  // On form submit, send support message with location appended to message
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Handle submission (API or feedback)
+
+    setLoading(true);
+    setError(null);
+    setSuccessMsg(null);
+
+    try {
+      // Append location details to message body if available
+      const locationStr =
+        location.city || location.state || location.country
+          ? `\n\nLocation:\nCity: ${location.city}\nState: ${location.state}\nCountry: ${location.country}`
+          : "";
+
+      const response = await sendSupportMessage({
+        ...form,
+        message: form.message + locationStr,
+      });
+      setSuccessMsg(response.message);
+      setForm({ name: "", email: "", subject: "", message: "" });
+      setLocation({ city: "", state: "", country: "", lat: null, lng: null });
+    } catch (err: any) {
+      setError(err.message || "Failed to send message");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,6 +96,10 @@ export default function Support() {
           {/* Contact Form */}
           <form className="support-form" onSubmit={handleSubmit}>
             <h2>Contact Support</h2>
+
+            {successMsg && <p className="success-msg">{successMsg}</p>}
+            {error && <p className="error-msg">{error}</p>}
+
             <div className="input-grid">
               <input
                 name="name"
@@ -58,6 +108,7 @@ export default function Support() {
                 onChange={handleChange}
                 required
                 className="input"
+                disabled={loading}
               />
               <input
                 name="email"
@@ -67,6 +118,7 @@ export default function Support() {
                 onChange={handleChange}
                 required
                 className="input"
+                disabled={loading}
               />
               <input
                 name="subject"
@@ -75,6 +127,7 @@ export default function Support() {
                 onChange={handleChange}
                 required
                 className="input"
+                disabled={loading}
               />
               <textarea
                 name="message"
@@ -84,10 +137,24 @@ export default function Support() {
                 required
                 className="textarea"
                 rows={4}
+                disabled={loading}
               />
-              <button type="submit" className="support-btn">
-                Send Message
+              <button type="submit" className="support-btn" disabled={loading}>
+                {loading ? "Sending..." : "Send Message"}
               </button>
+            </div>
+
+            <div style={{ marginTop: "24px" }}>
+              {/* Insert LocationPicker below form inputs */}
+              <LocationPicker onSelect={handleLocationSelect} />
+
+              {/* Display selected address below map */}
+              {(location.city || location.state || location.country) && (
+                <p className="selected-location">
+                  <strong>Selected Location:</strong> {location.city},{" "}
+                  {location.state}, {location.country}
+                </p>
+              )}
             </div>
           </form>
         </div>
