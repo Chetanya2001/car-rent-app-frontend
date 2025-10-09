@@ -259,12 +259,13 @@
   padding: 30px 35px;
   margin: 30px 35px;
   border-radius: 5px;
-  width: 800px;
+  width: 100%;
+  max-width: 800px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
   text-align: center;
   position: relative;
   top: -150px;
-  left: -70px;
+  left: 0;
   z-index: 15;
 }
 
@@ -287,11 +288,12 @@
 }
 
 .info-icon {
-  width: 60px;
-  height: 60px;
+  width: 100%;
+  max-width: 60px;
+  height: auto;
   object-fit: contain;
-  margin-bottom: 15px;
-  margin-top: 0; /* Fixed: removed the 3rem that caused overlap */
+  margin: 0 auto 15px;
+  display: block;
 }
 .reserve-btn {
   background: #007bff;
@@ -1538,5 +1540,31 @@ input:checked + .slider:before {
   .switch-label {
     color: #fff; /* Keep white labels */
     font-size: 14px;
+  }
+}
+
+/* Responsive icon sizing for different screens */
+@media (max-width: 1440px) {
+  .info-icon {
+    max-width: 50px;
+  }
+
+  .info-box {
+    width: 90%;
+    max-width: 700px;
+    left: 0;
+    margin: 30px auto;
+  }
+}
+
+@media (max-width: 1024px) {
+  .info-icon {
+    max-width: 45px;
+  }
+
+  .info-box {
+    width: 85%;
+    max-width: 600px;
+    padding: 25px 30px;
   }
 }
