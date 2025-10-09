@@ -265,12 +265,13 @@ export default function Navbar() {
             </a>
           </li>
           <li>
-            <a
-              href="https://zipdrive.in/support.html"
+            <NavLink
+              to="/support"
+              className={({ isActive }) => (isActive ? "active" : "")}
               onClick={() => setNavOpen(false)}
             >
               Support
-            </a>
+            </NavLink>
           </li>
         </ul>
 

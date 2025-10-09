@@ -220,12 +220,9 @@ export default function Home() {
           >
             Community
           </a>
-          <a
-            href="https://zipdrive.in/support.html"
-            onClick={() => setIsNavOpen(false)}
-          >
+          <Link to="/support" onClick={() => setIsNavOpen(false)}>
             Support
-          </a>
+          </Link>
 
           {!user ? (
             <a

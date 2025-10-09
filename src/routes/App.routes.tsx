@@ -16,6 +16,7 @@ import ManageSupport from "../pages/admin/manageSupport/manageSupport";
 import AdminRoute from "../components/AdminRoute/AdminRoute"; // Make sure path is correct
 import MyDocumentsPage from "../pages/MyDocuments/MyDocuments";
 import BookACar from "../pages/BookACar/BookACar";
+import Support from "../pages/support/support";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -28,6 +29,7 @@ const AppRoutes = () => (
       <Route path="/car-details/:id" element={<CarDetails />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/my-documents" element={<MyDocumentsPage />} />
+      <Route path="/support" element={<Support />} />
       <Route path="/bookAcar" element={<BookACar />} />
       <Route
         path="/admin/manage-cars"

@@ -246,7 +246,6 @@ const BookACar: React.FC = () => {
             {/* Drop-off Location input and map icon if differentDrop is true */}
             {differentDrop && (
               <div style={{ marginTop: "1rem" }}>
-                <label>Drop-off Location</label>
                 <div style={{ display: "flex", alignItems: "center" }}>
                   <input
                     type="text"
