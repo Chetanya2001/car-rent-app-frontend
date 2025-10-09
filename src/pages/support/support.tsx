@@ -1,11 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import {
   sendSupportMessage,
   type SupportFormData,
 } from "../../services/support";
-import LocationPicker from "../../components/Map/LocationPicker";
+import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import L from "leaflet";
+import markerIconPng from "leaflet/dist/images/marker-icon.png";
+import markerShadowPng from "leaflet/dist/images/marker-shadow.png";
 import "./support.css";
+
+// Fix Leaflet marker icon issue
+const DefaultIcon = L.icon({
+  iconUrl: markerIconPng,
+  shadowUrl: markerShadowPng,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+L.Marker.prototype.options.icon = DefaultIcon;
 
 export default function Support() {
   const [form, setForm] = useState<SupportFormData>({
@@ -15,31 +29,68 @@ export default function Support() {
     message: "",
   });
 
+  // Fixed location LatLng
+  const fixedPosition = { lat: 28.557016, lng: 77.32624 };
+
   const [location, setLocation] = useState({
     city: "",
     state: "",
     country: "",
-    lat: null as number | null,
-    lng: null as number | null,
+    lat: fixedPosition.lat,
+    lng: fixedPosition.lng,
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // Update form state on inputs
+  // Use LocationIQ token from .env
+  const LOCATIONIQ_KEY = import.meta.env.VITE_LOCATIONIQ_TOKEN;
+
+  // Fetch address from coordinates on mount
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const res = await fetch(
+          `https://us1.locationiq.com/v1/reverse?key=${LOCATIONIQ_KEY}&lat=${fixedPosition.lat}&lon=${fixedPosition.lng}&format=json`
+        );
+        const data = await res.json();
+
+        const addr = {
+          city:
+            data.address.city ||
+            data.address.town ||
+            data.address.village ||
+            data.address.hamlet ||
+            "",
+          state: data.address.state || "",
+          country: data.address.country || "",
+          lat: fixedPosition.lat,
+          lng: fixedPosition.lng,
+        };
+        setLocation(addr);
+      } catch (err) {
+        console.error("Error fetching address:", err);
+        setLocation({
+          city: "",
+          state: "",
+          country: "",
+          lat: fixedPosition.lat,
+          lng: fixedPosition.lng,
+        });
+      }
+    };
+    fetchAddress();
+  }, []);
+
+  // Update form state on input change
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // On location selection from map
-  const handleLocationSelect = (loc: typeof location) => {
-    setLocation(loc);
-  };
-
-  // On form submit, send support message with location appended to message
+  // On form submit, append location details to message and send
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -48,7 +99,6 @@ export default function Support() {
     setSuccessMsg(null);
 
     try {
-      // Append location details to message body if available
       const locationStr =
         location.city || location.state || location.country
           ? `\n\nLocation:\nCity: ${location.city}\nState: ${location.state}\nCountry: ${location.country}`
@@ -60,7 +110,6 @@ export default function Support() {
       });
       setSuccessMsg(response.message);
       setForm({ name: "", email: "", subject: "", message: "" });
-      setLocation({ city: "", state: "", country: "", lat: null, lng: null });
     } catch (err: any) {
       setError(err.message || "Failed to send message");
     } finally {
@@ -144,13 +193,27 @@ export default function Support() {
               </button>
             </div>
 
+            {/* Fixed Location Map */}
             <div style={{ marginTop: "24px" }}>
-              {/* Insert LocationPicker below form inputs */}
-              <LocationPicker onSelect={handleLocationSelect} />
+              <MapContainer
+                center={fixedPosition}
+                zoom={13}
+                style={{ height: "400px", width: "100%" }}
+                dragging={false}
+                zoomControl={false}
+                doubleClickZoom={false}
+                scrollWheelZoom={false}
+                keyboard={false}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                />
+                <Marker position={fixedPosition} />
+              </MapContainer>
 
-              {/* Display selected address below map */}
-              {(location.city || location.state || location.country) && (
-                <p className="selected-location">
+              {location.city && (
+                <p style={{ marginTop: "10px" }}>
                   <strong>Selected Location:</strong> {location.city},{" "}
                   {location.state}, {location.country}
                 </p>
