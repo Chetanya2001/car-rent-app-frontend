@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Navbar from "../../components/Navbar/Navbar";
-import "./Support.css";
+import "./support.css";
 // Add your CSS according to your design system
 
 export default function Support() {
