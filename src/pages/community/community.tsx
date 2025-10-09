@@ -3,7 +3,7 @@ import Navbar from "../../components/Navbar/Navbar";
 import "./community.css";
 
 // Import images to fix display issue
-import smartTransportationImg from "../../assets/smart-transportation.png";
+import smartTransportationImg from "../../assets/image.png";
 
 type CommunityPost = {
   id: number;
