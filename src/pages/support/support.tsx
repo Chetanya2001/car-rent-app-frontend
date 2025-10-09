@@ -29,7 +29,6 @@ export default function Support() {
     message: "",
   });
 
-  // Fixed location LatLng
   const fixedPosition = { lat: 28.557016, lng: 77.32624 };
 
   const [location, setLocation] = useState({
@@ -44,10 +43,8 @@ export default function Support() {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // Use LocationIQ token from .env
   const LOCATIONIQ_KEY = import.meta.env.VITE_LOCATIONIQ_TOKEN;
 
-  // Fetch address from coordinates on mount
   useEffect(() => {
     const fetchAddress = async () => {
       try {
@@ -69,8 +66,7 @@ export default function Support() {
           lng: fixedPosition.lng,
         };
         setLocation(addr);
-      } catch (err) {
-        console.error("Error fetching address:", err);
+      } catch {
         setLocation({
           city: "",
           state: "",
@@ -83,14 +79,12 @@ export default function Support() {
     fetchAddress();
   }, []);
 
-  // Update form state on input change
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // On form submit, append location details to message and send
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -99,14 +93,14 @@ export default function Support() {
     setSuccessMsg(null);
 
     try {
-      const locationStr =
+      const locationDetails =
         location.city || location.state || location.country
           ? `\n\nLocation:\nCity: ${location.city}\nState: ${location.state}\nCountry: ${location.country}`
           : "";
 
       const response = await sendSupportMessage({
         ...form,
-        message: form.message + locationStr,
+        message: form.message + locationDetails,
       });
       setSuccessMsg(response.message);
       setForm({ name: "", email: "", subject: "", message: "" });
@@ -192,34 +186,34 @@ export default function Support() {
                 {loading ? "Sending..." : "Send Message"}
               </button>
             </div>
-
-            {/* Fixed Location Map */}
-            <div style={{ marginTop: "24px" }}>
-              <MapContainer
-                center={fixedPosition}
-                zoom={13}
-                style={{ height: "600px", width: "100%" }} // increased height for big map
-                dragging={true} // enable dragging
-                zoomControl={true} // enable zoom control UI
-                doubleClickZoom={true} // enable zoom by double click
-                scrollWheelZoom={true} // enable zoom by scroll
-                keyboard={true} // enable keyboard navigation
-              >
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                />
-                <Marker position={fixedPosition} />
-              </MapContainer>
-
-              {location.city && (
-                <p style={{ marginTop: "10px" }}>
-                  <strong>Selected Location:</strong> {location.city},{" "}
-                  {location.state}, {location.country}
-                </p>
-              )}
-            </div>
           </form>
+        </div>
+
+        {/* Map as a separate block below */}
+        <div className="support-map-container">
+          <MapContainer
+            center={fixedPosition}
+            zoom={13}
+            style={{ height: "600px", width: "100%" }}
+            dragging={true}
+            zoomControl={true}
+            doubleClickZoom={true}
+            scrollWheelZoom={true}
+            keyboard={true}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            />
+            <Marker position={fixedPosition} />
+          </MapContainer>
+
+          {location.city && (
+            <p className="selected-location">
+              <strong>Selected Location:</strong> {location.city},{" "}
+              {location.state}, {location.country}
+            </p>
+          )}
         </div>
       </div>
     </>
