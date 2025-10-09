@@ -214,12 +214,9 @@ export default function Home() {
           <Link to="/cars" onClick={() => setIsNavOpen(false)}>
             Cars
           </Link>
-          <a
-            href="https://zipdrive.in/community.html"
-            onClick={() => setIsNavOpen(false)}
-          >
+          <Link to="/community" onClick={() => setIsNavOpen(false)}>
             Community
-          </a>
+          </Link>
           <Link to="/support" onClick={() => setIsNavOpen(false)}>
             Support
           </Link>

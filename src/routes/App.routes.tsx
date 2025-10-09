@@ -17,6 +17,7 @@ import AdminRoute from "../components/AdminRoute/AdminRoute"; // Make sure path 
 import MyDocumentsPage from "../pages/MyDocuments/MyDocuments";
 import BookACar from "../pages/BookACar/BookACar";
 import Support from "../pages/support/support";
+import Community from "../pages/community/community";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -30,6 +31,7 @@ const AppRoutes = () => (
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/my-documents" element={<MyDocumentsPage />} />
       <Route path="/support" element={<Support />} />
+      <Route path="/community" element={<Community />} />
       <Route path="/bookAcar" element={<BookACar />} />
       <Route
         path="/admin/manage-cars"

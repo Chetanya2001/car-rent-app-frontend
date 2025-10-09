@@ -257,12 +257,13 @@ export default function Navbar() {
             </NavLink>
           </li>
           <li>
-            <a
-              href="https://zipdrive.in/community.html"
+            <NavLink
+              to="/community"
+              className={({ isActive }) => (isActive ? "active" : "")}
               onClick={() => setNavOpen(false)}
             >
               Community
-            </a>
+            </NavLink>
           </li>
           <li>
             <NavLink
