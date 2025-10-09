@@ -11,13 +11,13 @@ type CommunityPost = {
   title: string;
   excerpt: string;
   buttonText?: string;
-  onClick?: () => void;
+  link: string; // added link field
 };
 
 const posts: CommunityPost[] = [
   {
     id: 1,
-    image: "../../assets/user.png",
+    image: "../../assets/smart-transportation.png",
     date: "Dec. 29, 2024",
     author: "Admin",
     comments: 3,
@@ -25,10 +25,11 @@ const posts: CommunityPost[] = [
     excerpt:
       "A good amount of planning and attention is required before renting a self driven car anywhere in the world. In India, it gets all the more important.",
     buttonText: "Continue ➡",
+    link: "/tips-to-rent-a-self-drive-car", // example internal link or path
   },
   {
     id: 2,
-    image: "../../assets/user.png",
+    image: "../../assets/smart-transportation.png",
     date: "Jan. 29, 2025",
     author: "Admin",
     comments: 3,
@@ -36,10 +37,11 @@ const posts: CommunityPost[] = [
     excerpt:
       "Here you find a checklist in printable format. It is a good idea to adhere to this checklist before taking over a rental car.",
     buttonText: "Continue ➡",
+    link: "/checklist-self-drive",
   },
   {
     id: 3,
-    image: "../../assets/user.png",
+    image: "../../assets/smart-transportation.png",
     date: "Dec. 12, 2024",
     author: "Travel Triangle",
     comments: 3,
@@ -47,10 +49,15 @@ const posts: CommunityPost[] = [
     excerpt:
       "Road trips are perhaps the best way to satiate your craving for adventure and escape monotony. Here’s a list of popular road trips in India that you strongly need to take in order to get a break from monotony.",
     buttonText: "Continue ➡",
+    link: "/self-drive-routes",
   },
 ];
 
 export default function Community() {
+  const handleContinue = (link: string) => {
+    window.location.href = link; // navigates in same tab
+  };
+
   return (
     <>
       <Navbar />
@@ -73,7 +80,7 @@ export default function Community() {
             <p className="community-excerpt">{post.excerpt}</p>
             <button
               className="community-btn"
-              onClick={post.onClick}
+              onClick={() => handleContinue(post.link)}
               style={{ marginTop: "16px" }}
             >
               {post.buttonText || "Continue"}
