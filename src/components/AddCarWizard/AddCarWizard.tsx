@@ -8,7 +8,8 @@ import Step6Availability from "./Step6Availability";
 import Navbar from "../Navbar/Navbar";
 import "./AddCarWizard.css";
 import type { CarFormData } from "../../types/Cars";
-import { addCar } from "../../services/carService"; // ✅ Make sure you have this API service
+import { addCar } from "../../services/carService";
+import { useNavigate } from "react-router-dom";
 
 interface AddCarWizardProps {
   onClose?: () => void; // optional since Navbar may handle navigation
@@ -24,6 +25,7 @@ const steps = [
 ];
 
 export default function AddCarWizard({ onClose }: AddCarWizardProps) {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<CarFormData>({});
   const [carId, setCarId] = useState<number | null>(null);
@@ -63,7 +65,9 @@ export default function AddCarWizard({ onClose }: AddCarWizardProps) {
   const handleSubmit = () => {
     console.log("Final Data:", { carId, ...formData });
     alert(`Car Added Successfully ✅ (Car ID: ${carId})`);
+
     if (onClose) onClose();
+    navigate("/my-cars");
   };
 
   return (
