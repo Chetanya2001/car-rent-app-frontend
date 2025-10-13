@@ -18,7 +18,6 @@ export default function MyCars() {
           console.error("Invalid response from backend:", data);
           setCars([]);
         } else {
-          // Ensure photos array exists and sanitize image URLs
           const processedCars = data.cars.map((car: any) => ({
             ...car,
             photos: Array.isArray(car.photos) ? car.photos : [],
@@ -62,7 +61,6 @@ export default function MyCars() {
             </div>
           ) : (
             cars.map((car) => {
-              // Safely extract first image
               const mainImage =
                 car.photos && car.photos.length > 0 ? car.photos[0] : "";
 
