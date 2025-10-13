@@ -22,11 +22,18 @@ export default function Register({
     role: "guest",
   });
 
+  // State to hold error message
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error message on input change
+    if (errorMessage) {
+      setErrorMessage("");
+    }
   };
 
   const handleRoleToggle = () => {
@@ -40,9 +47,16 @@ export default function Register({
     e.preventDefault();
     try {
       await registerUser(formData);
-      onRegisterSuccess(); // <--- triggers showing login with remark
+      setErrorMessage("");
+      onRegisterSuccess(); // triggers showing login with remark
     } catch (error: any) {
       console.error("Error registering user:", error.message);
+      // Show error message from API if available
+      if (error.message) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("Registration failed. Please try again.");
+      }
     }
   };
 
@@ -109,12 +123,21 @@ export default function Register({
                 <input
                   type="email"
                   name="email"
-                  className="form-control"
+                  className={`form-control ${errorMessage ? "is-invalid" : ""}`}
                   placeholder="Email"
                   value={formData.email}
                   onChange={handleChange}
                   required
                 />
+                {/* Display error message near email input */}
+                {errorMessage && (
+                  <div
+                    className="invalid-feedback"
+                    style={{ display: "block" }}
+                  >
+                    {errorMessage}
+                  </div>
+                )}
               </div>
               <div>
                 <label className="form-label small fw-semibold text-secondary">
