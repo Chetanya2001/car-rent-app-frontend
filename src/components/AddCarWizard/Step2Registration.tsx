@@ -109,7 +109,9 @@ export default function Step2Registration({
         <option value="">Select City</option>
         <option value="Delhi">Delhi</option>
         <option value="Agra">Agra</option>
-        <option value="Mumbai">Mumbai</option>
+        <option value="Noida">Noida</option>
+        <option value="Meerat">Meerat</option>
+        <option value="Gurgoan">Gurgoan</option>
       </select>
       <label className="block mb-2">RC Valid Till</label>
       <input
