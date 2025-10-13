@@ -24,9 +24,9 @@ const BookACar: React.FC = () => {
   // Car details state
   const [car, setCar] = useState<CarDetailsType | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Trip details state - initialize from bookingDetails or defaults
   const now = new Date();
+  now.setHours(now.getHours() + 2); // Add 2 hours
+
   const pad = (num: string | number) => (Number(num) < 10 ? "0" + num : num);
   const currentDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
     now.getDate()

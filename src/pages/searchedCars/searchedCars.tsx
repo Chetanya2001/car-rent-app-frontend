@@ -37,11 +37,11 @@ export default function SearchedCars() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Current date and time (IST): 2025-10-08 14:59
-  const now = new Date(2025, 9, 8, 14, 59); // JS months are 0-based
+  const now = new Date();
+  now.setHours(now.getHours() + 2);
 
-  // Get default pickup (today now) and dropoff (tomorrow same time)
   const { date: todayDate, time: nowTime } = getDateAndTime(now);
+
   const dropDefault = new Date(now.getTime() + 24 * 60 * 60 * 1000);
   const { date: tomorrowDate, time: dropTime } = getDateAndTime(dropDefault);
 

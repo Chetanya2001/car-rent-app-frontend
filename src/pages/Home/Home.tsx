@@ -139,6 +139,7 @@ export default function Home() {
 
     // ✅ set default current time for pickup & drop
     const now = new Date();
+    now.setHours(now.getHours() + 2);
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
     const currentTime = `${hours}:${minutes}`;

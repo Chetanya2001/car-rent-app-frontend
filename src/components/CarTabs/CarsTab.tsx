@@ -76,7 +76,7 @@ const CarTabs: React.FC<Props> = ({ car }) => {
         )}
 
         {activeTab === "review" && (
-          <p className="tab-description">Review is underdevelopment</p>
+          <p className="tab-description">No reviews yet</p>
         )}
       </div>
     </div>
