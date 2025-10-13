@@ -143,8 +143,9 @@ const BookACar: React.FC = () => {
             onClick={() => navigate(-1)}
             aria-label="Go back"
           >
-            &#8592; Back
+            &#8592;
           </button>
+
           <div className="breadcrumb">
             {car.make} {car.model}
           </div>

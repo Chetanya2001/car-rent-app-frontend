@@ -170,21 +170,24 @@
   margin: 0;
 }
 .back-button {
-  background: none;
+  background-color: #007bff; /* blue background */
   border: none;
-  color: #007bff;
+  color: white;
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 1.25rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%; /* circle shape */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 0;
   margin-bottom: 0.75rem;
-  display: inline-flex;
-  align-items: center;
-  transition: color 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .back-button:hover {
-  color: #0056b3;
+  background-color: #0056b3; /* darker blue on hover */
 }
 
 /* Toggle Switch */
