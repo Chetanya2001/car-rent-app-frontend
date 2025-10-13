@@ -138,6 +138,13 @@ const BookACar: React.FC = () => {
       <div className="book-car-container">
         {/* Left Section: Car Details */}
         <div className="car-details-section">
+          <button
+            className="back-button"
+            onClick={() => navigate(-1)}
+            aria-label="Go back"
+          >
+            &#8592; Back
+          </button>
           <div className="breadcrumb">
             {car.make} {car.model}
           </div>
