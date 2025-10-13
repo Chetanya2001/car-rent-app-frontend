@@ -6,6 +6,7 @@ import { getCarDetails } from "../../services/carDetails";
 import CarTabs from "../../components/CarTabs/CarsTab";
 import ChargesCard from "../../components/ChargesCard/ChargesCard";
 import Footer from "../../components/Footer/Footer";
+import Navbar from "../../components/Navbar/Navbar";
 
 interface LocationState {
   pickup_datetime: string;
@@ -100,6 +101,7 @@ const CarDetails: React.FC = () => {
 
   return (
     <>
+      <Navbar />
       <div className="car-details-page">
         {/* Hero Section */}
         <div
