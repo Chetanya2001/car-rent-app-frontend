@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import logo from "../../assets/logo.png";
 import defaultAvatar from "../../assets/user.png";
 import "./Navbar.css";
@@ -73,23 +73,21 @@ export default function Navbar() {
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null
   );
-  const [showMenu, setShowMenu] = useState(false); // profile dropdown
-  const [navOpen, setNavOpen] = useState(false); // hamburger nav links
+  const [remark, setRemark] = useState(""); // <--- Add remark state here
+  const [showMenu, setShowMenu] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
   const profileMenuRef = useRef<HTMLUListElement | null>(null);
   const hamburgerRef = useRef<HTMLDivElement | null>(null);
   const navMenuRef = useRef<HTMLUListElement | null>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      // Close profile dropdown
       if (
         profileMenuRef.current &&
         !profileMenuRef.current.contains(event.target as Node)
       ) {
         setShowMenu(false);
       }
-
-      // Close hamburger nav
       if (
         hamburgerRef.current &&
         !hamburgerRef.current.contains(event.target as Node) &&
@@ -99,7 +97,6 @@ export default function Navbar() {
         setNavOpen(false);
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -140,6 +137,7 @@ export default function Navbar() {
         console.error("Invalid token after login", err);
       }
     }
+    setRemark(""); // Clear remark on login success
     setActiveModal(null);
   };
 
@@ -323,18 +321,38 @@ export default function Navbar() {
 
       {/* Login/Register Modal */}
       {activeModal && (
-        <ModalWrapper onClose={() => setActiveModal(null)}>
+        <ModalWrapper
+          onClose={() => {
+            setActiveModal(null);
+            setRemark("");
+          }}
+        >
           {activeModal === "login" ? (
             <Login
-              onClose={() => setActiveModal(null)}
-              onSwitch={() => setActiveModal("register")}
+              onClose={() => {
+                setActiveModal(null);
+                setRemark("");
+              }}
+              onSwitch={() => {
+                setActiveModal("register");
+                setRemark("");
+              }}
               onLoginSuccess={handleUserLogin}
+              remark={remark} // <--- Pass remark prop here
             />
           ) : (
             <Register
               onClose={() => setActiveModal(null)}
-              onSwitch={() => setActiveModal("login")}
-              onRegisterSuccess={handleUserLogin}
+              onSwitch={() => {
+                setActiveModal("login");
+                setRemark("");
+              }}
+              onRegisterSuccess={() => {
+                setRemark(
+                  "Verification sent to your email/ phone no. Complete the verification to enable the login"
+                );
+                setActiveModal("login");
+              }}
             />
           )}
         </ModalWrapper>

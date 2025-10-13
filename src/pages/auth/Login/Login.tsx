@@ -9,6 +9,7 @@ interface LoginProps {
   onClose: () => void;
   onSwitch: () => void;
   onLoginSuccess: (userData: User) => void;
+  remark?: string; // <--- prop to show verification message
 }
 
 interface JwtPayload {
@@ -23,6 +24,7 @@ export default function Login({
   onClose,
   onSwitch,
   onLoginSuccess,
+  remark,
 }: LoginProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,34 +34,25 @@ export default function Login({
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
     try {
-      // Call backend login API
       const res = await loginUser({ email, password });
       const token = res.token;
-
       if (!token) throw new Error("No token returned from server");
-
-      // Store token in localStorage
       localStorage.setItem("token", token);
 
-      // Decode JWT to get user info
       const decoded: JwtPayload = jwtDecode(token);
-
       const userData: User = {
         id: decoded.id,
         email: decoded.email,
         role: decoded.role,
         token,
       };
-
       localStorage.setItem("user", JSON.stringify(userData));
       onLoginSuccess(userData);
 
       if (decoded.role === "admin") navigate("/admin/manage-cars");
-      else if (decoded.role === "host") navigate("/");
-      else if (decoded.role === "guest") navigate("/");
-
+      else if (decoded.role === "host" || decoded.role === "guest")
+        navigate("/");
       onClose();
     } catch (err: any) {
       console.error("Login error:", err);
@@ -85,6 +78,11 @@ export default function Login({
               Please enter your details to sign in.
             </p>
 
+            {/* Show verification remark if present */}
+            {remark && (
+              <div className="alert alert-info w-100 mb-3 small">{remark}</div>
+            )}
+
             <form className="d-flex flex-column gap-3" onSubmit={handleLogin}>
               <div>
                 <label
@@ -103,7 +101,6 @@ export default function Login({
                   required
                 />
               </div>
-
               <div>
                 <label
                   htmlFor="password"
@@ -121,15 +118,12 @@ export default function Login({
                   required
                 />
               </div>
-
               {error && (
                 <div className="alert alert-danger py-2 small">{error}</div>
               )}
-
               <button type="submit" className="btn btn-primary w-100">
                 Sign in
               </button>
-
               <p className="text-center text-muted mt-2 mb-0 small">
                 Don’t have an account?{" "}
                 <button
@@ -142,7 +136,6 @@ export default function Login({
               </p>
             </form>
           </div>
-
           {/* Right side: Image */}
           <div className="col-md-6 d-none d-md-block position-relative">
             <img

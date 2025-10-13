@@ -40,6 +40,8 @@ export default function Home() {
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null
   );
+  const [remark, setRemark] = useState(""); // Info message for the login modal
+
   const [user, setUser] = useState<{ name?: string; avatar?: string } | null>(
     null
   );
@@ -344,14 +346,26 @@ export default function Home() {
 
       {/* Modal */}
       {activeModal && (
-        <ModalWrapper onClose={() => setActiveModal(null)}>
+        <ModalWrapper
+          onClose={() => {
+            setActiveModal(null);
+            setRemark("");
+          }}
+        >
           {activeModal === "login" ? (
             <Login
-              onClose={() => setActiveModal(null)}
-              onSwitch={() => setActiveModal("register")}
+              onClose={() => {
+                setActiveModal(null);
+                setRemark("");
+              }}
+              onSwitch={() => {
+                setActiveModal("register");
+                setRemark("");
+              }}
               onLoginSuccess={(userData) => {
                 setUser(userData);
                 setActiveModal(null);
+                setRemark("");
                 const token = localStorage.getItem("token");
                 if (token) {
                   try {
@@ -362,23 +376,21 @@ export default function Home() {
                   }
                 }
               }}
+              remark={remark} // Pass the verification message here
             />
           ) : (
             <Register
               onClose={() => setActiveModal(null)}
-              onSwitch={() => setActiveModal("login")}
-              onRegisterSuccess={(userData) => {
-                setUser(userData);
-                setActiveModal(null);
-                const token = localStorage.getItem("token");
-                if (token) {
-                  try {
-                    const decoded = jwtDecode<TokenPayload>(token);
-                    setRole(decoded.role);
-                  } catch {
-                    console.error("Invalid token after register");
-                  }
-                }
+              onSwitch={() => {
+                setActiveModal("login");
+                setRemark("");
+              }}
+              onRegisterSuccess={() => {
+                // Set verification message and open login modal
+                setRemark(
+                  "Verification link sent to your email/phone. Complete the verification to enable login"
+                );
+                setActiveModal("login");
               }}
             />
           )}
