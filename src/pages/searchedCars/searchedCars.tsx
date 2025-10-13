@@ -74,7 +74,7 @@ export default function SearchedCars() {
   };
 
   // Separate handler for dropCity input to avoid mixing into filters
-  const handleDropCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDropCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setDropCity(e.target.value);
   };
 
@@ -223,21 +223,27 @@ export default function SearchedCars() {
           </span>
         </label>
 
-        {/* Conditionally show dropCity input and map icon */}
         {filters.differentDrop && (
           <label>
             Drop-off Location:
             <div style={{ display: "flex", alignItems: "center" }}>
-              <input
-                name="dropCity"
+              <select
                 value={dropCity}
                 onChange={handleDropCityChange}
-                placeholder="Drop-off City"
-                autoComplete="off"
-              />
+                style={{ flexGrow: 1, padding: "6px", fontSize: "1rem" }}
+              >
+                <option value="" disabled>
+                  Select Drop-off City
+                </option>
+                <option value="Noida">Noida</option>
+                <option value="Gurgaon">Gurgaon</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Agra">Agra</option>
+                <option value="Meerut">Meerut</option>
+              </select>
               <FontAwesomeIcon
                 icon={faMapMarkerAlt}
-                style={{ marginLeft: 8, cursor: "pointer" }}
+                style={{ marginLeft: "8px", cursor: "pointer" }}
                 onClick={() => setShowDropMap(true)}
               />
             </div>

@@ -501,17 +501,24 @@ export default function Home() {
               <span className="slider round"></span>
             </label>
           </div>
-
           {differentDrop && (
             <>
               <label>Drop-off Location</label>
               <div style={{ display: "flex", alignItems: "center" }}>
-                <input
-                  type="text"
-                  placeholder="Drop-off City"
+                <select
                   value={dropCity}
                   onChange={(e) => setDropCity(e.target.value)}
-                />
+                  style={{ flexGrow: 1, padding: "6px", fontSize: "1rem" }}
+                >
+                  <option value="" disabled>
+                    Select Drop-off City
+                  </option>
+                  <option value="Noida">Noida</option>
+                  <option value="Gurgaon">Gurgaon</option>
+                  <option value="Delhi">Delhi</option>
+                  <option value="Agra">Agra</option>
+                  <option value="Meerut">Meerut</option>
+                </select>
                 <FontAwesomeIcon
                   icon={faMapMarkerAlt}
                   style={{ marginLeft: "8px", cursor: "pointer" }}

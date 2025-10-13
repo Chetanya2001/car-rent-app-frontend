@@ -114,9 +114,6 @@ const BookACar: React.FC = () => {
     setCurrentImageIndex((i) => (i - 1 + photos.length) % photos.length);
 
   // Handler for dropCity input change
-  const handleDropCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDropCity(e.target.value);
-  };
 
   if (loading)
     return (
@@ -247,13 +244,23 @@ const BookACar: React.FC = () => {
             {differentDrop && (
               <div style={{ marginTop: "1rem" }}>
                 <div style={{ display: "flex", alignItems: "center" }}>
-                  <input
-                    type="text"
+                  <select
                     value={dropCity}
-                    onChange={handleDropCityChange}
-                    placeholder="Drop-off City"
-                    style={{ flex: 1 }}
-                  />
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                      setDropCity(e.target.value)
+                    }
+                    style={{ flex: 1, padding: "6px", fontSize: "1rem" }}
+                    title="Select drop-off city"
+                  >
+                    <option value="" disabled>
+                      Select Drop-off City
+                    </option>
+                    <option value="Noida">Noida</option>
+                    <option value="Gurgaon">Gurgaon</option>
+                    <option value="Delhi">Delhi</option>
+                    <option value="Agra">Agra</option>
+                    <option value="Meerut">Meerut</option>
+                  </select>
                   <FontAwesomeIcon
                     icon={faMapMarkerAlt}
                     style={{ marginLeft: 8, cursor: "pointer" }}
