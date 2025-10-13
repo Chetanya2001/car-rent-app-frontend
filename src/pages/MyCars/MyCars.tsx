@@ -114,7 +114,7 @@ export default function MyCars() {
                         <span className="detail-label">Price</span>
                         <span className="detail-value price">
                           {car.price_per_hour
-                            ? `${car.price_per_hour}/hr`
+                            ? `₹${car.price_per_hour} / hr`
                             : "Not set"}
                         </span>
                       </div>
