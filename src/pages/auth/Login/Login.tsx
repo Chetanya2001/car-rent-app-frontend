@@ -50,9 +50,14 @@ export default function Login({
       localStorage.setItem("user", JSON.stringify(userData));
       onLoginSuccess(userData);
 
-      if (decoded.role === "admin") navigate("/admin/manage-cars");
-      else if (decoded.role === "host" || decoded.role === "guest")
-        navigate("/");
+      if (decoded.role === "admin") {
+        navigate("/admin/manage-cars");
+      } else if (decoded.role === "host") {
+        navigate("/my-cars");
+      } else if (decoded.role === "guest") {
+        navigate("/bookAcar");
+      }
+
       onClose();
     } catch (err: any) {
       console.error("Login error:", err);
