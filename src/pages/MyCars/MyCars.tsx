@@ -13,15 +13,23 @@ export default function MyCars() {
     const fetchCars = async () => {
       try {
         const data = await getHostCars();
+        console.log("Fetched car data:", data); // ✅ console log to check data structure
 
         if (!Array.isArray(data.cars)) {
           console.error("Invalid response from backend:", data);
           setCars([]);
         } else {
+          // Clean and process each car object
           const processedCars = data.cars.map((car: any) => ({
             ...car,
             photos: Array.isArray(car.photos) ? car.photos : [],
+            // Remove any $ signs from price if backend sends as string
+            price_per_hour:
+              typeof car.price_per_hour === "string"
+                ? car.price_per_hour.replace(/\$/g, "")
+                : car.price_per_hour,
           }));
+
           setCars(processedCars);
         }
       } catch (err) {
