@@ -224,30 +224,27 @@ export default function SearchedCars() {
         </label>
 
         {filters.differentDrop && (
-          <label>
-            Drop-off Location:
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <select
-                value={dropCity}
-                onChange={handleDropCityChange}
-                style={{ flexGrow: 1, padding: "6px", fontSize: "1rem" }}
-              >
-                <option value="" disabled>
-                  Select Drop-off City
-                </option>
-                <option value="Noida">Noida</option>
-                <option value="Gurgaon">Gurgaon</option>
-                <option value="Delhi">Delhi</option>
-                <option value="Agra">Agra</option>
-                <option value="Meerut">Meerut</option>
-              </select>
-              <FontAwesomeIcon
-                icon={faMapMarkerAlt}
-                style={{ marginLeft: "8px", cursor: "pointer" }}
-                onClick={() => setShowDropMap(true)}
-              />
-            </div>
-          </label>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <select
+              value={dropCity}
+              onChange={handleDropCityChange}
+              style={{ flexGrow: 1, padding: "6px", fontSize: "1rem" }}
+            >
+              <option value="" disabled>
+                Select Drop-off City
+              </option>
+              <option value="Noida">Noida</option>
+              <option value="Gurgaon">Gurgaon</option>
+              <option value="Delhi">Delhi</option>
+              <option value="Agra">Agra</option>
+              <option value="Meerut">Meerut</option>
+            </select>
+            <FontAwesomeIcon
+              icon={faMapMarkerAlt}
+              style={{ marginLeft: "8px", cursor: "pointer" }}
+              onClick={() => setShowDropMap(true)}
+            />
+          </div>
         )}
 
         <button className="searched-search-btn" onClick={handleSearch}>

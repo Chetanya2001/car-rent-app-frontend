@@ -503,7 +503,6 @@ export default function Home() {
           </div>
           {differentDrop && (
             <>
-              <label>Drop-off Location</label>
               <div style={{ display: "flex", alignItems: "center" }}>
                 <select
                   value={dropCity}
