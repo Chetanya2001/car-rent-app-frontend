@@ -187,7 +187,7 @@ export default function Step4Features({
         <option value="EV">Electric</option>
       </select>
 
-      <label className="block mb-2 font-semibold">Mileage (Rs / km)</label>
+      <label className="block mb-2 font-semibold">Km / Litre</label>
       <input
         type="number"
         value={mileage}
