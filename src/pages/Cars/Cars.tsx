@@ -22,12 +22,9 @@ const Cars: React.FC = () => {
   }, []);
 
   const handleBookNowClick = (car: Car) => {
+    // Pass price per hour along with carId
     navigate("/bookAcar", {
-      state: {
-        carId: car.id,
-        pricePerHour: car.price,
-        location: car.location, // ✅ Added location
-      },
+      state: { carId: car.id, pricePerHour: car.price },
     });
   };
 
