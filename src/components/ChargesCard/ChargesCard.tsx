@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./ChargesCard.css";
 
 interface ChargesCardProps {
@@ -7,7 +7,7 @@ interface ChargesCardProps {
   driverCharges: number;
   pickDropCharges: number;
   gst: number;
-  carLocation?: string; // ✅ Only location
+  carLocation?: string;
   onPay: () => void;
 }
 
@@ -22,8 +22,9 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
 }) => {
   const totalCost =
     carCharges + insuranceCharges + driverCharges + pickDropCharges + gst;
+  const [isAgreed, setIsAgreed] = useState(false);
 
-  // ✅ Debugging log
+  // 🔎 Debug log
   console.log("👉 ChargesCard props:", {
     carCharges,
     insuranceCharges,
@@ -51,14 +52,6 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
           <span className="icon">🤝</span>
           <span>You have a valid license and documents to drive.</span>
         </div>
-
-        <div className="detail-item">
-          <span className="icon">🚗</span>
-          <span>
-            You agree to key terms and conditions including the cancellation
-            policy.
-          </span>
-        </div>
       </div>
 
       <div className="charges-card">
@@ -84,7 +77,39 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
           <span>TOTAL COST:</span> <span>INR {totalCost}</span>
         </div>
 
-        <button className="pay-btn" onClick={onPay}>
+        {/* Checkbox before agreement text */}
+        <div className="terms-agree" style={{ margin: "16px 0" }}>
+          <input
+            type="checkbox"
+            id="termsAgree"
+            checked={isAgreed}
+            onChange={(e) => setIsAgreed(e.target.checked)}
+            style={{ marginRight: 8 }}
+          />
+          <label htmlFor="termsAgree">
+            You agree to{" "}
+            <a
+              href="https://www.zipdrive.in/tnc-guest.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textDecoration: "underline" }}
+            >
+              terms & conditions
+            </a>
+            {", including the cancellation policy."}
+          </label>
+        </div>
+
+        <button
+          className="pay-btn"
+          onClick={onPay}
+          disabled={!isAgreed}
+          style={{
+            opacity: isAgreed ? 1 : 0.6,
+            cursor: isAgreed ? "pointer" : "not-allowed",
+            transition: "opacity 0.2s",
+          }}
+        >
           Pay Now
         </button>
       </div>
