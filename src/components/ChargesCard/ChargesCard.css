@@ -169,7 +169,7 @@
 }
 .terms-agree label {
   color: #fff;
-  font-size: 16px;
+  font-size: 10px;
   cursor: pointer;
 }
 .terms-agree input[type="checkbox"] {
@@ -182,7 +182,7 @@
 .terms-agree a {
   color: #22c55e;
   text-decoration: underline;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 /* Tablet Styles (768px - 1024px) */

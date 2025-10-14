@@ -6,14 +6,9 @@ import {
   getUserDocumentsByUserId,
 } from "../../services/userDocuments";
 
-const idTypes: string[] = [
-  "Passport",
-  "Driver's License",
-  "National ID Card",
-  "Voter Card",
-  "PAN Card",
-  "Other",
-];
+// Only allow "Passport" or "Aadhar" for ID1 and only "Driver's License" for ID2
+const id1Types = ["Passport", "Aadhar"];
+const id2Types = ["Driver's License"];
 
 interface DocumentSectionProps {
   label: string;
@@ -25,6 +20,7 @@ interface DocumentSectionProps {
   setVerificationStatus?: React.Dispatch<React.SetStateAction<string>>;
   previewUrl?: string | null;
   onUploadSuccess?: () => void;
+  allowedTypes: string[];
 }
 
 function DocumentSection({
@@ -37,6 +33,7 @@ function DocumentSection({
   setVerificationStatus,
   previewUrl,
   onUploadSuccess,
+  allowedTypes,
 }: DocumentSectionProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +54,11 @@ function DocumentSection({
 
   const uploadDocument = async () => {
     if (!idType || !file) {
-      setError("Please select ID type and upload a file before submitting.");
+      setError(
+        `Please select a valid ${allowedTypes.join(
+          " or "
+        )} and upload a file before submitting.`
+      );
       return;
     }
     setLoading(true);
@@ -79,15 +80,23 @@ function DocumentSection({
   return (
     <div className="doc-block" style={{ flex: 1, minWidth: 280 }}>
       <h3>{label}</h3>
-      <label>ID Type</label>
+      <label>
+        {allowedTypes.length === 1
+          ? allowedTypes[0]
+          : allowedTypes.join(" or ")}
+      </label>
       <select
         value={idType}
         onChange={handleTypeChange}
         className="doc-dropdown"
         style={{ width: "100%", marginBottom: 8 }}
       >
-        <option value="">Select ID type</option>
-        {idTypes.map((type) => (
+        <option value="">
+          {allowedTypes.length === 1
+            ? `Select ${allowedTypes[0]}`
+            : `Select ${allowedTypes.join(" or ")}`}
+        </option>
+        {allowedTypes.map((type) => (
           <option key={type} value={type}>
             {type}
           </option>
@@ -132,7 +141,6 @@ function DocumentSection({
         </div>
       )}
 
-      {/* Upload or Reupload Section */}
       <div
         style={{
           border: "2px dashed #aaa",
@@ -156,7 +164,7 @@ function DocumentSection({
             marginBottom: "8px",
           }}
         >
-          {file ? "Change File" : previewUrl ? "Reupload Document" : "Browse"}
+          {file ? "Change File" : previewUrl ? "Reupload Document" : `Browse`}
         </label>
         <input
           type="file"
@@ -194,7 +202,7 @@ function DocumentSection({
             opacity: loading ? 0.6 : 1,
           }}
         >
-          {loading ? "Uploading..." : `Upload ${label}`}
+          {loading ? "Uploading..." : `Upload ${allowedTypes.join(" or ")}`}
         </button>
       </div>
 
@@ -355,7 +363,6 @@ export default function MyDocumentsPage() {
     try {
       const data = await getUserDocumentsByUserId(userToken);
       const docs = data.documents || [];
-
       if (docs[0]) {
         setId1Type(docs[0].doc_type);
         setId1Url(docs[0].image);
@@ -390,15 +397,14 @@ export default function MyDocumentsPage() {
       >
         <h2 style={{ fontWeight: "800" }}>Verify Your Identity</h2>
         <p style={{ marginBottom: "24px", color: "#555" }}>
-          Please upload your profile picture and 2 ID documents. If already
-          uploaded, you can preview and reupload new ones.
+          Please upload your profile picture, a Passport or Aadhar, and your
+          Driver's License. If already uploaded, you can preview and reupload
+          new ones.
         </p>
-
         <ProfilePicSection />
-
         <div style={{ display: "flex", gap: "28px", flexWrap: "wrap" }}>
           <DocumentSection
-            label="ID 1"
+            label="Upload Passport or Aadhar"
             idType={id1Type}
             setIdType={setId1Type}
             file={id1File}
@@ -407,9 +413,10 @@ export default function MyDocumentsPage() {
             setVerificationStatus={setId1Status}
             previewUrl={id1Url}
             onUploadSuccess={fetchDocuments}
+            allowedTypes={id1Types}
           />
           <DocumentSection
-            label="ID 2"
+            label="Upload Driver's License"
             idType={id2Type}
             setIdType={setId2Type}
             file={id2File}
@@ -418,6 +425,7 @@ export default function MyDocumentsPage() {
             setVerificationStatus={setId2Status}
             previewUrl={id2Url}
             onUploadSuccess={fetchDocuments}
+            allowedTypes={id2Types}
           />
         </div>
       </div>
