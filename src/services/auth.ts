@@ -53,3 +53,23 @@ export const getUserRole = (): "host" | "guest" | null => {
     return null;
   }
 };
+
+export const fetchUserProfile = async (token: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.data.success) {
+      return response.data.user;
+    } else {
+      throw new Error(response.data.message || "Failed to fetch profile");
+    }
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || error.message || "API error"
+    );
+  }
+};

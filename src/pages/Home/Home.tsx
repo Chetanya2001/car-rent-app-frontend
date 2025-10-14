@@ -30,6 +30,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import { searchCars } from "../../services/carService"; // ✅ Import API
+import { fetchUserProfile } from "../../services/auth";
 
 type TokenPayload = {
   role: "host" | "guest" | "admin";
@@ -85,6 +86,20 @@ export default function Home() {
     setShowMenu(false);
     navigate("/"); // Redirect on logout
   };
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetchUserProfile(token)
+        .then((userData) => {
+          setUser(userData);
+          if (userData.profile_pic) {
+            setProfilePicUrl(userData.profile_pic);
+            localStorage.setItem("profilePicUrl", userData.profile_pic); // optional, sync with localStorage
+          }
+        })
+        .catch((err) => console.error("Profile fetch error:", err));
+    }
+  }, []);
 
   const handleSearch = async () => {
     if (!city || !pickupDate || !dropDate) {

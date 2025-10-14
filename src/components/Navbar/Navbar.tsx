@@ -21,6 +21,7 @@ import {
   faFile,
 } from "@fortawesome/free-solid-svg-icons";
 import type { User } from "../../types/user";
+import { fetchUserProfile } from "../../services/auth";
 
 interface TokenPayload {
   role: "host" | "guest" | "admin";
@@ -69,7 +70,9 @@ const iconMap: Record<string, any> = {
   "My Documents": faFile,
 };
 
-export default function Navbar({ profilePicUrl }: NavbarProps) {
+export default function Navbar({
+  profilePicUrl: propProfilePicUrl,
+}: NavbarProps) {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<"host" | "guest" | "admin" | null>(null);
@@ -79,6 +82,9 @@ export default function Navbar({ profilePicUrl }: NavbarProps) {
   const [remark, setRemark] = useState(""); // <--- Add remark state here
   const [showMenu, setShowMenu] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
+  const [profilePicUrl, setProfilePicUrl] = useState<string | null>(
+    propProfilePicUrl ?? null
+  );
   const profileMenuRef = useRef<HTMLUListElement | null>(null);
   const hamburgerRef = useRef<HTMLDivElement | null>(null);
   const navMenuRef = useRef<HTMLUListElement | null>(null);
@@ -116,6 +122,33 @@ export default function Navbar({ profilePicUrl }: NavbarProps) {
         console.error("Invalid token", err);
       }
     }
+  }, []);
+  useEffect(() => {
+    // Function to fetch and set profile pic
+    const loadUserProfile = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const profile = await fetchUserProfile(token);
+        setUser(profile);
+        if (profile.profile_pic) {
+          setProfilePicUrl(profile.profile_pic);
+          // Optionally update localStorage for consistency
+          localStorage.setItem("profilePicUrl", profile.profile_pic);
+        } else {
+          setProfilePicUrl(null);
+        }
+
+        // Decode role from token
+        const decoded = jwtDecode<TokenPayload>(token);
+        setRole(decoded.role);
+      } catch (err) {
+        console.error("Failed to load user profile", err);
+      }
+    };
+
+    loadUserProfile();
   }, []);
 
   const handleLogout = () => {
