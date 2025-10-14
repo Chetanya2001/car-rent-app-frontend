@@ -130,10 +130,6 @@ const BookACar: React.FC = () => {
       </>
     );
 
-  // ✅ Car location from state (fallback to backend if needed)
-  const pickupLocation =
-    carLocation || car.documents?.location || "Location not available";
-
   return (
     <>
       <Navbar />
@@ -174,18 +170,6 @@ const BookACar: React.FC = () => {
           <div className="about-section-1">
             <h3>About this car</h3>
             <p>{car.description ?? "No description available."}</p>
-          </div>
-
-          {/* ✅ Car Pickup Location */}
-          <div className="car-location">
-            <h3>
-              <FontAwesomeIcon
-                icon={faMapMarkerAlt}
-                style={{ marginRight: 8, color: "#ff4757" }}
-              />
-              Car Pickup Location
-            </h3>
-            <p style={{ fontSize: "1.1rem" }}>{pickupLocation}</p>
           </div>
 
           {/* Trip Section */}
@@ -302,7 +286,7 @@ const BookACar: React.FC = () => {
             driverCharges={driverCharges}
             pickDropCharges={pickDropCharges}
             gst={gst}
-            carLocation={carLocation} // 🟢 Pass location to ChargesCard
+            carLocation={carLocation}
             onPay={() => alert("Proceeding to payment...")}
           />
         </div>
