@@ -31,7 +31,7 @@ export interface CarDetailsType {
   model: string;
   year: number;
   description: string | null;
-  location: string;
+  location?: string;
   features: CarFeatures;
   photos: CarPhoto[];
 }
