@@ -215,8 +215,10 @@ function DocumentSection({
     </div>
   );
 }
-
-function ProfilePicSection() {
+interface ProfilePicSectionProps {
+  setProfilePicUrl: React.Dispatch<React.SetStateAction<string | null>>;
+}
+function ProfilePicSection({ setProfilePicUrl }: ProfilePicSectionProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -245,6 +247,8 @@ function ProfilePicSection() {
     try {
       const res = await uploadProfilePicture(file, userToken);
       if (!res) throw new Error("Upload failed");
+      setProfilePicUrl(res.profile_pic);
+      localStorage.setItem("profilePicUrl", res.profile_pic);
       setMessage("✅ Profile picture uploaded successfully!");
     } catch (err: any) {
       setError(err.message || "Upload failed.");
@@ -347,6 +351,7 @@ function ProfilePicSection() {
 }
 
 export default function MyDocumentsPage() {
+  const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
   const [id1Type, setId1Type] = useState<string>("");
   const [id1File, setId1File] = useState<File | null>(null);
   const [id1Status, setId1Status] = useState<string>("Pending");
@@ -384,7 +389,7 @@ export default function MyDocumentsPage() {
 
   return (
     <>
-      <Navbar />
+      <Navbar profilePicUrl={profilePicUrl} />
       <div
         style={{
           maxWidth: "650px",
@@ -401,7 +406,7 @@ export default function MyDocumentsPage() {
           Driver's License. If already uploaded, you can preview and reupload
           new ones.
         </p>
-        <ProfilePicSection />
+        <ProfilePicSection setProfilePicUrl={setProfilePicUrl} />
         <div style={{ display: "flex", gap: "28px", flexWrap: "wrap" }}>
           <DocumentSection
             label="Upload Passport or Aadhar"

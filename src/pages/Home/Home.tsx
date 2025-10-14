@@ -40,6 +40,7 @@ export default function Home() {
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null
   );
+  const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
   const [remark, setRemark] = useState(""); // Info message for the login modal
 
   const [user, setUser] = useState<{ name?: string; avatar?: string } | null>(
@@ -66,7 +67,10 @@ export default function Home() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const showLogin = params.get("showLogin");
-
+    const storedProfilePic = localStorage.getItem("profilePicUrl");
+    if (storedProfilePic) {
+      setProfilePicUrl(storedProfilePic);
+    }
     if (showLogin === "true") {
       setActiveModal("login"); // opens login modal automatically
       // Clean the URL so it doesn't stay in address bar
@@ -242,12 +246,13 @@ export default function Home() {
               onClick={() => setShowMenu((prev) => !prev)}
             >
               <img
-                src={user.avatar || defaultAvatar}
+                src={profilePicUrl || user.avatar || defaultAvatar}
                 alt="Profile"
                 className={`profile-avatar ${
-                  !user.avatar ? "default-avatar" : ""
+                  !profilePicUrl && !user.avatar ? "default-avatar" : ""
                 }`}
               />
+
               {showMenu && (
                 <ul className="profile-menu">
                   {menuItems.map((item, idx) => {

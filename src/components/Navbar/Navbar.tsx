@@ -26,6 +26,9 @@ interface TokenPayload {
   role: "host" | "guest" | "admin";
 }
 
+interface NavbarProps {
+  profilePicUrl?: string | null; // Add new prop for profile picture URL
+}
 const hostMenu = [
   "Add a Car",
   "My Cars",
@@ -66,7 +69,7 @@ const iconMap: Record<string, any> = {
   "My Documents": faFile,
 };
 
-export default function Navbar() {
+export default function Navbar({ profilePicUrl }: NavbarProps) {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<"host" | "guest" | "admin" | null>(null);
@@ -286,8 +289,7 @@ export default function Navbar() {
           ) : (
             <div className="user-profile-wrapper">
               <img
-                src={user.avatar || defaultAvatar}
-                alt="Profile"
+                src={profilePicUrl || user.avatar || defaultAvatar}
                 className="profile-avatar"
                 onClick={() => setShowMenu((prev) => !prev)}
               />
