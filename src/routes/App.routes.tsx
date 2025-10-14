@@ -18,6 +18,7 @@ import MyDocumentsPage from "../pages/MyDocuments/MyDocuments";
 import BookACar from "../pages/BookACar/BookACar";
 import Support from "../pages/support/support";
 import Community from "../pages/community/community";
+import Dashboard from "../pages/admin/dashboard/dashboard";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -33,6 +34,14 @@ const AppRoutes = () => (
       <Route path="/support" element={<Support />} />
       <Route path="/community" element={<Community />} />
       <Route path="/bookAcar" element={<BookACar />} />
+      <Route
+        path="/admin/dashboard"
+        element={
+          <AdminRoute>
+            <Dashboard />
+          </AdminRoute>
+        }
+      />
       <Route
         path="/admin/manage-cars"
         element={

@@ -33,33 +33,7 @@ const months = [
 
 const years = ["2023", "2024", "2025"];
 
-const supportTickets: SupportTicket[] = [
-  {
-    ticketId: "TCKT001",
-    source: "Email",
-    ticketRaisedBy: "John Doe",
-    booking: "BK2023001",
-    date: "2023-07-15",
-    issueDescription: "Booking confirmation not received",
-    isVerified: true,
-    isResolved: false,
-    remarks: "Waiting for customer confirmation",
-    ratings: 4.5,
-  },
-  {
-    ticketId: "TCKT002",
-    source: "App",
-    ticketRaisedBy: "Jane Smith",
-    booking: "BK2023005",
-    date: "2023-07-20",
-    issueDescription: "Car not available at pickup",
-    isVerified: true,
-    isResolved: true,
-    remarks: "Refund issued",
-    ratings: 3.8,
-  },
-  // Add more as needed...
-];
+const supportTickets: SupportTicket[] = [];
 
 export default function ManageSupport() {
   const [search, setSearch] = useState("");
