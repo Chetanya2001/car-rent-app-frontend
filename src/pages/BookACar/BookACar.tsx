@@ -126,8 +126,7 @@ const BookACar: React.FC = () => {
       </>
     );
 
-  const carLocation =
-    car.documents?.city_of_registration || "Location not available";
+  const carLocation = car.documents?.location || "Location not available";
 
   return (
     <>
