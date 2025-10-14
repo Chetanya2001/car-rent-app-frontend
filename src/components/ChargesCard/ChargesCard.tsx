@@ -7,6 +7,7 @@ interface ChargesCardProps {
   driverCharges: number;
   pickDropCharges: number;
   gst: number;
+  pickupLocation?: string; // ✅ Only location
   onPay: () => void;
 }
 
@@ -16,6 +17,7 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
   driverCharges,
   pickDropCharges,
   gst,
+  pickupLocation,
   onPay,
 }) => {
   const totalCost =
@@ -28,52 +30,60 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
     driverCharges,
     pickDropCharges,
     gst,
+    pickupLocation,
     totalCost,
   });
 
   return (
     <div className="booking-container">
       <div className="check-details">
-        <h3>Check details</h3>
+        <h3>Check Details</h3>
+
         <div className="detail-item">
           <span className="icon">📍</span>
-          <span>Check Your Car's Pickup Location, date and time</span>
+          <span>
+            <strong>Car Pickup Location:</strong>{" "}
+            {pickupLocation || "Not specified"}
+          </span>
         </div>
+
         <div className="detail-item">
           <span className="icon">🤝</span>
-          <span>You have valid license and documents to drive.</span>
+          <span>You have a valid license and documents to drive.</span>
         </div>
+
         <div className="detail-item">
           <span className="icon">🚗</span>
           <span>
-            You agree to key terms and conditions including cancellation policy.
+            You agree to key terms and conditions including the cancellation
+            policy.
           </span>
         </div>
       </div>
+
       <div className="charges-card">
-        <h3>Confirm your Booking</h3>
+        <h3>Confirm Your Booking</h3>
+
         <div className="charge-item">
-          <span>CAR CHARGES :</span> <span>INR {carCharges}</span>
+          <span>CAR CHARGES:</span> <span>INR {carCharges}</span>
         </div>
         <div className="charge-item">
-          <span>INSURE CHARGES :</span> <span>INR {insuranceCharges}</span>
+          <span>INSURE CHARGES:</span> <span>INR {insuranceCharges}</span>
         </div>
         <div className="charge-item">
-          <span>DRIVER CHARGES :</span> <span>INR {driverCharges}</span>
+          <span>DRIVER CHARGES:</span> <span>INR {driverCharges}</span>
         </div>
         <div className="charge-item">
-          <span>PICK & DROP CHARGES :</span> <span>INR {pickDropCharges}</span>
+          <span>PICK & DROP CHARGES:</span> <span>INR {pickDropCharges}</span>
         </div>
         <div className="charge-item">
-          <span>GST(18%) :</span> <span>INR {gst}</span>
+          <span>GST (18%):</span> <span>INR {gst}</span>
         </div>
+
         <div className="charge-total">
           <span>TOTAL COST:</span> <span>INR {totalCost}</span>
         </div>
-        <br />
-        <br />
-        <br />
-        <br />
+
         <button className="pay-btn" onClick={onPay}>
           Pay Now
         </button>

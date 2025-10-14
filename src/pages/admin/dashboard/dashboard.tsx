@@ -36,9 +36,7 @@ export default function Dashboard() {
             deliver comprehensive analytics and reporting features.
           </p>
 
-          <div className="dashboard-info">
-            <p>Expected Launch: Q1 2025</p>
-          </div>
+          <div className="dashboard-info"></div>
         </div>
       </div>
     </>
