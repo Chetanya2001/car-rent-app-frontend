@@ -165,7 +165,7 @@ export default function Navbar() {
         navigate("/searched-cars");
         break;
       case "My Bookings":
-        navigate("/my-bookings");
+        navigate("/guest-mybookings");
         break;
       case "My Payments":
         navigate("/my-payments");
