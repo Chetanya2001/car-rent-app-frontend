@@ -7,7 +7,7 @@ interface ChargesCardProps {
   driverCharges: number;
   pickDropCharges: number;
   gst: number;
-  pickupLocation?: string; // ✅ Only location
+  carLocation?: string; // ✅ Only location
   onPay: () => void;
 }
 
@@ -17,7 +17,7 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
   driverCharges,
   pickDropCharges,
   gst,
-  pickupLocation,
+  carLocation,
   onPay,
 }) => {
   const totalCost =
@@ -30,7 +30,7 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
     driverCharges,
     pickDropCharges,
     gst,
-    pickupLocation,
+    carLocation,
     totalCost,
   });
 
@@ -43,7 +43,7 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
           <span className="icon">📍</span>
           <span>
             <strong>Car Pickup Location:</strong>{" "}
-            {pickupLocation || "Not specified"}
+            {carLocation || "Not specified"}
           </span>
         </div>
 

@@ -14,18 +14,24 @@ import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 const BookACar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  // ✅ Get all state passed from Cars component
   const {
     carId,
     pricePerHour: routedPricePerHour,
     bookingDetails,
+    carLocation, // 🟢 added this field from Cars page
   } = location.state || {};
+
+  // Log state data for debugging
+  console.log("📦 State received from Cars component:", location.state);
 
   // Car details state
   const [car, setCar] = useState<CarDetailsType | null>(null);
   const [loading, setLoading] = useState(true);
 
   const now = new Date();
-  now.setHours(now.getHours() + 2); // Default pickup time +2 hours
+  now.setHours(now.getHours() + 2);
 
   const pad = (num: string | number) => (Number(num) < 10 ? "0" + num : num);
   const currentDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
@@ -55,13 +61,12 @@ const BookACar: React.FC = () => {
     bookingDetails?.differentDrop ?? false
   );
 
-  // Drop-off state
   const [dropCity, setDropCity] = useState<string>(
     bookingDetails?.dropCity || ""
   );
   const [showDropMap, setShowDropMap] = useState(false);
 
-  // Fetch car details when carId changes
+  // Fetch car details
   useEffect(() => {
     const fetchCarDetails = async () => {
       if (!carId) {
@@ -80,8 +85,8 @@ const BookACar: React.FC = () => {
     fetchCarDetails();
   }, [carId, navigate]);
 
-  // Calculate charges
   const pricePerHour = car?.price_per_hour ?? routedPricePerHour ?? 100;
+
   let hours = 1;
   if (pickupDate && dropDate && pickupTime && dropTime) {
     const pickup = new Date(`${pickupDate}T${pickupTime}`);
@@ -100,7 +105,6 @@ const BookACar: React.FC = () => {
     carCharges + insuranceCharges + driverCharges + pickDropCharges;
   const gst = Math.round(subTotal * 0.18);
 
-  // Images
   const photos = car?.photos?.map((p) => p.photo_url) || [];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -126,7 +130,9 @@ const BookACar: React.FC = () => {
       </>
     );
 
-  const carLocation = car.documents?.location || "Location not available";
+  // ✅ Car location from state (fallback to backend if needed)
+  const pickupLocation =
+    carLocation || car.documents?.location || "Location not available";
 
   return (
     <>
@@ -149,7 +155,6 @@ const BookACar: React.FC = () => {
             {car.make} {car.model}
           </h1>
 
-          {/* Image Carousel */}
           {photos.length > 0 && (
             <div className="carousel">
               <button className="prev" onClick={prevImage}>
@@ -166,7 +171,6 @@ const BookACar: React.FC = () => {
             </div>
           )}
 
-          {/* About Section */}
           <div className="about-section-1">
             <h3>About this car</h3>
             <p>{car.description ?? "No description available."}</p>
@@ -181,7 +185,7 @@ const BookACar: React.FC = () => {
               />
               Car Pickup Location
             </h3>
-            <p style={{ fontSize: "1.1rem" }}>{carLocation}</p>
+            <p style={{ fontSize: "1.1rem" }}>{pickupLocation}</p>
           </div>
 
           {/* Trip Section */}
@@ -290,7 +294,7 @@ const BookACar: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Section: Charges Summary */}
+        {/* ✅ Right Section: Charges Summary */}
         <div className="right-section">
           <ChargesCard
             carCharges={carCharges}
@@ -298,13 +302,14 @@ const BookACar: React.FC = () => {
             driverCharges={driverCharges}
             pickDropCharges={pickDropCharges}
             gst={gst}
+            carLocation={carLocation} // 🟢 Pass location to ChargesCard
             onPay={() => alert("Proceeding to payment...")}
           />
         </div>
       </div>
+
       <Footer />
 
-      {/* Drop-off Map Modal */}
       {showDropMap && (
         <ModalWrapper onClose={() => setShowDropMap(false)}>
           <LocationPicker
