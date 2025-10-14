@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import Footer from "../../components/Footer/Footer";
 import Navbar from "../../components/Navbar/Navbar";
 import "./guest-mybooking.css";
@@ -16,6 +17,11 @@ type Booking = {
 
 export default function GuestMyBookings() {
   const bookings: Booking[] = []; // no data for now
+  const navigate = useNavigate();
+
+  const handleBookNow = () => {
+    navigate("/cars");
+  };
 
   if (bookings.length === 0) {
     return (
@@ -23,7 +29,9 @@ export default function GuestMyBookings() {
         <Navbar />
         <div className="no-bookings-container">
           <p className="no-bookings-text">You have no bookings yet.</p>
-          <button className="book-now-btn">Book Now</button>
+          <button className="book-now-btn" onClick={handleBookNow}>
+            Book Now
+          </button>
         </div>
         <Footer />
       </>
