@@ -26,7 +26,7 @@ const Cars: React.FC = () => {
       state: {
         carId: car.id,
         pricePerHour: car.price,
-        location: car.location, // ✅ Added location
+        carLocation: car.location, // ✅ Added location
       },
     });
   };

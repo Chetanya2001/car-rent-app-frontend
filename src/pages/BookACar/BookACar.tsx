@@ -20,11 +20,12 @@ const BookACar: React.FC = () => {
     carId,
     pricePerHour: routedPricePerHour,
     bookingDetails,
-    carLocation, // 🟢 added this field from Cars page
+    carLocation,
   } = location.state || {};
 
   // Log state data for debugging
   console.log("📦 State received from Cars component:", location.state);
+  console.log(carLocation);
 
   // Car details state
   const [car, setCar] = useState<CarDetailsType | null>(null);
