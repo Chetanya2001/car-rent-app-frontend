@@ -161,6 +161,29 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
 }
+.terms-agree {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+.terms-agree label {
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+.terms-agree input[type="checkbox"] {
+  accent-color: #22c55e; /* Modern browsers */
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+.terms-agree a {
+  color: #22c55e;
+  text-decoration: underline;
+  font-weight: 500;
+}
 
 /* Tablet Styles (768px - 1024px) */
 @media screen and (max-width: 1024px) {

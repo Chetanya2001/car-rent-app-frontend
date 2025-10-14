@@ -78,21 +78,47 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
         </div>
 
         {/* Checkbox before agreement text */}
-        <div className="terms-agree" style={{ margin: "16px 0" }}>
+        {/* Checkbox & Agreement Section */}
+        <div
+          className="terms-agree"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            margin: "20px 0",
+          }}
+        >
           <input
             type="checkbox"
             id="termsAgree"
             checked={isAgreed}
             onChange={(e) => setIsAgreed(e.target.checked)}
-            style={{ marginRight: 8 }}
+            style={{
+              accentColor: "#22c55e", // optional: matches a green theme
+              width: 20,
+              height: 20,
+              verticalAlign: "middle",
+              cursor: "pointer",
+            }}
           />
-          <label htmlFor="termsAgree">
+          <label
+            htmlFor="termsAgree"
+            style={{
+              color: "#fff",
+              fontSize: "16px",
+              cursor: "pointer",
+            }}
+          >
             You agree to{" "}
             <a
               href="https://www.zipdrive.in/tnc-guest.html"
               target="_blank"
               rel="noopener noreferrer"
-              style={{ textDecoration: "underline" }}
+              style={{
+                color: "#22c55e",
+                textDecoration: "underline",
+                fontWeight: 500,
+              }}
             >
               terms & conditions
             </a>
