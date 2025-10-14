@@ -24,12 +24,14 @@ export interface CarPhoto {
 }
 
 export interface CarDetailsType {
+  documents: any;
   price_per_hour: number;
   id: number;
   make: string;
   model: string;
   year: number;
   description: string | null;
+  location: string;
   features: CarFeatures;
   photos: CarPhoto[];
 }

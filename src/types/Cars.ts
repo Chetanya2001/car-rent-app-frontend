@@ -8,6 +8,7 @@ export interface Car {
   price: number;
   model: string;
   year: number;
+  location?: string; // ✅ Added location
   price_per_hour: number | null;
   kms_driven?: number;
   available_from?: string | null;
