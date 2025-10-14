@@ -12,7 +12,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 
 const BookACar: React.FC = () => {
-  // Get navigation state
   const location = useLocation();
   const navigate = useNavigate();
   const {
@@ -24,8 +23,9 @@ const BookACar: React.FC = () => {
   // Car details state
   const [car, setCar] = useState<CarDetailsType | null>(null);
   const [loading, setLoading] = useState(true);
+
   const now = new Date();
-  now.setHours(now.getHours() + 2); // Add 2 hours
+  now.setHours(now.getHours() + 2); // Default pickup time +2 hours
 
   const pad = (num: string | number) => (Number(num) < 10 ? "0" + num : num);
   const currentDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
@@ -55,7 +55,7 @@ const BookACar: React.FC = () => {
     bookingDetails?.differentDrop ?? false
   );
 
-  // New state for the different drop-off location input and modal
+  // Drop-off state
   const [dropCity, setDropCity] = useState<string>(
     bookingDetails?.dropCity || ""
   );
@@ -65,7 +65,7 @@ const BookACar: React.FC = () => {
   useEffect(() => {
     const fetchCarDetails = async () => {
       if (!carId) {
-        navigate("/cars"); // No car selected, back to listing
+        navigate("/cars");
         return;
       }
       try {
@@ -80,14 +80,8 @@ const BookACar: React.FC = () => {
     fetchCarDetails();
   }, [carId, navigate]);
 
-  // Calculation for pricing
+  // Calculate charges
   const pricePerHour = car?.price_per_hour ?? routedPricePerHour ?? 100;
-  let carCharges = 0,
-    insuranceCharges = 0,
-    driverCharges = 0,
-    pickDropCharges = 0,
-    gst = 0;
-
   let hours = 1;
   if (pickupDate && dropDate && pickupTime && dropTime) {
     const pickup = new Date(`${pickupDate}T${pickupTime}`);
@@ -97,13 +91,14 @@ const BookACar: React.FC = () => {
       Math.ceil((dropoff.getTime() - pickup.getTime()) / (1000 * 60 * 60))
     );
   }
-  carCharges = pricePerHour * hours;
-  insuranceCharges = insureTrip ? 20 * hours : 0;
-  driverCharges = driverRequired ? 150 * hours : 0;
-  pickDropCharges = differentDrop ? 1000 : 0;
+
+  const carCharges = pricePerHour * hours;
+  const insuranceCharges = insureTrip ? 20 * hours : 0;
+  const driverCharges = driverRequired ? 150 * hours : 0;
+  const pickDropCharges = differentDrop ? 1000 : 0;
   const subTotal =
     carCharges + insuranceCharges + driverCharges + pickDropCharges;
-  gst = Math.round(subTotal * 0.18);
+  const gst = Math.round(subTotal * 0.18);
 
   // Images
   const photos = car?.photos?.map((p) => p.photo_url) || [];
@@ -113,8 +108,6 @@ const BookACar: React.FC = () => {
   const prevImage = () =>
     setCurrentImageIndex((i) => (i - 1 + photos.length) % photos.length);
 
-  // Handler for dropCity input change
-
   if (loading)
     return (
       <>
@@ -123,6 +116,7 @@ const BookACar: React.FC = () => {
         <Footer />
       </>
     );
+
   if (!car)
     return (
       <>
@@ -132,11 +126,14 @@ const BookACar: React.FC = () => {
       </>
     );
 
+  const carLocation =
+    car.documents?.city_of_registration || "Location not available";
+
   return (
     <>
       <Navbar />
       <div className="book-car-container">
-        {/* Left Section: Car Details */}
+        {/* Left Section */}
         <div className="car-details-section">
           <button
             className="back-button"
@@ -152,6 +149,7 @@ const BookACar: React.FC = () => {
           <h1 className="car-title">
             {car.make} {car.model}
           </h1>
+
           {/* Image Carousel */}
           {photos.length > 0 && (
             <div className="carousel">
@@ -168,11 +166,25 @@ const BookACar: React.FC = () => {
               </button>
             </div>
           )}
+
           {/* About Section */}
           <div className="about-section-1">
             <h3>About this car</h3>
             <p>{car.description ?? "No description available."}</p>
           </div>
+
+          {/* ✅ Car Pickup Location */}
+          <div className="car-location">
+            <h3>
+              <FontAwesomeIcon
+                icon={faMapMarkerAlt}
+                style={{ marginRight: 8, color: "#ff4757" }}
+              />
+              Car Pickup Location
+            </h3>
+            <p style={{ fontSize: "1.1rem" }}>{carLocation}</p>
+          </div>
+
           {/* Trip Section */}
           <div className="trip-section">
             <h3>Zip Your Trip</h3>
@@ -210,6 +222,7 @@ const BookACar: React.FC = () => {
                 />
               </div>
             </div>
+
             <div className="trip-options">
               <div className="toggle-wrapper">
                 <span className="switch-label">Insure Trip</span>
@@ -248,15 +261,12 @@ const BookACar: React.FC = () => {
               </div>
             </div>
 
-            {/* Drop-off Location input and map icon if differentDrop is true */}
             {differentDrop && (
               <div style={{ marginTop: "1rem" }}>
                 <div style={{ display: "flex", alignItems: "center" }}>
                   <select
                     value={dropCity}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                      setDropCity(e.target.value)
-                    }
+                    onChange={(e) => setDropCity(e.target.value)}
                     style={{ flex: 1, padding: "6px", fontSize: "1rem" }}
                     title="Select drop-off city"
                   >
@@ -280,6 +290,7 @@ const BookACar: React.FC = () => {
             )}
           </div>
         </div>
+
         {/* Right Section: Charges Summary */}
         <div className="right-section">
           <ChargesCard
@@ -303,7 +314,6 @@ const BookACar: React.FC = () => {
                 loc.city && loc.state
                   ? `${loc.city}, ${loc.state}`
                   : loc.city || loc.state || loc.country || "";
-
               setDropCity(locationName);
               setShowDropMap(false);
             }}
