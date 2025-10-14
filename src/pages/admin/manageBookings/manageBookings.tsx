@@ -20,43 +20,7 @@ interface Booking {
   ratings: number; // Ratings value
 }
 
-const bookingData: Booking[] = [
-  {
-    bookingId: "#12345",
-    carNo: "Tesla-01",
-    bookedBy: "Ethan Carter",
-    pickUpLoc: "Los Angeles",
-    pickUpType: "Airport",
-    dropOffLoc: "San Francisco",
-    dropOffType: "City Center",
-    startDatetime: "2024-07-15T10:00:00",
-    endDatetime: "2024-07-20T18:00:00",
-    driveType: "Self-drive",
-    insure: true,
-    payment: "Paid",
-    status: "Active",
-    action: "",
-    ratings: 4.5,
-  },
-  {
-    bookingId: "#67890",
-    carNo: "BMW-05",
-    bookedBy: "Sophia Clark",
-    pickUpLoc: "New York",
-    pickUpType: "Hotel",
-    dropOffLoc: "Boston",
-    dropOffType: "Airport",
-    startDatetime: "2024-07-10T09:00:00",
-    endDatetime: "2024-07-15T17:00:00",
-    driveType: "Chauffeur",
-    insure: false,
-    payment: "Pending",
-    status: "Completed",
-    action: "",
-    ratings: 5,
-  },
-  // Add other bookings similarly
-];
+const bookingData: Booking[] = [];
 
 const months = [
   "January",
