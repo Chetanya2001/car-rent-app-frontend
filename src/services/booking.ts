@@ -50,3 +50,55 @@ export const bookCar = async (
     throw err.response?.data || new Error("Booking failed");
   }
 };
+export const getAllBookingsAdmin = async (token: string): Promise<any[]> => {
+  try {
+    const res = await axios.get<any[]>(`${API_URL}/admin/bookings`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (err: any) {
+    console.error(
+      "❌ Error fetching admin bookings:",
+      err.response?.status,
+      err.response?.data || err.message
+    );
+    throw err.response?.data || new Error("Failed to fetch admin bookings");
+  }
+};
+
+export const getHostBookings = async (token: string): Promise<any[]> => {
+  try {
+    const res = await axios.get<any[]>(`${API_URL}/host/bookings`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (err: any) {
+    console.error(
+      "❌ Error fetching host bookings:",
+      err.response?.status,
+      err.response?.data || err.message
+    );
+    throw err.response?.data || new Error("Failed to fetch host bookings");
+  }
+};
+export const getGuestBookings = async (token: string): Promise<any[]> => {
+  try {
+    const res = await axios.get<any[]>(`${API_URL}/guest/bookings`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (err: any) {
+    console.error(
+      "❌ Error fetching guest bookings:",
+      err.response?.status,
+      err.response?.data || err.message
+    );
+    throw err.response?.data || new Error("Failed to fetch guest bookings");
+  }
+};

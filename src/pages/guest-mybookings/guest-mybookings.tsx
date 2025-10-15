@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../components/Footer/Footer";
 import Navbar from "../../components/Navbar/Navbar";
+import { getGuestBookings } from "../../services/booking"; // import the service
 import "./guest-mybooking.css";
 
 type Booking = {
@@ -16,12 +18,82 @@ type Booking = {
 };
 
 export default function GuestMyBookings() {
-  const bookings: Booking[] = []; // no data for now
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  // Load JWT token from localStorage or your auth state
+  const token = localStorage.getItem("token") || "";
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        setLoading(true);
+        const data = await getGuestBookings(token);
+        // Map API booking data to Booking type fields for UI
+        const mappedBookings = data.map((b: any) => ({
+          id: b.id,
+          carName: b.Car?.name || "Unknown Car",
+          carType: b.Car?.type || "Unknown Type",
+          image: b.Car?.image || "/default-car.png",
+          pickupDate: new Date(b.start_datetime).toLocaleDateString(),
+          pickupTime: new Date(b.start_datetime).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          dropoffDate: new Date(b.end_datetime).toLocaleDateString(),
+          dropoffTime: new Date(b.end_datetime).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          price: b.price || 0, // Assuming booking price is returned or calculate accordingly
+        }));
+        setBookings(mappedBookings);
+      } catch (err) {
+        setError("Failed to load bookings.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (token) fetchBookings();
+    else {
+      setLoading(false);
+      setError("Not authenticated");
+    }
+  }, [token]);
 
   const handleBookNow = () => {
     navigate("/cars");
   };
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="loading-container">
+          <p>Loading your bookings...</p>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Navbar />
+        <div className="error-container">
+          <p className="error-text">{error}</p>
+          <button className="book-now-btn" onClick={handleBookNow}>
+            Book Now
+          </button>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   if (bookings.length === 0) {
     return (
