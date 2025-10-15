@@ -48,6 +48,9 @@ export default function GuestMyBookings() {
   }, [token]);
 
   const handleBookNow = () => navigate("/cars");
+  const handleViewDetails = (carId: number) => {
+    navigate(`/car-details/${carId}`);
+  };
 
   if (bookings.length === 0) {
     return (
@@ -138,7 +141,12 @@ export default function GuestMyBookings() {
                     Insure: ₹{booking.insure_amount} <br />
                     Driver: ₹{booking.driver_amount}
                   </p>
-                  <button className="view-details-btn">View Details</button>
+                  <button
+                    className="view-details-btn"
+                    onClick={() => handleViewDetails(car.id)} // ✅ new
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
             </div>
