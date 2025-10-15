@@ -119,7 +119,7 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
             htmlFor="termsAgree"
             style={{
               color: "#fff",
-              fontSize: "8px",
+              fontSize: "12px",
               fontWeight: "400",
               cursor: "pointer",
             }}

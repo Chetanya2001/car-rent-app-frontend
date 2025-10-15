@@ -10,6 +10,10 @@ import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
 import LocationPicker from "../../components/Map/LocationPicker";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
+import { bookCar } from "../../services/booking";
+import { geocodeAddress } from "../../utils/geocode";
+
+const LOCATIONIQ_KEY = import.meta.env.VITE_LOCATIONIQ_TOKEN;
 
 const BookACar: React.FC = () => {
   const location = useLocation();
@@ -97,7 +101,71 @@ const BookACar: React.FC = () => {
       Math.ceil((dropoff.getTime() - pickup.getTime()) / (1000 * 60 * 60))
     );
   }
+  const handlePayClick = async () => {
+    try {
+      // Use carLocation as pickup address string
+      const pickupAddress = carLocation || "";
+      if (!pickupAddress) {
+        alert("Pickup location is not specified.");
+        return;
+      }
 
+      // Geocode pickup location (carLocation from props/state)
+      const pickupGeo = await geocodeAddress(pickupAddress, LOCATIONIQ_KEY);
+      if (!pickupGeo) {
+        alert("Could not find coordinates for pickup location.");
+        return;
+      }
+
+      // Drop off address from dropCity dropdown selection
+      const dropAddress = dropCity || "";
+      if (!dropAddress) {
+        alert("Please select drop-off location.");
+        return;
+      }
+
+      // Geocode drop location
+      const dropGeo = await geocodeAddress(dropAddress, LOCATIONIQ_KEY);
+      if (!dropGeo) {
+        alert("Could not find coordinates for drop-off location.");
+        return;
+      }
+
+      // Prepare booking request payload
+      const bookingData = {
+        car_id: Number(carId),
+        start_datetime: `${pickupDate}T${pickupTime}:00`,
+        end_datetime: `${dropDate}T${dropTime}:00`,
+        pickup_address: pickupAddress,
+        pickup_lat: pickupGeo.lat,
+        pickup_long: pickupGeo.lng,
+        drop_address: dropAddress,
+        drop_lat: dropGeo.lat,
+        drop_long: dropGeo.lng,
+        insure_amount: insureTrip ? insuranceCharges : 0,
+        driver_amount: driverRequired ? driverCharges : 0,
+      };
+
+      const token = localStorage.getItem("token") || "";
+      if (!token) {
+        alert("Please login to proceed with booking.");
+        return;
+      }
+
+      // Call booking API
+      const response = await bookCar(bookingData, token);
+
+      alert("Booking confirmed! Pay balance amount on car pickup.");
+
+      // Navigate to confirmation page
+      navigate("/cars", {
+        state: { booking: response.booking },
+      });
+    } catch (error: any) {
+      console.error("Booking error:", error);
+      alert(error.message || "Booking failed. Please try again.");
+    }
+  };
   const carCharges = pricePerHour * hours;
   const insuranceCharges = insureTrip ? 20 * hours : 0;
   const driverCharges = driverRequired ? 150 * hours : 0;
@@ -288,7 +356,7 @@ const BookACar: React.FC = () => {
             pickDropCharges={pickDropCharges}
             gst={gst}
             carLocation={carLocation}
-            onPay={() => alert("Proceeding to payment...")}
+            onPay={handlePayClick}
           />
         </div>
       </div>
