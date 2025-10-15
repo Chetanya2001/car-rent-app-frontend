@@ -77,7 +77,21 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
           <span>TOTAL COST:</span> <span>INR {totalCost}</span>
         </div>
 
-        {/* Checkbox before agreement text */}
+        <div
+          style={{
+            marginTop: "15px",
+            marginBottom: "10px",
+            background: "#ebfaeb",
+            fontWeight: 500,
+            color: "#277919",
+            fontSize: "1rem",
+            padding: "10px",
+            borderRadius: "6px",
+          }}
+        >
+          Pay only INR 0 now and confirm your booking. Pay balance amount on car
+          pickup
+        </div>
         {/* Checkbox & Agreement Section */}
         <div
           className="terms-agree"
@@ -105,7 +119,8 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
             htmlFor="termsAgree"
             style={{
               color: "#fff",
-              fontSize: "16px",
+              fontSize: "8px",
+              fontWeight: "400",
               cursor: "pointer",
             }}
           >
