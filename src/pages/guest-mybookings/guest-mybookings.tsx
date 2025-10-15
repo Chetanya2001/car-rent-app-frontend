@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../components/Footer/Footer";
 import Navbar from "../../components/Navbar/Navbar";
+import { getGuestBookings } from "../../services/booking"; // import your service
 import "./guest-mybooking.css";
 
 type Booking = {
@@ -16,8 +18,41 @@ type Booking = {
 };
 
 export default function GuestMyBookings() {
-  const bookings: Booking[] = []; // no data for now
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const navigate = useNavigate();
+
+  // JWT token from localStorage or auth context
+  const token = localStorage.getItem("token") || "";
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        if (!token) return;
+        const data = await getGuestBookings(token);
+        const mappedBookings = data.map((b: any) => ({
+          id: b.id,
+          carName: b.Car?.name || "Unknown Car",
+          carType: b.Car?.type || "Unknown Type",
+          image: b.Car?.image || "/default-car.png",
+          pickupDate: new Date(b.start_datetime).toLocaleDateString(),
+          pickupTime: new Date(b.start_datetime).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          dropoffDate: new Date(b.end_datetime).toLocaleDateString(),
+          dropoffTime: new Date(b.end_datetime).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          price: b.price || 0, // Replace if your API returns price in other field
+        }));
+        setBookings(mappedBookings);
+      } catch (err) {
+        console.error("Error loading bookings", err);
+      }
+    };
+    fetchBookings();
+  }, [token]);
 
   const handleBookNow = () => {
     navigate("/cars");
