@@ -1,26 +1,25 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
 import "./manageBooking.css";
+import { getAllBookingsAdmin } from "../../../services/booking";
 
 interface Booking {
-  bookingId: string; // Booking ID
-  carNo: string; // Car No
-  bookedBy: string; // Booked by
-  pickUpLoc: string; // Pick-up Loc
-  pickUpType: string; // Pick-up Type
-  dropOffLoc: string; // Drop-off Loc
-  dropOffType: string; // Drop-off Type
-  startDatetime: string; // Start Datetime (ISO format)
-  endDatetime: string; // End DateTime (ISO format)
-  driveType: string; // Drive Type (e.g. Self-drive)
-  insure: boolean; // Insure (true/false)
-  payment: string; // Payment status or method
-  status: "Active" | "Completed" | "Cancelled" | "Pending"; // Status
-  action?: string; // Optional UI usage
-  ratings: number; // Ratings value
+  bookingId: string;
+  carNo: string;
+  bookedBy: string;
+  pickUpLoc: string;
+  pickUpType: string;
+  dropOffLoc: string;
+  dropOffType: string;
+  startDatetime: string;
+  endDatetime: string;
+  driveType: string;
+  insure: boolean;
+  payment: string;
+  status: "Active" | "Completed" | "Cancelled" | "Pending";
+  action?: string;
+  ratings: number;
 }
-
-const bookingData: Booking[] = [];
 
 const months = [
   "January",
@@ -39,6 +38,10 @@ const months = [
 const years = ["2023", "2024", "2025"];
 
 export default function BookingManagement() {
+  const [bookingData, setBookingData] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [carFilter, setCarFilter] = useState("All Cars");
   const [selectedMonth, setSelectedMonth] = useState("All Months");
@@ -47,29 +50,70 @@ export default function BookingManagement() {
   const [page, setPage] = useState(1);
   const pageSize = 5;
 
+  useEffect(() => {
+    async function fetchBookings() {
+      setLoading(true);
+      setError(null);
+      try {
+        const token = localStorage.getItem("token") || "";
+        const data = await getAllBookingsAdmin(token);
+
+        const mappedData: Booking[] = data.map((item: any) => ({
+          bookingId: item.id.toString(),
+          carNo: item.Car?.car_no || "N/A",
+          bookedBy: `${item.guest?.first_name || ""} ${
+            item.guest?.last_name || ""
+          }`.trim(),
+          pickUpLoc: item.pickup_address,
+          pickUpType: "Standard",
+          dropOffLoc: item.drop_address,
+          dropOffType: "Standard",
+          startDatetime: item.start_datetime,
+          endDatetime: item.end_datetime,
+          driveType: "Self-drive",
+          insure: Boolean(item.insure_amount && item.insure_amount > 0),
+          payment: item.payment_status || "Pending",
+          status: item.status,
+          action: "",
+          ratings: item.ratings || 0,
+        }));
+
+        setBookingData(mappedData);
+        setLoading(false);
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch bookings");
+        setLoading(false);
+      }
+    }
+
+    fetchBookings();
+  }, []);
+
   const filteredBookings = useMemo(() => {
     return bookingData.filter((booking) => {
       const matchesSearch =
         booking.bookingId.toLowerCase().includes(search.toLowerCase()) ||
         booking.bookedBy.toLowerCase().includes(search.toLowerCase());
-
       const matchesStatus =
         statusFilter === "All Status" || booking.status === statusFilter;
       const matchesCar =
         carFilter === "All Cars" || booking.carNo === carFilter;
-
-      // Without rentalDates, month/year filtering disabled here; can adapt with startDatetime if needed
       const bookingDate = new Date(booking.startDatetime);
       const bookingMonth = months[bookingDate.getMonth()];
       const bookingYear = bookingDate.getFullYear().toString();
-
       const matchesDate =
         (selectedMonth === "All Months" || bookingMonth === selectedMonth) &&
         (selectedYear === "All Years" || bookingYear === selectedYear);
-
       return matchesSearch && matchesStatus && matchesCar && matchesDate;
     });
-  }, [search, statusFilter, carFilter, selectedMonth, selectedYear]);
+  }, [
+    search,
+    statusFilter,
+    carFilter,
+    selectedMonth,
+    selectedYear,
+    bookingData,
+  ]);
 
   const paginatedBookings = useMemo(() => {
     const start = (page - 1) * pageSize;
@@ -80,9 +124,12 @@ export default function BookingManagement() {
 
   const uniqueStatuses = [
     "All Status",
-    ...new Set(bookingData.map((b) => b.status)),
+    ...Array.from(new Set(bookingData.map((b) => b.status))),
   ];
-  const uniqueCars = ["All Cars", ...new Set(bookingData.map((b) => b.carNo))];
+  const uniqueCars = [
+    "All Cars",
+    ...Array.from(new Set(bookingData.map((b) => b.carNo))),
+  ];
 
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -113,6 +160,30 @@ export default function BookingManagement() {
         return "●";
     }
   };
+
+  if (loading) {
+    return (
+      <>
+        <AdminNavBar />
+        <div className="booking-management">
+          <h1 className="title">Booking Management</h1>
+          <p>Loading bookings...</p>
+        </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <AdminNavBar />
+        <div className="booking-management">
+          <h1 className="title">Booking Management</h1>
+          <p className="error">Error: {error}</p>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
