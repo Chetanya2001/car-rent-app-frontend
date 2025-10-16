@@ -203,6 +203,5 @@ export const getCarLocation = async (car_id: number): Promise<string> => {
     }
   );
 
-  // The API response returns { location: string }
   return response.data.location;
 };

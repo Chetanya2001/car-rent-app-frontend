@@ -46,6 +46,7 @@ const BookACar: React.FC = () => {
     const fetchLocation = async () => {
       if (!carId) return;
       try {
+        console.log("car id", carId);
         const location = await getCarLocation(Number(carId));
         setFetchedCarLocation(location);
       } catch (error) {
