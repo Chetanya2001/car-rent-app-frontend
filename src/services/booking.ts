@@ -19,16 +19,14 @@ export interface BookCarRequest {
   // you can add more fields as required
 }
 
-// The response type can be extended if needed
 export interface BookCarResponse {
   message: string;
-  booking: any; // type this in detail if you want
+  booking: any;
 }
 
-// Auth is passed via Bearer token (from localStorage)
 export const bookCar = async (
   bookingData: BookCarRequest,
-  token: string // pass your JWT token
+  token: string
 ): Promise<BookCarResponse> => {
   try {
     const res = await axios.post<BookCarResponse>(
