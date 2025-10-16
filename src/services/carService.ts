@@ -188,3 +188,21 @@ export const getCarById = async (id: number): Promise<Car> => {
   const response = await axios.get(`${API_URL}/${id}`);
   return response.data;
 };
+
+export const getCarLocation = async (car_id: number): Promise<string> => {
+  const token = localStorage.getItem("token");
+
+  const response = await axios.post(
+    `${API_URL}/get-city`,
+    { car_id },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    }
+  );
+
+  // The API response returns { location: string }
+  return response.data.location;
+};

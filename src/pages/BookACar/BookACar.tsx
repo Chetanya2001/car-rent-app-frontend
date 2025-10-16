@@ -13,13 +13,16 @@ import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import { bookCar } from "../../services/booking";
 import { geocodeAddress } from "../../utils/geocode";
 
+// Import your car location fetch service
+import { getCarLocation } from "../../services/carService";
+
 const LOCATIONIQ_KEY = import.meta.env.VITE_LOCATIONIQ_TOKEN;
 
 const BookACar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // ✅ Get all state passed from Cars component
+  // Get all state passed from Cars component
   const {
     carId,
     pricePerHour: routedPricePerHour,
@@ -34,6 +37,24 @@ const BookACar: React.FC = () => {
   // Car details state
   const [car, setCar] = useState<CarDetailsType | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // State for fetched car location by carId
+  const [fetchedCarLocation, setFetchedCarLocation] = useState<string>("");
+
+  // Fetch car location by carId
+  useEffect(() => {
+    const fetchLocation = async () => {
+      if (!carId) return;
+      try {
+        const location = await getCarLocation(Number(carId));
+        setFetchedCarLocation(location);
+      } catch (error) {
+        console.error("Failed to fetch car location:", error);
+        setFetchedCarLocation(""); // fallback empty or "Not specified"
+      }
+    };
+    fetchLocation();
+  }, [carId]);
 
   const now = new Date();
   now.setHours(now.getHours() + 2);
@@ -101,23 +122,24 @@ const BookACar: React.FC = () => {
       Math.ceil((dropoff.getTime() - pickup.getTime()) / (1000 * 60 * 60))
     );
   }
+
   const handlePayClick = async () => {
     try {
-      // Use carLocation as pickup address string
-      const pickupAddress = carLocation || "";
+      // Use fetchedCarLocation as pickup address string (priority)
+      const pickupAddress = fetchedCarLocation || carLocation || "";
       if (!pickupAddress) {
         alert("Pickup location is not specified.");
         return;
       }
 
-      // Geocode pickup location (carLocation from props/state)
+      // Geocode pickup location (carLocation from props/state/services)
       const pickupGeo = await geocodeAddress(pickupAddress, LOCATIONIQ_KEY);
       if (!pickupGeo) {
         alert("Could not find coordinates for pickup location.");
         return;
       }
 
-      // Drop off address from dropCity dropdown selection
+      // Drop off address from dropdown selection
       const dropAddress = dropCity || "";
       if (!dropAddress) {
         alert("Please select drop-off location.");
@@ -157,7 +179,7 @@ const BookACar: React.FC = () => {
 
       alert("Booking confirmed! Pay balance amount on car pickup.");
 
-      // Navigate to confirmation page
+      // Navigate to confirmation page with booking info
       navigate("/cars", {
         state: { booking: response.booking },
       });
@@ -166,6 +188,7 @@ const BookACar: React.FC = () => {
       alert(error.message || "Booking failed. Please try again.");
     }
   };
+
   const carCharges = pricePerHour * hours;
   const insuranceCharges = insureTrip ? 20 * hours : 0;
   const driverCharges = driverRequired ? 150 * hours : 0;
@@ -347,7 +370,7 @@ const BookACar: React.FC = () => {
           </div>
         </div>
 
-        {/* ✅ Right Section: Charges Summary */}
+        {/* Right Section: Charges Summary */}
         <div className="right-section">
           <ChargesCard
             carCharges={carCharges}
@@ -355,7 +378,7 @@ const BookACar: React.FC = () => {
             driverCharges={driverCharges}
             pickDropCharges={pickDropCharges}
             gst={gst}
-            carLocation={carLocation}
+            carLocation={fetchedCarLocation || carLocation}
             onPay={handlePayClick}
           />
         </div>
@@ -363,6 +386,7 @@ const BookACar: React.FC = () => {
 
       <Footer />
 
+      {/* Map Modal for drop location selection */}
       {showDropMap && (
         <ModalWrapper onClose={() => setShowDropMap(false)}>
           <LocationPicker
