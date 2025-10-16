@@ -191,6 +191,7 @@ export const getCarById = async (id: number): Promise<Car> => {
 
 export const getCarLocation = async (car_id: number): Promise<string> => {
   const token = localStorage.getItem("token");
+  console.log("Fetching location for car ID:", car_id);
 
   const response = await axios.post(
     `${API_URL}/get-city`,
