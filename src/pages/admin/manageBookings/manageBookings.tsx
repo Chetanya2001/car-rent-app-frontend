@@ -5,7 +5,7 @@ import { getAllBookingsAdmin } from "../../../services/booking";
 
 interface Booking {
   bookingId: string;
-  carNo: string;
+  carNo: string; // Using carId as carNo for display because original data has no car_no
   bookedBy: string;
   pickUpLoc: string;
   pickUpType: string;
@@ -61,7 +61,7 @@ export default function BookingManagement() {
 
         const mappedData: Booking[] = data.map((item: any) => ({
           bookingId: item.id.toString(),
-          carNo: item.Car?.car_no || "N/A",
+          carNo: item.Car?.id ? item.Car.id.toString() : "N/A", // Use Car.id as carNo
           bookedBy: `${item.guest?.first_name || ""} ${
             item.guest?.last_name || ""
           }`.trim(),
