@@ -16,7 +16,6 @@ export interface BookCarRequest {
   drop_long: number;
   insure_amount?: number;
   driver_amount?: number;
-  // you can add more fields as required
 }
 
 export interface BookCarResponse {
