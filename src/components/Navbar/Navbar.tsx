@@ -33,7 +33,7 @@ interface NavbarProps {
 const hostMenu = [
   "Add a Car",
   "My Cars",
-  // "My Bookings",
+  "Bookings",
   // "My Payments",
   // "Notifications",
   "Logout",
@@ -193,6 +193,9 @@ export default function Navbar({
         break;
       case "My Cars":
         navigate("/my-cars");
+        break;
+      case "Bookings":
+        navigate("/host-mybookings");
         break;
       case "Logout":
         handleLogout();
