@@ -57,6 +57,7 @@ export default function BookingManagement() {
       try {
         const token = localStorage.getItem("token") || "";
         const data = await getAllBookingsAdmin(token);
+        console.log("Fetched admin bookings:", data);
 
         const mappedData: Booking[] = data.map((item: any) => ({
           bookingId: item.id.toString(),
