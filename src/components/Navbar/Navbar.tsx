@@ -194,14 +194,18 @@ export default function Navbar({
       case "My Cars":
         navigate("/my-cars");
         break;
+      case "My Bookings":
+        if (role === "host") {
+          navigate("/host-mybookings");
+        } else {
+          navigate("/guest-mybookings");
+        }
+        break;
       case "Logout":
         handleLogout();
         break;
       case "Book a Car":
         navigate("/searched-cars");
-        break;
-      case "My Bookings":
-        navigate("/guest-mybookings");
         break;
       case "My Payments":
         navigate("/my-payments");

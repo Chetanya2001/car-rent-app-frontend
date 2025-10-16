@@ -170,7 +170,7 @@ export default function Home() {
   const hostMenu = [
     "Add a Car",
     "My Cars",
-    // "My Bookings",
+    "My Bookings",
     // "My Payments",
     // "Notifications",
     "Logout",
@@ -215,6 +215,7 @@ export default function Home() {
 
   return (
     <div className="home-container">
+      {/* Header */}
       {/* Header */}
       <header className="home-header">
         {/* Logo */}
@@ -292,6 +293,35 @@ export default function Home() {
                       );
                     }
 
+                    // Role-based routing for "My Bookings"
+                    if (item === "My Bookings") {
+                      const bookingsPath =
+                        role === "host"
+                          ? "/host-mybookings"
+                          : role === "guest"
+                          ? "/guest-mybookings"
+                          : "/";
+
+                      return (
+                        <li
+                          key={idx}
+                          onClick={() => navigate(bookingsPath)}
+                          tabIndex={0}
+                          role="menuitem"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ")
+                              navigate(bookingsPath);
+                          }}
+                        >
+                          <FontAwesomeIcon
+                            icon={iconMap[item]}
+                            className="menu-icon"
+                          />{" "}
+                          {item}
+                        </li>
+                      );
+                    }
+
                     const adminNavMap: Record<string, string> = {
                       Cars: "/admin/manage-cars",
                       Bookings: "/admin/manage-bookings",
@@ -305,8 +335,8 @@ export default function Home() {
                       item === "Add a Car" ||
                       item === "My Cars" ||
                       item === "Book a Car" ||
-                      adminNavMap[item] ||
-                      item === "My Documents"
+                      item === "My Documents" ||
+                      adminNavMap[item]
                     ) {
                       const path =
                         item === "Add a Car"
@@ -315,7 +345,7 @@ export default function Home() {
                           ? "/my-cars"
                           : item === "My Documents"
                           ? "/my-documents"
-                          : item === "Book a Car" // ✅ route guest here
+                          : item === "Book a Car"
                           ? "/searched-cars"
                           : adminNavMap[item];
 
