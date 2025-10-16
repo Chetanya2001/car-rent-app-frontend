@@ -1,0 +1,80 @@
+.bookings-container {
+  max-width: 900px;
+  margin: 40px auto;
+  font-family: "Poppins", sans-serif;
+}
+
+.bookings-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.booking-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.booking-image {
+  width: 220px;
+  height: 160px;
+  object-fit: cover;
+}
+
+.booking-details {
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+  padding: 16px 24px;
+}
+
+.booking-dates {
+  display: flex;
+  gap: 40px;
+  margin-top: 10px;
+}
+
+.label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.price-section {
+  text-align: right;
+}
+
+.view-details-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin-top: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.view-details-btn:hover {
+  background-color: #0056b3;
+}
+
+.no-bookings-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  text-align: center;
+}
+
+.no-bookings-text {
+  font-size: 1.2rem;
+  color: #555;
+  margin-bottom: 20px;
+}
