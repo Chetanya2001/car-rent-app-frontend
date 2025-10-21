@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
+import { getAdminCars } from "../../../services/carService";
 import "./manageCars.css";
 
 // types/AdminCar.ts
@@ -21,9 +22,8 @@ export interface AdminCar {
   ratings: number;
 }
 
-const carData: AdminCar[] = [];
-
 export default function ManageCars() {
+  const [carData, setCarData] = useState<AdminCar[]>([]);
   const [filter, setFilter] = useState<"All" | "Available" | "Rented">("All");
   const [typeFilter, setTypeFilter] = useState<string>("All Types");
   const [yearFilter, setYearFilter] = useState<string>("All Years");
@@ -31,6 +31,16 @@ export default function ManageCars() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 5;
+  useEffect(() => {
+    (async () => {
+      try {
+        const cars = await getAdminCars();
+        setCarData(cars);
+      } catch (error) {
+        console.error("Failed to fetch admin cars:", error);
+      }
+    })();
+  }, []);
 
   // Unique dropdown values
   const uniqueTypes = ["All Types", ...new Set(carData.map((car) => car.type))];
