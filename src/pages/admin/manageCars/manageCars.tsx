@@ -2,24 +2,26 @@ import { useState, useMemo } from "react";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
 import "./manageCars.css";
 
-interface Car {
-  id: number; // Car ID
-  carNo: string; // Car No
-  name: string; // Make / Model
-  type: string; // Type (e.g., Sedan)
-  price: number; // Hourly price
+// types/AdminCar.ts
+
+export interface AdminCar {
+  id: number;
+  carNo: string;
+  name: string;
+  type: string;
+  price: number;
   status: "Available" | "Rented";
   location: string;
-  year: number; // Year of make
+  year: number;
   month: string;
-  fuelType: string; // Fuel Type
-  seatingCapacity: number; // Seating capacity
-  hostedBy: string; // Hosted by
-  isVerified: boolean; // Is Verified
-  ratings: number; // Ratings (e.g., 1-5)
+  fuelType: string;
+  seatingCapacity: number;
+  hostedBy: string;
+  isVerified: boolean;
+  ratings: number;
 }
 
-const carData: Car[] = [];
+const carData: AdminCar[] = [];
 
 export default function ManageCars() {
   const [filter, setFilter] = useState<"All" | "Available" | "Rented">("All");
