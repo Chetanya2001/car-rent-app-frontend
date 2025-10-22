@@ -3,7 +3,6 @@ import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
 import { getAdminCars } from "../../../services/carService";
 import "./manageCars.css";
 
-// AdminCar type matching backend data format
 export interface AdminCar {
   id: number;
   carNo: string;
@@ -44,16 +43,14 @@ export default function ManageCars() {
         const response = await getAdminCars();
         console.log("📦 Raw API Response:", response);
 
-        // ✅ Normalize data safely
         const carsArray = Array.isArray(response)
           ? response
-          : Array.isArray(response.cars)
+          : Array.isArray(response?.cars)
           ? response.cars
-          : response?.cars || [];
+          : [];
 
         setCarData(carsArray);
         console.log("🚗 Cars set in state:", carsArray);
-        console.log("here it is : ", carData);
       } catch (error) {
         console.error("❌ Failed to fetch admin cars:", error);
       } finally {
@@ -64,7 +61,7 @@ export default function ManageCars() {
     fetchCars();
   }, []);
 
-  // ✅ Unique dropdown filter values
+  // ✅ Unique dropdown values
   const uniqueTypes = useMemo(
     () => ["All Types", ...new Set(carData.map((car) => car.type))],
     [carData]
@@ -103,13 +100,17 @@ export default function ManageCars() {
     });
   }, [carData, search, filter, typeFilter, yearFilter, monthFilter]);
 
-  // ✅ Pagination logic
+  // ✅ Fix pagination reset when filters/search change
+  useEffect(() => {
+    setPage(1);
+  }, [filter, typeFilter, yearFilter, monthFilter, search]);
+
+  // ✅ Paginate filtered data
+  const totalPages = Math.ceil(filteredCars.length / pageSize);
   const paginatedCars = useMemo(() => {
     const start = (page - 1) * pageSize;
     return filteredCars.slice(start, start + pageSize);
   }, [filteredCars, page]);
-
-  const totalPages = Math.ceil(filteredCars.length / pageSize);
 
   return (
     <>
@@ -235,7 +236,7 @@ export default function ManageCars() {
                           {car.status}
                         </span>
                       </td>
-                      <td>{car.ratings.toFixed(1)}</td>
+                      <td>{car.ratings?.toFixed(1) || "0.0"}</td>
                       <td>✏️ 👁️ 🗑️</td>
                     </tr>
                   ))
@@ -252,18 +253,24 @@ export default function ManageCars() {
               </tbody>
             </table>
 
-            {/* Pagination */}
+            {/* ✅ Pagination (same design, functional now) */}
             <div className="zipd-mc-pagination_5832">
               <span>
-                Showing {paginatedCars.length} of {filteredCars.length} vehicles
+                Showing {(page - 1) * pageSize + 1}–
+                {Math.min(page * pageSize, filteredCars.length)} of{" "}
+                {filteredCars.length} vehicles
               </span>
               <div>
-                <button disabled={page === 1} onClick={() => setPage(page - 1)}>
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage((prev) => prev - 1)}
+                >
                   ← Previous
                 </button>
+                <br />
                 <button
                   disabled={page === totalPages || totalPages === 0}
-                  onClick={() => setPage(page + 1)}
+                  onClick={() => setPage((prev) => prev + 1)}
                 >
                   Next →
                 </button>
