@@ -38,6 +38,7 @@ export default function ManageCars() {
     (async () => {
       try {
         const response = await getAdminCars();
+        console.log("📦 Received admin cars:", response);
         setCarData(response.cars || []);
       } catch (error) {
         console.error("Failed to fetch admin cars:", error);
