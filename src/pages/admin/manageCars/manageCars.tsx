@@ -3,8 +3,7 @@ import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
 import { getAdminCars } from "../../../services/carService";
 import "./manageCars.css";
 
-// types/AdminCar.ts
-
+// AdminCar type matching backend data format
 export interface AdminCar {
   id: number;
   carNo: string;
@@ -21,6 +20,9 @@ export interface AdminCar {
   isVerified: boolean;
   ratings: number;
 }
+export interface GetAdminCarsResponse {
+  cars: AdminCar[];
+}
 
 export default function ManageCars() {
   const [carData, setCarData] = useState<AdminCar[]>([]);
@@ -31,18 +33,19 @@ export default function ManageCars() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 5;
+
   useEffect(() => {
     (async () => {
       try {
-        const cars = await getAdminCars();
-        setCarData(cars);
+        const response = await getAdminCars();
+        setCarData(response.cars || []);
       } catch (error) {
         console.error("Failed to fetch admin cars:", error);
       }
     })();
   }, []);
 
-  // Unique dropdown values
+  // Unique dropdown values to filter by
   const uniqueTypes = ["All Types", ...new Set(carData.map((car) => car.type))];
   const uniqueYears = [
     "All Years",
@@ -76,8 +79,9 @@ export default function ManageCars() {
         matchesMonthFilter
       );
     });
-  }, [search, filter, typeFilter, yearFilter, monthFilter]);
+  }, [search, filter, typeFilter, yearFilter, monthFilter, carData]);
 
+  // Pagination logic
   const paginatedCars = useMemo(() => {
     const start = (page - 1) * pageSize;
     return filteredCars.slice(start, start + pageSize);
@@ -92,7 +96,7 @@ export default function ManageCars() {
         <h1 className="zipd-mc-title_5832">Car Fleet Management</h1>
 
         <div className="zipd-mc-card_5832">
-          {/* 🔍 Filters */}
+          {/* Filters */}
           <div className="zipd-mc-toolbar_5832">
             <input
               type="text"
@@ -165,7 +169,7 @@ export default function ManageCars() {
             <button className="zipd-mc-addbtn_5832">Add Vehicle</button>
           </div>
 
-          {/* 🚘 Car Table */}
+          {/* Car Table */}
           <table className="zipd-mc-table_5832">
             <thead>
               <tr>
@@ -213,9 +217,7 @@ export default function ManageCars() {
                       </span>
                     </td>
                     <td>{car.hostedBy}</td>
-                    <td>
-                      {car.isVerified ? <span>✅</span> : <span>❌</span>}
-                    </td>
+                    <td>{car.isVerified ? "✅" : "❌"}</td>
                     <td>
                       <span
                         className={`zipd-mc-status_5832 ${
@@ -265,7 +267,7 @@ export default function ManageCars() {
             </tbody>
           </table>
 
-          {/* 📄 Pagination */}
+          {/* Pagination */}
           <div className="zipd-mc-pagination_5832">
             <div className="zipd-mc-paginationtext_5832">
               <span className="zipd-mc-results-count_5832">

@@ -1,6 +1,6 @@
 import axios from "axios";
 import type { Car } from "../types/Cars";
-import type { AdminCar } from "../pages/admin/manageCars/manageCars";
+import type { GetAdminCarsResponse } from "../pages/admin/manageCars/manageCars";
 
 // ✅ Use env variable
 const API_URL = `${import.meta.env.VITE_API_URL}/api/cars`;
@@ -208,7 +208,7 @@ export const getCarLocation = async (car_id: number): Promise<string> => {
   return response.data.location;
 };
 
-export const getAdminCars = async (): Promise<AdminCar[]> => {
+export const getAdminCars = async (): Promise<GetAdminCarsResponse> => {
   try {
     const token = localStorage.getItem("token");
 
@@ -224,7 +224,7 @@ export const getAdminCars = async (): Promise<AdminCar[]> => {
     );
 
     console.log("🚗 Admin Cars API Response:", response.data);
-    return response.data.cars as AdminCar[];
+    return response.data.cars as GetAdminCarsResponse;
   } catch (error) {
     console.error("Error fetching admin cars:", error);
     throw error;
