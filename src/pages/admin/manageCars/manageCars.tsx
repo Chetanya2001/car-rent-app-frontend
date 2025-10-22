@@ -20,10 +20,6 @@ export interface AdminCar {
   ratings: number;
 }
 
-export interface GetAdminCarsResponse {
-  cars: AdminCar[];
-}
-
 export default function ManageCars() {
   const [carData, setCarData] = useState<AdminCar[]>([]);
   const [filter, setFilter] = useState<"All" | "Available" | "Rented">("All");
@@ -35,33 +31,26 @@ export default function ManageCars() {
   const [loading, setLoading] = useState(true);
   const pageSize = 5;
 
-  // ✅ Fetch data properly
   useEffect(() => {
     const fetchCars = async () => {
       try {
         setLoading(true);
         const response = await getAdminCars();
-        console.log("📦 Raw API Response:", response);
-
         const carsArray = Array.isArray(response)
           ? response
           : Array.isArray(response?.cars)
           ? response.cars
           : [];
-
         setCarData(carsArray);
-        console.log("🚗 Cars set in state:", carsArray);
       } catch (error) {
-        console.error("❌ Failed to fetch admin cars:", error);
+        console.error("Failed to load cars:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchCars();
   }, []);
 
-  // ✅ Unique dropdown values
   const uniqueTypes = useMemo(
     () => ["All Types", ...new Set(carData.map((car) => car.type))],
     [carData]
@@ -75,7 +64,6 @@ export default function ManageCars() {
     [carData]
   );
 
-  // ✅ Filtering logic
   const filteredCars = useMemo(() => {
     return carData.filter((car) => {
       const matchesSearch =
@@ -100,12 +88,10 @@ export default function ManageCars() {
     });
   }, [carData, search, filter, typeFilter, yearFilter, monthFilter]);
 
-  // ✅ Fix pagination reset when filters/search change
   useEffect(() => {
     setPage(1);
   }, [filter, typeFilter, yearFilter, monthFilter, search]);
 
-  // ✅ Paginate filtered data
   const totalPages = Math.ceil(filteredCars.length / pageSize);
   const paginatedCars = useMemo(() => {
     const start = (page - 1) * pageSize;
@@ -119,7 +105,7 @@ export default function ManageCars() {
         <h1 className="zipd-mc-title_5832">Car Fleet Management</h1>
 
         {loading ? (
-          <p>Loading cars...</p>
+          <div className="loading">Loading cars...</div>
         ) : (
           <div className="zipd-mc-card_5832">
             {/* Filters */}
@@ -207,8 +193,11 @@ export default function ManageCars() {
               </thead>
               <tbody>
                 {paginatedCars.length > 0 ? (
-                  paginatedCars.map((car) => (
-                    <tr key={car.id}>
+                  paginatedCars.map((car, index) => (
+                    <tr
+                      key={car.id}
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
                       <td>{car.id}</td>
                       <td>{car.carNo}</td>
                       <td>
@@ -236,7 +225,7 @@ export default function ManageCars() {
                           {car.status}
                         </span>
                       </td>
-                      <td>{car.ratings?.toFixed(1) || "0.0"}</td>
+                      <td>{car.ratings.toFixed(1)}</td>
                       <td>✏️ 👁️ 🗑️</td>
                     </tr>
                   ))
@@ -253,21 +242,25 @@ export default function ManageCars() {
               </tbody>
             </table>
 
-            {/* ✅ Pagination (same design, functional now) */}
-            <div className="zipd-mc-pagination_5832">
-              <span>
-                Showing {(page - 1) * pageSize + 1}–
-                {Math.min(page * pageSize, filteredCars.length)} of{" "}
-                {filteredCars.length} vehicles
-              </span>
-              <div>
+            {/* Pagination (Manage Guests style) */}
+            <div className="pagination">
+              <div className="pagination-info">
+                <div className="results-count">
+                  Showing {(page - 1) * pageSize + 1}-
+                  {Math.min(page * pageSize, filteredCars.length)} of{" "}
+                  {filteredCars.length} vehicles
+                </div>
+                <div className="page-number">
+                  Page {page} of {totalPages || 1}
+                </div>
+              </div>
+              <div className="pagination-controls">
                 <button
                   disabled={page === 1}
                   onClick={() => setPage((prev) => prev - 1)}
                 >
                   ← Previous
                 </button>
-                <br />
                 <button
                   disabled={page === totalPages || totalPages === 0}
                   onClick={() => setPage((prev) => prev + 1)}
