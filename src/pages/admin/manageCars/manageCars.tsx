@@ -20,6 +20,9 @@ export interface AdminCar {
   ratings: number;
 }
 
+export interface GetAdminCarsResponse {
+  cars: AdminCar[];
+}
 export default function ManageCars() {
   const [carData, setCarData] = useState<AdminCar[]>([]);
   const [filter, setFilter] = useState<"All" | "Available" | "Rented">("All");
