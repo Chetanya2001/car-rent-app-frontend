@@ -229,7 +229,19 @@ export default function ManageCars() {
                         </span>
                       </td>
                       <td>{car.ratings.toFixed(1)}</td>
-                      <td>✏️ 👁️ 🗑️</td>
+                      <td>
+                        <div className="zipd-mc-actions_5832">
+                          <span className="zipd-mc-iconbtn_5832" title="Edit">
+                            ✏️
+                          </span>
+                          <span className="zipd-mc-iconbtn_5832" title="View">
+                            👁️
+                          </span>
+                          <span className="zipd-mc-iconbtn_5832" title="Delete">
+                            🗑️
+                          </span>
+                        </div>
+                      </td>
                     </tr>
                   ))
                 ) : (

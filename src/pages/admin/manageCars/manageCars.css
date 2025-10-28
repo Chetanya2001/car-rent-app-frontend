@@ -147,6 +147,12 @@
   border-spacing: 0 12px;
   margin-top: 8px;
 }
+/* Actions column width */
+.zipd-mc-table_5832 th:nth-child(14),
+.zipd-mc-table_5832 td:nth-child(14) {
+  width: 140px;
+  white-space: nowrap;
+}
 
 .zipd-mc-table_5832 th {
   color: #6b7280;
@@ -257,19 +263,23 @@
 /* ========= Action Buttons ========= */
 .zipd-mc-actions_5832 {
   display: flex;
-  gap: 12px;
+  gap: 16px;
+  justify-content: center;
   align-items: center;
+  width: 100%;
 }
-
 .zipd-mc-iconbtn_5832 {
+  flex: 1;
+  text-align: center;
   font-size: 1.3em;
   color: #64748b;
   cursor: pointer;
   transition: all 0.2s ease;
-  padding: 8px;
+  padding: 8px 12px;
   border-radius: 8px;
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
+  user-select: none;
 }
 
 .zipd-mc-iconbtn_5832:hover {
