@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
-import { getAdminCars } from "../../../services/carService";
+import { deleteCarById, getAdminCars } from "../../../services/carService";
 import "./manageCars.css";
 
 export interface AdminCar {
@@ -100,6 +100,21 @@ export default function ManageCars() {
     const start = (page - 1) * pageSize;
     return filteredCars.slice(start, start + pageSize);
   }, [filteredCars, page]);
+
+  const handleCarDelete = async (carId: number) => {
+    if (window.confirm("Are you sure you want to delete this car?")) {
+      setCarData((prevCars) => prevCars.filter((car) => car.id !== carId));
+    }
+    try {
+      setLoading(true);
+      await deleteCarById(carId);
+      setCarData((prevCars) => prevCars.filter((car) => car.id !== carId));
+    } catch (error) {
+      console.error("Failed to delete car:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -237,7 +252,11 @@ export default function ManageCars() {
                           <span className="zipd-mc-iconbtn_5832" title="View">
                             👁️
                           </span>
-                          <span className="zipd-mc-iconbtn_5832" title="Delete">
+                          <span
+                            className="zipd-mc-iconbtn_5832"
+                            title="Delete"
+                            onClick={() => handleCarDelete(car.id)}
+                          >
                             🗑️
                           </span>
                         </div>
