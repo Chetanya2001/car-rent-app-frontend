@@ -99,3 +99,24 @@ export const getGuestBookings = async (token: string): Promise<any[]> => {
     throw err.response?.data || new Error("Failed to fetch guest bookings");
   }
 };
+
+export const deleteBooking = async (
+  bookingId: string,
+  token: string
+): Promise<{ message: string }> => {
+  try {
+    const res = await axios.delete(`${API_URL}/delete-booking/${bookingId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (err: any) {
+    console.error(
+      "❌ Error deleting booking:",
+      err.response?.status,
+      err.response?.data || err.message
+    );
+    throw err.response?.data || new Error("Delete booking failed");
+  }
+};

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
 import "./manageBooking.css";
-import { getAllBookingsAdmin } from "../../../services/booking";
+import { getAllBookingsAdmin, deleteBooking } from "../../../services/booking";
 
 interface Booking {
   bookingId: string;
@@ -50,12 +50,13 @@ export default function BookingManagement() {
   const [page, setPage] = useState(1);
   const pageSize = 5;
 
+  const token = localStorage.getItem("token") || "";
+
   useEffect(() => {
     async function fetchBookings() {
       setLoading(true);
       setError(null);
       try {
-        const token = localStorage.getItem("token") || "";
         const data = await getAllBookingsAdmin(token);
         console.log("Fetched admin bookings:", data);
 
@@ -88,7 +89,7 @@ export default function BookingManagement() {
     }
 
     fetchBookings();
-  }, []);
+  }, [token]);
 
   const filteredBookings = useMemo(() => {
     return bookingData.filter((booking) => {
@@ -159,6 +160,25 @@ export default function BookingManagement() {
         return "⏳";
       default:
         return "●";
+    }
+  };
+
+  // DELETE handler for bookings
+  const handleDelete = async (bookingId: string) => {
+    if (!window.confirm("Are you sure you want to delete this booking?")) {
+      return;
+    }
+
+    try {
+      await deleteBooking(bookingId, token);
+      setBookingData((prev) => prev.filter((b) => b.bookingId !== bookingId));
+      // Adjust pagination if current page becomes empty
+      if ((page - 1) * pageSize >= filteredBookings.length - 1 && page > 1) {
+        setPage(page - 1);
+      }
+    } catch (err) {
+      alert("Failed to delete booking. Please try again.");
+      console.error("Delete booking error:", err);
     }
   };
 
@@ -324,7 +344,11 @@ export default function BookingManagement() {
                         <button className="icon-btn" title="Edit Booking">
                           ✏️
                         </button>
-                        <button className="icon-btn" title="Cancel Booking">
+                        <button
+                          className="icon-btn"
+                          title="Cancel Booking"
+                          onClick={() => handleDelete(booking.bookingId)}
+                        >
                           ❌
                         </button>
                       </div>
