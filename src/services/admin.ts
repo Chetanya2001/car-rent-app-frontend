@@ -23,3 +23,24 @@ export const getAllUsers = async (): Promise<User[]> => {
   });
   return response.data;
 };
+
+export const deleteUser = async (
+  token: string,
+  userId: string
+): Promise<{ message: string }> => {
+  try {
+    const response = await axios.delete(`${API_URL}/delete-user/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      "❌ Error deleting user:",
+      error.response?.status,
+      error.response?.data || error.message
+    );
+    throw error.response?.data || new Error("Delete user failed");
+  }
+};

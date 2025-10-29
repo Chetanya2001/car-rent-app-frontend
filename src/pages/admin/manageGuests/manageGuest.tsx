@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
-import { getAllUsers } from "./../../../services/admin";
+import { getAllUsers, deleteUser } from "./../../../services/admin"; // Import deleteUser
 import "./manageGuest.css";
 
 interface Guest {
@@ -11,7 +11,7 @@ interface Guest {
   phone: string;
   id1Verified: boolean;
   id2Verified: boolean;
-  isVerified: boolean; // corresponds to existing verified status
+  isVerified: boolean;
   ratings: number;
   action?: string;
 }
@@ -22,6 +22,9 @@ export default function ManageGuests() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 5;
+
+  // Replace this with actual token management (e.g., from context or auth store)
+  const token = localStorage.getItem("token") || "";
 
   useEffect(() => {
     const fetchGuests = async () => {
@@ -34,10 +37,10 @@ export default function ManageGuests() {
           lastName: guest.last_name,
           email: guest.email,
           phone: guest.phone || "N/A",
-          id1Verified: false, // temporary default, set later
-          id2Verified: false, // temporary default, set later
+          id1Verified: false,
+          id2Verified: false,
           isVerified: guest.is_verified,
-          ratings: 0, // temporary default, set later
+          ratings: 0,
         }));
         setGuests(mappedGuests);
       } catch (error) {
@@ -69,6 +72,24 @@ export default function ManageGuests() {
   }, [filteredGuests, page]);
 
   const totalPages = Math.ceil(filteredGuests.length / pageSize);
+
+  // Delete user handler
+  const handleDelete = async (userId: number) => {
+    if (!window.confirm("Are you sure you want to delete this guest?")) return;
+
+    try {
+      await deleteUser(token, userId.toString());
+      // Remove deleted guest from local state
+      setGuests((prev) => prev.filter((guest) => guest.id !== userId));
+      // Adjust pagination if needed
+      if ((page - 1) * pageSize >= filteredGuests.length - 1 && page > 1) {
+        setPage(page - 1);
+      }
+    } catch (error) {
+      console.error("Failed to delete guest:", error);
+      alert("Failed to delete guest. Please try again.");
+    }
+  };
 
   return (
     <>
@@ -150,7 +171,11 @@ export default function ManageGuests() {
                           <button className="edit" title="Edit Guest">
                             ✏️
                           </button>
-                          <button className="delete" title="Delete Guest">
+                          <button
+                            className="delete"
+                            title="Delete Guest"
+                            onClick={() => handleDelete(guest.id)}
+                          >
                             🗑️
                           </button>
                         </div>
