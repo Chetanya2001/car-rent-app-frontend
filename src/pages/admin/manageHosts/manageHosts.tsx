@@ -1,6 +1,18 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
+import { getAllHosts, deleteUser } from "../../../services/admin"; // Ensure the import path is correct
 import "./manageHosts.css";
+
+interface User {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  role: "admin" | "host" | "guest";
+  is_verified: boolean;
+  // Extend with more fields if your backend provides them
+}
 
 interface Host {
   id: number;
@@ -12,23 +24,49 @@ interface Host {
   status: "Active" | "Inactive" | "Pending";
   joinDate: string;
   rating: number;
-  // old fields removed to avoid duplication: name, contact, carsListed, location
-  action?: string; // For UI action placeholders if needed
+  action?: string;
 }
 
-const hostData: Host[] = [];
+const pageSize = 5;
 
 export default function ManageHosts() {
+  const [hosts, setHosts] = useState<Host[]>([]);
   const [filter, setFilter] = useState<
     "All" | "Active" | "Inactive" | "Pending"
   >("All");
-  const [dateFilter, setDateFilter] = useState<string>("All Dates");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const pageSize = 5;
 
+  // Fetch token from localStorage
+  const token = localStorage.getItem("token") || "";
+
+  // Fetch hosts (users with role 'host') from API
+  useEffect(() => {
+    const fetchHostsData = async () => {
+      try {
+        const users: User[] = await getAllHosts(); // Your API call
+        const mappedHosts: Host[] = users.map((user) => ({
+          id: user.id,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          address: "Unknown Address", // Placeholder, extend backend to provide real data
+          city: "Unknown City", // Placeholder
+          id1Verified: user.is_verified,
+          status: user.is_verified ? "Active" : "Pending", // Example
+          joinDate: "2025-01-01", // Placeholder, extend backend to provide real data
+          rating: 0, // Placeholder, extend backend to provide ratings
+        }));
+        setHosts(mappedHosts);
+      } catch (error) {
+        console.error("Failed to load hosts:", error);
+      }
+    };
+    fetchHostsData();
+  }, []);
+
+  // Filtered hosts based on search and status filter
   const filteredHosts = useMemo(() => {
-    return hostData.filter((host) => {
+    return hosts.filter((host) => {
       const matchesSearch =
         host.firstName.toLowerCase().includes(search.toLowerCase()) ||
         host.lastName.toLowerCase().includes(search.toLowerCase()) ||
@@ -37,22 +75,11 @@ export default function ManageHosts() {
 
       const matchesFilter = filter === "All" || host.status === filter;
 
-      let matchesDateFilter = true;
-      if (dateFilter !== "All Dates") {
-        const hostYear = new Date(host.joinDate).getFullYear();
-        const currentYear = new Date().getFullYear();
-
-        if (dateFilter === "This Year") {
-          matchesDateFilter = hostYear === currentYear;
-        } else if (dateFilter === "Last Year") {
-          matchesDateFilter = hostYear === currentYear - 1;
-        }
-      }
-
-      return matchesSearch && matchesFilter && matchesDateFilter;
+      return matchesSearch && matchesFilter;
     });
-  }, [search, filter, dateFilter]);
+  }, [search, filter, hosts]);
 
+  // Pagination logic
   const paginatedHosts = useMemo(() => {
     const start = (page - 1) * pageSize;
     return filteredHosts.slice(start, start + pageSize);
@@ -60,28 +87,20 @@ export default function ManageHosts() {
 
   const totalPages = Math.ceil(filteredHosts.length / pageSize);
 
-  const dateOptions = ["All Dates", "This Year", "Last Year"];
-
-  const renderStars = (rating: number) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(
-        <span key={i} className="star-full">
-          ★
-        </span>
-      );
+  // Handle delete host
+  const handleDelete = async (hostId: number) => {
+    if (!window.confirm("Are you sure you want to delete this host?")) return;
+    try {
+      await deleteUser(token, hostId.toString()); // Your API call
+      // Remove host from local state
+      setHosts((prev) => prev.filter((host) => host.id !== hostId));
+      // adjust page if necessary
+      if ((page - 1) * pageSize >= filteredHosts.length - 1 && page > 1)
+        setPage(page - 1);
+    } catch (error) {
+      console.error("Failed to delete host:", error);
+      alert("Failed to delete host. Please try again.");
     }
-    if (hasHalfStar) {
-      stars.push(
-        <span key="half" className="star-half">
-          ☆
-        </span>
-      );
-    }
-    return stars;
   };
 
   return (
@@ -101,6 +120,7 @@ export default function ManageHosts() {
               className="zipd-mc-search_5832"
             />
 
+            {/* Filters */}
             <div className="zipd-mc-filters_5832">
               <select
                 value={filter}
@@ -118,25 +138,14 @@ export default function ManageHosts() {
                 <option value="Pending">Pending</option>
               </select>
 
-              <select
-                value={dateFilter}
-                onChange={(e) => {
-                  setDateFilter(e.target.value);
-                  setPage(1);
-                }}
-                className="zipd-mc-filterselect_5832"
-              >
-                {dateOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
+              {/* Date filter placeholder, extend as needed */}
+              {/* <select> ... </select> */}
             </div>
 
             <button className="zipd-mc-addbtn_5832">Add Host</button>
           </div>
 
+          {/* Hosts Table */}
           <table className="zipd-mc-table_5832">
             <thead>
               <tr>
@@ -157,27 +166,25 @@ export default function ManageHosts() {
                     key={host.id}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <td data-label="First Name">{host.firstName}</td>
-                    <td data-label="Last Name">{host.lastName}</td>
-                    <td data-label="Address">{host.address}</td>
-                    <td data-label="City">{host.city}</td>
-                    <td data-label="ID 1 Verified">
-                      {host.id1Verified ? "✅" : "❌"}
-                    </td>
-                    <td data-label="Status">
+                    <td>{host.firstName}</td>
+                    <td>{host.lastName}</td>
+                    <td>{host.address}</td>
+                    <td>{host.city}</td>
+                    <td>{host.id1Verified ? "✅" : "❌"}</td>
+                    <td>
                       <span
                         className={`zipd-mc-status_5832 zipd-mc-status-${host.status.toLowerCase()}_5832`}
                       >
                         {host.status}
                       </span>
                     </td>
-                    <td data-label="Ratings">
+                    <td>
                       <div className="zipd-mc-rating_5832">
                         {renderStars(host.rating)}
                         <span>({host.rating.toFixed(1)})</span>
                       </div>
                     </td>
-                    <td data-label="Actions">
+                    <td>
                       <div className="zipd-mc-actions_5832">
                         <button
                           className="zipd-mc-iconbtn_5832"
@@ -194,6 +201,7 @@ export default function ManageHosts() {
                         <button
                           className="zipd-mc-iconbtn_5832 delete"
                           title="Delete Host"
+                          onClick={() => handleDelete(host.id)}
                         >
                           🗑️
                         </button>
@@ -214,6 +222,7 @@ export default function ManageHosts() {
             </tbody>
           </table>
 
+          {/* Pagination Controls */}
           <div className="zipd-mc-pagination_5832">
             <div className="zipd-mc-paginationtext_5832">
               <span className="zipd-mc-results-count_5832">
@@ -245,3 +254,26 @@ export default function ManageHosts() {
     </>
   );
 }
+
+// Helper to render stars for ratings
+const renderStars = (rating: number) => {
+  const stars = [];
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 !== 0;
+
+  for (let i = 0; i < fullStars; i++) {
+    stars.push(
+      <span key={i} className="star-full">
+        ★
+      </span>
+    );
+  }
+  if (hasHalfStar) {
+    stars.push(
+      <span key="half" className="star-half">
+        ☆
+      </span>
+    );
+  }
+  return stars;
+};

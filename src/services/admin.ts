@@ -44,3 +44,15 @@ export const deleteUser = async (
     throw error.response?.data || new Error("Delete user failed");
   }
 };
+
+export const getAllHosts = async (): Promise<User[]> => {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No auth token found");
+
+  const response = await axios.get<User[]>(`${API_URL}/get-hosts`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
