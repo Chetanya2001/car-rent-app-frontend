@@ -144,8 +144,6 @@ export default function ManageCars() {
 
     try {
       setLoading(true);
-
-      // 🔄 Map frontend fields to backend fields
       const payload = {
         make: editForm.name?.split(" ")[0] || "",
         model: editForm.name?.split(" ")[1] || "",
