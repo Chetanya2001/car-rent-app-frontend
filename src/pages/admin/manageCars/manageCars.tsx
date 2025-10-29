@@ -1,6 +1,12 @@
+"use client";
+
 import { useState, useMemo, useEffect } from "react";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
-import { deleteCarById, getAdminCars } from "../../../services/carService";
+import {
+  deleteCarById,
+  getAdminCars,
+  editCar,
+} from "../../../services/carService";
 import "./manageCars.css";
 
 export interface AdminCar {
@@ -23,6 +29,7 @@ export interface AdminCar {
 export interface GetAdminCarsResponse {
   cars: AdminCar[];
 }
+
 export default function ManageCars() {
   const [carData, setCarData] = useState<AdminCar[]>([]);
   const [filter, setFilter] = useState<"All" | "Available" | "Rented">("All");
@@ -32,6 +39,9 @@ export default function ManageCars() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [editingCar, setEditingCar] = useState<AdminCar | null>(null);
+  const [editForm, setEditForm] = useState<Partial<AdminCar>>({});
+
   const pageSize = 5;
 
   useEffect(() => {
@@ -111,6 +121,54 @@ export default function ManageCars() {
       setCarData((prevCars) => prevCars.filter((car) => car.id !== carId));
     } catch (error) {
       console.error("Failed to delete car:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🧩 Edit Handlers
+  const handleEditClick = (car: AdminCar) => {
+    setEditingCar(car);
+    setEditForm({ ...car });
+  };
+
+  const handleEditChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setEditForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingCar) return;
+
+    try {
+      setLoading(true);
+
+      // 🔄 Map frontend fields to backend fields
+      const payload = {
+        make: editForm.name?.split(" ")[0] || "",
+        model: editForm.name?.split(" ")[1] || "",
+        year: editForm.year,
+        price_per_hour: editForm.price,
+        city_of_registration: editForm.location,
+        fuel_type: editForm.fuelType,
+        seating_capacity: editForm.seatingCapacity,
+        status: editForm.status,
+        isVerified: editForm.isVerified,
+      };
+
+      await editCar(editingCar.id, payload);
+
+      setCarData((prevCars) =>
+        prevCars.map((car) =>
+          car.id === editingCar.id ? { ...car, ...editForm } : car
+        )
+      );
+
+      setEditingCar(null);
+    } catch (error) {
+      console.error("Failed to update car:", error);
     } finally {
       setLoading(false);
     }
@@ -246,7 +304,11 @@ export default function ManageCars() {
                       <td>{car.ratings.toFixed(1)}</td>
                       <td>
                         <div className="zipd-mc-actions_5832">
-                          <span className="zipd-mc-iconbtn_5832" title="Edit">
+                          <span
+                            className="zipd-mc-iconbtn_5832"
+                            title="Edit"
+                            onClick={() => handleEditClick(car)}
+                          >
                             ✏️
                           </span>
                           <span className="zipd-mc-iconbtn_5832" title="View">
@@ -276,7 +338,7 @@ export default function ManageCars() {
               </tbody>
             </table>
 
-            {/* Pagination (Manage Guests style) */}
+            {/* Pagination */}
             <div className="pagination">
               <div className="pagination-info">
                 <div className="results-count">
@@ -301,6 +363,92 @@ export default function ManageCars() {
                 >
                   Next →
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 🧩 Edit Modal */}
+        {editingCar && (
+          <div className="edit-modal">
+            <div className="edit-modal-content">
+              <h2>Edit Car Details</h2>
+
+              <label>
+                Name:
+                <input
+                  type="text"
+                  name="name"
+                  value={editForm.name || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+
+              <label>
+                Year:
+                <input
+                  type="number"
+                  name="year"
+                  value={editForm.year || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+
+              <label>
+                Price:
+                <input
+                  type="number"
+                  name="price"
+                  value={editForm.price || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+
+              <label>
+                Location:
+                <input
+                  type="text"
+                  name="location"
+                  value={editForm.location || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+
+              <label>
+                Fuel Type:
+                <input
+                  type="text"
+                  name="fuelType"
+                  value={editForm.fuelType || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+
+              <label>
+                Seating Capacity:
+                <input
+                  type="number"
+                  name="seatingCapacity"
+                  value={editForm.seatingCapacity || ""}
+                  onChange={handleEditChange}
+                />
+              </label>
+
+              <label>
+                Status:
+                <select
+                  name="status"
+                  value={editForm.status || "Available"}
+                  onChange={handleEditChange}
+                >
+                  <option value="Available">Available</option>
+                  <option value="Rented">Rented</option>
+                </select>
+              </label>
+
+              <div className="edit-modal-buttons">
+                <button onClick={handleSaveEdit}>Save</button>
+                <button onClick={() => setEditingCar(null)}>Cancel</button>
               </div>
             </div>
           </div>

@@ -241,3 +241,50 @@ export const deleteCarById = async (car_id: number) => {
   });
   return response.data;
 };
+
+export const editCar = async (
+  car_id: number,
+  updateData: {
+    make?: string;
+    model?: string;
+    year?: number;
+    description?: string;
+    price_per_hour?: number;
+    city_of_registration?: string;
+    registration_type?: "Private" | "Commercial";
+    hand_type?: "First" | "Second";
+    owner_name?: string;
+    rc_number?: string;
+    rc_valid_till?: string;
+    insurance_company?: string;
+    insurance_idv_value?: number;
+    insurance_valid_till?: string;
+  }
+) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No auth token found. Please login first.");
+
+    console.log("✏️ Editing Car:", { car_id, updateData });
+
+    const response = await axios.put(
+      `${API_URL}/edit-car/${car_id}`,
+      updateData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("✅ Car Updated Successfully:", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      "❌ Error editing car:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
