@@ -368,7 +368,13 @@ export default function ManageCars() {
 
         {/* 🧩 Edit Modal */}
         {editingCar && (
-          <div className="edit-modal">
+          <div
+            className="edit-modal"
+            onClick={(e) => {
+              // Close modal only when clicking outside the content box
+              if (e.target === e.currentTarget) setEditingCar(null);
+            }}
+          >
             <div className="edit-modal-content">
               <h2>Edit Car Details</h2>
 
@@ -446,7 +452,15 @@ export default function ManageCars() {
 
               <div className="edit-modal-buttons">
                 <button onClick={handleSaveEdit}>Save</button>
-                <button onClick={() => setEditingCar(null)}>Cancel</button>
+                <button
+                  style={{
+                    background: "#ef4444",
+                    boxShadow: "0 6px 16px rgba(239, 68, 68, 0.3)",
+                  }}
+                  onClick={() => setEditingCar(null)}
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </div>

@@ -380,39 +380,105 @@
   font-weight: 700;
   font-size: 0.9em;
 }
-.edit-modal-backdrop {
+/* ========= Edit Modal Overlay ========= */
+.edit-modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45); /* dark blur overlay */
+  backdrop-filter: blur(6px); /* blur effect */
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
 }
 
-.edit-modal {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  width: 400px;
+/* ========= Edit Modal Box ========= */
+.edit-modal-content {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 30px 40px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+  animation: popIn 0.25s ease;
+  position: relative;
+}
+
+.edit-modal-content h2 {
+  font-size: 1.6rem;
+  color: #111827;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.edit-modal-content label {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 14px;
 }
 
-.edit-modal label {
-  display: flex;
-  flex-direction: column;
-  font-size: 14px;
+.edit-modal-content input,
+.edit-modal-content select {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+  font-size: 1rem;
+  transition: all 0.3s ease;
 }
 
-.modal-actions {
+.edit-modal-content input:focus,
+.edit-modal-content select:focus {
+  border-color: #01d28e;
+  box-shadow: 0 0 0 3px rgba(1, 210, 142, 0.15);
+  outline: none;
+}
+
+.edit-modal-buttons {
   display: flex;
   justify-content: space-between;
-  margin-top: 10px;
+  margin-top: 24px;
+}
+
+.edit-modal-buttons button {
+  flex: 1;
+  margin: 0 6px;
+  background: linear-gradient(135deg, #01d28e 0%, #00b97b 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.edit-modal-buttons button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(1, 210, 142, 0.3);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* ========= Responsive ========= */
