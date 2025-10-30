@@ -30,7 +30,7 @@ const ManageGuests = () => {
     const fetchGuests = async () => {
       try {
         const res = await getAllUsers();
-        setGuests(res.filter((u) => u.role === "guest"));
+        setGuests(res.filter((u: Guest) => u.role === "guest"));
       } catch (err) {
         console.error("Failed to fetch guests:", err);
       } finally {
@@ -40,7 +40,7 @@ const ManageGuests = () => {
     fetchGuests();
   }, []);
 
-  // ✅ Filter guests safely
+  // ✅ Safe filtering
   const filteredGuests = useMemo(() => {
     return guests.filter((guest) => {
       const fullName = `${guest.first_name || ""} ${
@@ -52,25 +52,25 @@ const ManageGuests = () => {
     });
   }, [guests, searchQuery]);
 
-  // ✅ Pagination logic
+  // ✅ Pagination
   const totalPages = Math.ceil(filteredGuests.length / guestsPerPage);
   const displayedGuests = filteredGuests.slice(
     (currentPage - 1) * guestsPerPage,
     currentPage * guestsPerPage
   );
 
-  // ✅ Edit guest handler
+  // ✅ Edit guest
   const handleEditGuest = (guest: Guest) => {
     setEditingGuest(guest);
     setIsEditing(true);
   };
 
-  // ✅ Save guest update
+  // ✅ Save edit
   const handleSaveEdit = async () => {
     if (!editingGuest) return;
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("Authentication error. Please log in again.");
+      toast.error("Please login again");
       return;
     }
 
@@ -86,12 +86,12 @@ const ManageGuests = () => {
         prev.map((g) => (g.id === updatedGuest.id ? updatedGuest : g))
       );
 
+      toast.success("Guest updated successfully!");
       setIsEditing(false);
       setEditingGuest(null);
-      toast.success("Guest updated successfully!");
     } catch (err) {
-      console.error("Failed to update guest:", err);
-      toast.error("Error updating guest. Please try again.");
+      console.error(err);
+      toast.error("Failed to update guest");
     }
   };
 
@@ -101,97 +101,135 @@ const ManageGuests = () => {
 
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("Authentication error. Please log in again.");
+      toast.error("Please login again");
       return;
     }
 
     try {
       await deleteUser(token, String(id));
-      setGuests((prev) => prev.filter((guest) => guest.id !== id));
+      setGuests((prev) => prev.filter((g) => g.id !== id));
       toast.success("Guest deleted successfully!");
     } catch (err) {
-      console.error("Failed to delete guest:", err);
-      toast.error("Error deleting guest. Please try again.");
+      console.error(err);
+      toast.error("Failed to delete guest");
     }
   };
 
-  if (loading) return <div>Loading guests...</div>;
+  if (loading) return <div className="loading">Loading guests...</div>;
 
   return (
     <>
       <AdminNavBar />
       <Toaster position="top-right" />
       <div className="manage-guests-container">
-        <h1 className="manage-guests-title">Manage Guests</h1>
+        {/* Header */}
+        <div className="manage-guests-header">
+          <h1>Manage Guests</h1>
+          <button
+            className="add-btn"
+            onClick={() => toast("Feature coming soon!")}
+          >
+            + Add Guest
+          </button>
+        </div>
 
-        <input
-          type="text"
-          placeholder="Search by name or email"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="manage-guests-search"
-        />
-
-        <table className="manage-guests-table">
-          <thead>
-            <tr>
-              <th>Full Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Verified</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {displayedGuests.map((guest) => (
-              <tr key={guest.id}>
-                <td>
-                  {guest.first_name} {guest.last_name}
-                </td>
-                <td>{guest.email}</td>
-                <td>{guest.phone}</td>
-                <td>{guest.is_verified ? "✅" : "❌"}</td>
-                <td>
-                  <button
-                    onClick={() => handleEditGuest(guest)}
-                    className="guest-edit-btn"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteGuest(guest.id)}
-                    className="guest-delete-btn"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {/* ✅ Pagination Controls */}
-        {totalPages > 1 && (
-          <div className="manage-guests-pagination">
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
-            >
-              Prev
-            </button>
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => p + 1)}
-            >
-              Next
-            </button>
+        <div className="content-card">
+          {/* Filters */}
+          <div className="filters">
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
           </div>
-        )}
 
-        {/* ✅ Edit Modal */}
+          {/* Table */}
+          <div className="table-container">
+            <table className="guest-table">
+              <thead>
+                <tr>
+                  <th>Full Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Verified</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {displayedGuests.length > 0 ? (
+                  displayedGuests.map((guest) => (
+                    <tr key={guest.id}>
+                      <td className="guest-name">
+                        {guest.first_name} {guest.last_name}
+                      </td>
+                      <td className="guest-contact">{guest.email}</td>
+                      <td>{guest.phone}</td>
+                      <td>
+                        <span
+                          className={`status ${
+                            guest.is_verified ? "active" : "inactive"
+                          }`}
+                        >
+                          {guest.is_verified ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+                      <td className="actions">
+                        <button
+                          className="edit"
+                          onClick={() => handleEditGuest(guest)}
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          className="delete"
+                          onClick={() => handleDeleteGuest(guest.id)}
+                        >
+                          🗑️
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="no-data">
+                      No guests found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="pagination">
+              <div className="pagination-info">
+                <span className="results-count">
+                  Showing {displayedGuests.length} of {filteredGuests.length}
+                </span>
+              </div>
+              <div className="pagination-controls">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                >
+                  Prev
+                </button>
+                <span className="page-number">{currentPage}</span>
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Edit Modal */}
         {isEditing && editingGuest && (
           <div
             className="guest-edit-overlay"
@@ -201,59 +239,62 @@ const ManageGuests = () => {
           >
             <div className="guest-edit-box">
               <h2>Edit Guest</h2>
-              <div className="guest-edit-fields">
-                <label>First Name</label>
-                <input
-                  type="text"
-                  value={editingGuest.first_name}
-                  onChange={(e) =>
-                    setEditingGuest({
-                      ...editingGuest,
-                      first_name: e.target.value,
-                    })
-                  }
-                />
+              <label>First Name</label>
+              <input
+                type="text"
+                value={editingGuest.first_name}
+                onChange={(e) =>
+                  setEditingGuest({
+                    ...editingGuest,
+                    first_name: e.target.value,
+                  })
+                }
+              />
 
-                <label>Last Name</label>
-                <input
-                  type="text"
-                  value={editingGuest.last_name}
-                  onChange={(e) =>
-                    setEditingGuest({
-                      ...editingGuest,
-                      last_name: e.target.value,
-                    })
-                  }
-                />
+              <label>Last Name</label>
+              <input
+                type="text"
+                value={editingGuest.last_name}
+                onChange={(e) =>
+                  setEditingGuest({
+                    ...editingGuest,
+                    last_name: e.target.value,
+                  })
+                }
+              />
 
-                <label>Email</label>
-                <input
-                  type="text"
-                  value={editingGuest.email}
-                  onChange={(e) =>
-                    setEditingGuest({
-                      ...editingGuest,
-                      email: e.target.value,
-                    })
-                  }
-                />
+              <label>Email</label>
+              <input
+                type="text"
+                value={editingGuest.email}
+                onChange={(e) =>
+                  setEditingGuest({
+                    ...editingGuest,
+                    email: e.target.value,
+                  })
+                }
+              />
 
-                <label>Phone</label>
-                <input
-                  type="text"
-                  value={editingGuest.phone}
-                  onChange={(e) =>
-                    setEditingGuest({
-                      ...editingGuest,
-                      phone: e.target.value,
-                    })
-                  }
-                />
-              </div>
+              <label>Phone</label>
+              <input
+                type="text"
+                value={editingGuest.phone}
+                onChange={(e) =>
+                  setEditingGuest({
+                    ...editingGuest,
+                    phone: e.target.value,
+                  })
+                }
+              />
 
               <div className="guest-edit-buttons">
                 <button onClick={handleSaveEdit}>Save</button>
-                <button onClick={() => setIsEditing(false)}>Cancel</button>
+                <button
+                  className="guest-edit-cancel"
+                  onClick={() => setIsEditing(false)}
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </div>
