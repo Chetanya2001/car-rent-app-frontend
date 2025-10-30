@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useMemo, useState } from "react";
 import { getAllUsers, deleteUser, updateUser } from "../../../services/admin";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
