@@ -21,8 +21,8 @@ export default function ManageGuests() {
   const [filter, setFilter] = useState<"All" | "Active" | "Inactive">("All");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [editingGuest, setEditingGuest] = useState<Guest | null>(null); // 🆕
-  const [isEditing, setIsEditing] = useState(false); // 🆕
+  const [editingGuest, setEditingGuest] = useState<Guest | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const pageSize = 5;
   const token = localStorage.getItem("token") || "";
 
@@ -88,20 +88,17 @@ export default function ManageGuests() {
     }
   };
 
-  // 🆕 Handle Edit button click
   const handleEditClick = (guest: Guest) => {
     setEditingGuest(guest);
     setIsEditing(true);
   };
 
-  // 🆕 Handle input changes inside modal
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!editingGuest) return;
     const { name, value } = e.target;
     setEditingGuest((prev) => (prev ? { ...prev, [name]: value } : null));
   };
 
-  // 🆕 Save edited guest
   const handleSaveEdit = async () => {
     if (!editingGuest) return;
     try {
@@ -210,7 +207,7 @@ export default function ManageGuests() {
                           <button
                             className="edit"
                             title="Edit Guest"
-                            onClick={() => handleEditClick(guest)} // 🆕
+                            onClick={() => handleEditClick(guest)}
                           >
                             ✏️
                           </button>
@@ -266,74 +263,80 @@ export default function ManageGuests() {
         </div>
       </div>
 
-      {/* 🆕 Edit Modal */}
+      {/* ✅ Guest Edit Modal with unique classes */}
       {isEditing && editingGuest && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h2>Edit Guest</h2>
-            <div className="modal-content">
-              <label>
-                First Name:
-                <input
-                  type="text"
-                  name="firstName"
-                  value={editingGuest.firstName}
-                  onChange={handleInputChange}
-                />
-              </label>
-              <label>
-                Last Name:
-                <input
-                  type="text"
-                  name="lastName"
-                  value={editingGuest.lastName}
-                  onChange={handleInputChange}
-                />
-              </label>
-              <label>
-                Email:
-                <input
-                  type="email"
-                  name="email"
-                  value={editingGuest.email}
-                  onChange={handleInputChange}
-                />
-              </label>
-              <label>
-                Phone:
-                <input
-                  type="text"
-                  name="phone"
-                  value={editingGuest.phone}
-                  onChange={handleInputChange}
-                />
-              </label>
-              <label>
-                Status:
-                <select
-                  name="isVerified"
-                  value={editingGuest.isVerified ? "true" : "false"}
-                  onChange={(e) =>
-                    setEditingGuest((prev) =>
-                      prev
-                        ? { ...prev, isVerified: e.target.value === "true" }
-                        : null
-                    )
-                  }
-                >
-                  <option value="true">Active</option>
-                  <option value="false">Inactive</option>
-                </select>
-              </label>
-            </div>
+        <div
+          className="guest-edit-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsEditing(false);
+          }}
+        >
+          <div className="guest-edit-box">
+            <h2>Edit Guest Details</h2>
 
-            <div className="modal-actions">
-              <button onClick={handleSaveEdit} className="save-btn">
-                Save
-              </button>
+            <label>
+              First Name:
+              <input
+                type="text"
+                name="firstName"
+                value={editingGuest.firstName}
+                onChange={handleInputChange}
+              />
+            </label>
+
+            <label>
+              Last Name:
+              <input
+                type="text"
+                name="lastName"
+                value={editingGuest.lastName}
+                onChange={handleInputChange}
+              />
+            </label>
+
+            <label>
+              Email:
+              <input
+                type="email"
+                name="email"
+                value={editingGuest.email}
+                onChange={handleInputChange}
+              />
+            </label>
+
+            <label>
+              Phone:
+              <input
+                type="text"
+                name="phone"
+                value={editingGuest.phone}
+                onChange={handleInputChange}
+              />
+            </label>
+
+            <label>
+              Status:
+              <select
+                name="isVerified"
+                value={editingGuest.isVerified ? "true" : "false"}
+                onChange={(e) =>
+                  setEditingGuest((prev) =>
+                    prev
+                      ? { ...prev, isVerified: e.target.value === "true" }
+                      : null
+                  )
+                }
+              >
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </label>
+
+            <div className="guest-edit-buttons">
+              <button onClick={handleSaveEdit}>Save</button>
               <button
+                className="guest-edit-cancel"
                 onClick={() => setIsEditing(false)}
-                className="cancel-btn"
               >
                 Cancel
               </button>
