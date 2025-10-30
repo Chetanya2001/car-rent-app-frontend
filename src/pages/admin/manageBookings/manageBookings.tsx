@@ -459,13 +459,17 @@ export default function BookingManagement() {
         {/* Edit Modal */}
         {isEditing && editingBooking && (
           <div
-            className="guest-edit-overlay"
+            className="booking-edit-overlay"
             onClick={(e) => {
-              if (e.target === e.currentTarget) setIsEditing(false);
+              if (e.target === e.currentTarget) {
+                setIsEditing(false);
+                setEditingBooking(null);
+              }
             }}
           >
-            <div className="guest-edit-box">
+            <div className="booking-edit-box">
               <h2>Edit Booking</h2>
+              {/* Start Datetime */}
               <label>Start Datetime</label>
               <input
                 type="datetime-local"
@@ -477,7 +481,7 @@ export default function BookingManagement() {
                   })
                 }
               />
-
+              {/* End Datetime */}
               <label>End Datetime</label>
               <input
                 type="datetime-local"
@@ -489,7 +493,7 @@ export default function BookingManagement() {
                   })
                 }
               />
-
+              {/* Pickup Location */}
               <label>Pick-up Location</label>
               <input
                 type="text"
@@ -501,7 +505,7 @@ export default function BookingManagement() {
                   })
                 }
               />
-
+              {/* Dropoff Location */}
               <label>Drop-off Location</label>
               <input
                 type="text"
@@ -513,7 +517,7 @@ export default function BookingManagement() {
                   })
                 }
               />
-
+              {/* Status */}
               <label>Status</label>
               <select
                 value={editingBooking.status}
@@ -529,7 +533,7 @@ export default function BookingManagement() {
                 <option value="Cancelled">Cancelled</option>
                 <option value="Pending">Pending</option>
               </select>
-
+              {/* Insure Checkbox */}
               <label>
                 <input
                   type="checkbox"
@@ -543,11 +547,11 @@ export default function BookingManagement() {
                 />{" "}
                 Insure
               </label>
-
-              <div className="guest-edit-buttons">
+              {/* Buttons */}
+              <div className="booking-edit-buttons">
                 <button onClick={handleSaveEdit}>Save</button>
                 <button
-                  className="guest-edit-cancel"
+                  className="booking-edit-cancel"
                   onClick={() => {
                     setIsEditing(false);
                     setEditingBooking(null);
