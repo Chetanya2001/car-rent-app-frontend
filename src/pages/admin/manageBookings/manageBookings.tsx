@@ -1,11 +1,17 @@
 import { useState, useEffect, useMemo } from "react";
+import toast, { Toaster } from "react-hot-toast";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
+import {
+  getAllBookingsAdmin,
+  deleteBooking,
+  updateBooking,
+} from "../../../services/booking";
+
 import "./manageBooking.css";
-import { getAllBookingsAdmin, deleteBooking } from "../../../services/booking";
 
 interface Booking {
   bookingId: string;
-  carNo: string; // Using carId as carNo for display because original data has no car_no
+  carNo: string;
   bookedBy: string;
   pickUpLoc: string;
   pickUpType: string;
@@ -17,7 +23,6 @@ interface Booking {
   insure: boolean;
   payment: string;
   status: "Active" | "Completed" | "Cancelled" | "Pending";
-  action?: string;
   ratings: number;
 }
 
@@ -52,17 +57,19 @@ export default function BookingManagement() {
 
   const token = localStorage.getItem("token") || "";
 
+  // State for editing booking
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
+
   useEffect(() => {
     async function fetchBookings() {
       setLoading(true);
       setError(null);
       try {
         const data = await getAllBookingsAdmin(token);
-        console.log("Fetched admin bookings:", data);
-
         const mappedData: Booking[] = data.map((item: any) => ({
           bookingId: item.id.toString(),
-          carNo: item.Car?.id ? item.Car.id.toString() : "N/A", // Use Car.id as carNo
+          carNo: item.Car?.id ? item.Car.id.toString() : "N/A",
           bookedBy: `${item.guest?.first_name || ""} ${
             item.guest?.last_name || ""
           }`.trim(),
@@ -76,10 +83,8 @@ export default function BookingManagement() {
           insure: Boolean(item.insure_amount && item.insure_amount > 0),
           payment: item.payment_status || "Pending",
           status: item.status,
-          action: "",
           ratings: item.ratings || 0,
         }));
-
         setBookingData(mappedData);
         setLoading(false);
       } catch (err: any) {
@@ -87,7 +92,6 @@ export default function BookingManagement() {
         setLoading(false);
       }
     }
-
     fetchBookings();
   }, [token]);
 
@@ -163,22 +167,70 @@ export default function BookingManagement() {
     }
   };
 
-  // DELETE handler for bookings
   const handleDelete = async (bookingId: string) => {
     if (!window.confirm("Are you sure you want to delete this booking?")) {
       return;
     }
-
     try {
       await deleteBooking(bookingId, token);
       setBookingData((prev) => prev.filter((b) => b.bookingId !== bookingId));
-      // Adjust pagination if current page becomes empty
       if ((page - 1) * pageSize >= filteredBookings.length - 1 && page > 1) {
         setPage(page - 1);
       }
+      toast.success("Booking deleted successfully");
     } catch (err) {
       alert("Failed to delete booking. Please try again.");
       console.error("Delete booking error:", err);
+    }
+  };
+
+  // Open booking in edit modal
+  const handleEdit = (booking: Booking) => {
+    setEditingBooking(booking);
+    setIsEditing(true);
+  };
+
+  // Save edited booking
+  const handleSaveEdit = async () => {
+    if (!editingBooking) return;
+    try {
+      const updatedBooking = await updateBooking(
+        editingBooking.bookingId,
+        {
+          // Send only editable fields - adjust as needed
+          start_datetime: editingBooking.startDatetime,
+          end_datetime: editingBooking.endDatetime,
+          pickup_address: editingBooking.pickUpLoc,
+          drop_address: editingBooking.dropOffLoc,
+          status: editingBooking.status,
+          insure_amount: editingBooking.insure ? 1 : 0, // example boolean to number
+          // Add others if needed
+        },
+        token
+      );
+      setBookingData((prev) =>
+        prev.map((b) =>
+          b.bookingId === editingBooking.bookingId
+            ? {
+                ...b,
+                ...{
+                  startDatetime: updatedBooking.booking.start_datetime,
+                  endDatetime: updatedBooking.booking.end_datetime,
+                  pickUpLoc: updatedBooking.booking.pickup_address,
+                  dropOffLoc: updatedBooking.booking.drop_address,
+                  status: updatedBooking.booking.status,
+                  insure: updatedBooking.booking.insure_amount > 0,
+                },
+              }
+            : b
+        )
+      );
+      toast.success("Booking updated successfully!");
+      setIsEditing(false);
+      setEditingBooking(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update booking");
     }
   };
 
@@ -209,6 +261,7 @@ export default function BookingManagement() {
   return (
     <>
       <AdminNavBar />
+      <Toaster position="top-right" />
       <div className="booking-management">
         <h1 className="title">Booking Management</h1>
 
@@ -338,10 +391,18 @@ export default function BookingManagement() {
                     <td>{booking.ratings.toFixed(1)}</td>
                     <td>
                       <div className="actions">
-                        <button className="icon-btn" title="View Details">
+                        <button
+                          className="icon-btn"
+                          title="View Details"
+                          // Implement view details as needed
+                        >
                           👁️
                         </button>
-                        <button className="icon-btn" title="Edit Booking">
+                        <button
+                          className="icon-btn"
+                          title="Edit Booking"
+                          onClick={() => handleEdit(booking)}
+                        >
                           ✏️
                         </button>
                         <button
@@ -394,6 +455,110 @@ export default function BookingManagement() {
             </div>
           </div>
         </div>
+
+        {/* Edit Modal */}
+        {isEditing && editingBooking && (
+          <div
+            className="guest-edit-overlay"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setIsEditing(false);
+            }}
+          >
+            <div className="guest-edit-box">
+              <h2>Edit Booking</h2>
+              <label>Start Datetime</label>
+              <input
+                type="datetime-local"
+                value={editingBooking.startDatetime}
+                onChange={(e) =>
+                  setEditingBooking({
+                    ...editingBooking,
+                    startDatetime: e.target.value,
+                  })
+                }
+              />
+
+              <label>End Datetime</label>
+              <input
+                type="datetime-local"
+                value={editingBooking.endDatetime}
+                onChange={(e) =>
+                  setEditingBooking({
+                    ...editingBooking,
+                    endDatetime: e.target.value,
+                  })
+                }
+              />
+
+              <label>Pick-up Location</label>
+              <input
+                type="text"
+                value={editingBooking.pickUpLoc}
+                onChange={(e) =>
+                  setEditingBooking({
+                    ...editingBooking,
+                    pickUpLoc: e.target.value,
+                  })
+                }
+              />
+
+              <label>Drop-off Location</label>
+              <input
+                type="text"
+                value={editingBooking.dropOffLoc}
+                onChange={(e) =>
+                  setEditingBooking({
+                    ...editingBooking,
+                    dropOffLoc: e.target.value,
+                  })
+                }
+              />
+
+              <label>Status</label>
+              <select
+                value={editingBooking.status}
+                onChange={(e) =>
+                  setEditingBooking({
+                    ...editingBooking,
+                    status: e.target.value as Booking["status"],
+                  })
+                }
+              >
+                <option value="Active">Active</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+                <option value="Pending">Pending</option>
+              </select>
+
+              <label>
+                <input
+                  type="checkbox"
+                  checked={editingBooking.insure}
+                  onChange={() =>
+                    setEditingBooking({
+                      ...editingBooking,
+                      insure: !editingBooking.insure,
+                    })
+                  }
+                />{" "}
+                Insure
+              </label>
+
+              <div className="guest-edit-buttons">
+                <button onClick={handleSaveEdit}>Save</button>
+                <button
+                  className="guest-edit-cancel"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditingBooking(null);
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

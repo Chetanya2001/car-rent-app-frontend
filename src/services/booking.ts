@@ -4,6 +4,7 @@ import axios from "axios";
 const API_URL = `${import.meta.env.VITE_API_URL}/api/bookings`;
 
 // The booking input type matches your API needs
+
 export interface BookCarRequest {
   car_id: number;
   start_datetime: string;
@@ -19,6 +20,25 @@ export interface BookCarRequest {
 }
 
 export interface BookCarResponse {
+  message: string;
+  booking: any;
+}
+
+export interface UpdateBookingRequest {
+  start_datetime?: string;
+  end_datetime?: string;
+  pickup_address?: string;
+  pickup_lat?: number;
+  pickup_long?: number;
+  drop_address?: string;
+  drop_lat?: number;
+  drop_long?: number;
+  insure_amount?: number;
+  driver_amount?: number;
+  status?: string;
+}
+
+export interface UpdateBookingResponse {
   message: string;
   booking: any;
 }
@@ -118,5 +138,31 @@ export const deleteBooking = async (
       err.response?.data || err.message
     );
     throw err.response?.data || new Error("Delete booking failed");
+  }
+};
+
+export const updateBooking = async (
+  bookingId: string,
+  updateData: UpdateBookingRequest,
+  token: string
+): Promise<UpdateBookingResponse> => {
+  try {
+    const res = await axios.put<UpdateBookingResponse>(
+      `${API_URL}/update-booking/${bookingId}`,
+      updateData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (err: any) {
+    console.error(
+      "❌ Error updating booking:",
+      err.response?.status,
+      err.response?.data || err.message
+    );
+    throw err.response?.data || new Error("Update booking failed");
   }
 };
