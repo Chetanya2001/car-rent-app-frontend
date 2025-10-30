@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
-import { getAllUsers, deleteUser } from "./../../../services/admin"; // Import deleteUser
+import { getAllUsers, deleteUser, updateUser } from "./../../../services/admin";
 import "./manageGuest.css";
 
 interface Guest {
@@ -21,9 +21,9 @@ export default function ManageGuests() {
   const [filter, setFilter] = useState<"All" | "Active" | "Inactive">("All");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [editingGuest, setEditingGuest] = useState<Guest | null>(null); // 🆕
+  const [isEditing, setIsEditing] = useState(false); // 🆕
   const pageSize = 5;
-
-  // Replace this with actual token management (e.g., from context or auth store)
   const token = localStorage.getItem("token") || "";
 
   useEffect(() => {
@@ -73,21 +73,66 @@ export default function ManageGuests() {
 
   const totalPages = Math.ceil(filteredGuests.length / pageSize);
 
-  // Delete user handler
   const handleDelete = async (userId: number) => {
     if (!window.confirm("Are you sure you want to delete this guest?")) return;
 
     try {
       await deleteUser(token, userId.toString());
-      // Remove deleted guest from local state
       setGuests((prev) => prev.filter((guest) => guest.id !== userId));
-      // Adjust pagination if needed
       if ((page - 1) * pageSize >= filteredGuests.length - 1 && page > 1) {
         setPage(page - 1);
       }
     } catch (error) {
       console.error("Failed to delete guest:", error);
       alert("Failed to delete guest. Please try again.");
+    }
+  };
+
+  // 🆕 Handle Edit button click
+  const handleEditClick = (guest: Guest) => {
+    setEditingGuest(guest);
+    setIsEditing(true);
+  };
+
+  // 🆕 Handle input changes inside modal
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!editingGuest) return;
+    const { name, value } = e.target;
+    setEditingGuest((prev) => (prev ? { ...prev, [name]: value } : null));
+  };
+
+  // 🆕 Save edited guest
+  const handleSaveEdit = async () => {
+    if (!editingGuest) return;
+    try {
+      const updated = await updateUser(token, editingGuest.id.toString(), {
+        first_name: editingGuest.firstName,
+        last_name: editingGuest.lastName,
+        email: editingGuest.email,
+        phone: editingGuest.phone,
+        is_verified: editingGuest.isVerified,
+      });
+
+      setGuests((prev) =>
+        prev.map((g) =>
+          g.id === editingGuest.id
+            ? {
+                ...g,
+                firstName: updated.first_name,
+                lastName: updated.last_name,
+                email: updated.email,
+                phone: updated.phone,
+                isVerified: updated.is_verified,
+              }
+            : g
+        )
+      );
+
+      setIsEditing(false);
+      alert("Guest updated successfully!");
+    } catch (error) {
+      console.error("Failed to update guest:", error);
+      alert("Update failed. Please try again.");
     }
   };
 
@@ -136,10 +181,7 @@ export default function ManageGuests() {
                   <th>Last Name</th>
                   <th>Email</th>
                   <th>Phone no</th>
-                  <th>ID 1 Verified</th>
-                  <th>ID 2 Verified</th>
                   <th>Status</th>
-                  <th>Ratings</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -154,8 +196,6 @@ export default function ManageGuests() {
                       <td>{guest.lastName}</td>
                       <td>{guest.email}</td>
                       <td>{guest.phone}</td>
-                      <td>{guest.id1Verified ? "✅" : "❌"}</td>
-                      <td>{guest.id2Verified ? "✅" : "❌"}</td>
                       <td>
                         <span
                           className={`status ${
@@ -165,10 +205,13 @@ export default function ManageGuests() {
                           {guest.isVerified ? "Active" : "Inactive"}
                         </span>
                       </td>
-                      <td>{guest.ratings.toFixed(1)}</td>
                       <td>
                         <div className="actions">
-                          <button className="edit" title="Edit Guest">
+                          <button
+                            className="edit"
+                            title="Edit Guest"
+                            onClick={() => handleEditClick(guest)} // 🆕
+                          >
                             ✏️
                           </button>
                           <button
@@ -222,6 +265,82 @@ export default function ManageGuests() {
           </div>
         </div>
       </div>
+
+      {/* 🆕 Edit Modal */}
+      {isEditing && editingGuest && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Edit Guest</h2>
+            <div className="modal-content">
+              <label>
+                First Name:
+                <input
+                  type="text"
+                  name="firstName"
+                  value={editingGuest.firstName}
+                  onChange={handleInputChange}
+                />
+              </label>
+              <label>
+                Last Name:
+                <input
+                  type="text"
+                  name="lastName"
+                  value={editingGuest.lastName}
+                  onChange={handleInputChange}
+                />
+              </label>
+              <label>
+                Email:
+                <input
+                  type="email"
+                  name="email"
+                  value={editingGuest.email}
+                  onChange={handleInputChange}
+                />
+              </label>
+              <label>
+                Phone:
+                <input
+                  type="text"
+                  name="phone"
+                  value={editingGuest.phone}
+                  onChange={handleInputChange}
+                />
+              </label>
+              <label>
+                Status:
+                <select
+                  name="isVerified"
+                  value={editingGuest.isVerified ? "true" : "false"}
+                  onChange={(e) =>
+                    setEditingGuest((prev) =>
+                      prev
+                        ? { ...prev, isVerified: e.target.value === "true" }
+                        : null
+                    )
+                  }
+                >
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </select>
+              </label>
+            </div>
+
+            <div className="modal-actions">
+              <button onClick={handleSaveEdit} className="save-btn">
+                Save
+              </button>
+              <button
+                onClick={() => setIsEditing(false)}
+                className="cancel-btn"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

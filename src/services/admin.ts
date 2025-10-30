@@ -56,3 +56,29 @@ export const getAllHosts = async (): Promise<User[]> => {
   });
   return response.data;
 };
+
+export const updateUser = async (
+  token: string,
+  userId: string,
+  updateData: Partial<User>
+): Promise<User> => {
+  try {
+    const response = await axios.put<User>(
+      `${API_URL}/update-user/${userId}`,
+      updateData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      "❌ Error updating user:",
+      error.response?.status,
+      error.response?.data || error.message
+    );
+    throw error.response?.data || new Error("Update user failed");
+  }
+};
