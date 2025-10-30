@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
 import { getAllUsers, deleteUser, updateUser } from "./../../../services/admin";
+import toast, { Toaster } from "react-hot-toast";
 import "./manageGuest.css";
 
 interface Guest {
@@ -111,6 +112,7 @@ export default function ManageGuests() {
         is_verified: editingGuest.isVerified,
       });
 
+      // ✅ Update local guest state safely
       setGuests((prev) =>
         prev.map((g) =>
           g.id === editingGuest.id
@@ -126,11 +128,14 @@ export default function ManageGuests() {
         )
       );
 
-      // ✅ close modal before showing alert
-      setIsEditing(false);
+      // ✅ Reset modal first before alert to prevent render crash
       setEditingGuest(null);
+      setIsEditing(false);
 
-      alert("Guest updated successfully!");
+      // ✅ Use setTimeout to ensure React state finishes updating before alert
+      setTimeout(() => {
+        toast.success("Guest updated successfully!");
+      }, 100);
     } catch (error) {
       console.error("Failed to update guest:", error);
       alert("Update failed. Please try again.");
@@ -140,7 +145,7 @@ export default function ManageGuests() {
   return (
     <>
       <AdminNavBar />
-
+      <Toaster position="top-right" />
       <div className="manage-guests-container">
         <div className="manage-guests-header">
           <h1>Guest Management</h1>
