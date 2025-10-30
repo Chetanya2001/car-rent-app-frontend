@@ -99,6 +99,7 @@ export default function ManageGuests() {
     setEditingGuest((prev) => (prev ? { ...prev, [name]: value } : null));
   };
 
+  // 🆕 Save edited guest
   const handleSaveEdit = async () => {
     if (!editingGuest) return;
     try {
@@ -125,7 +126,10 @@ export default function ManageGuests() {
         )
       );
 
+      // ✅ close modal before showing alert
       setIsEditing(false);
+      setEditingGuest(null);
+
       alert("Guest updated successfully!");
     } catch (error) {
       console.error("Failed to update guest:", error);
