@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getAllUsers, deleteUser, updateUser } from "../../../services/admin";
 import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
 import toast, { Toaster } from "react-hot-toast";
-import "./ManageGuests.css";
+import "./manageGuest.css";
 
 type Guest = {
   id: number;
