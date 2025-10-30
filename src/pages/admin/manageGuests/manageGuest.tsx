@@ -46,6 +46,7 @@ export default function ManageGuests() {
         setGuests(mappedGuests);
       } catch (error) {
         console.error("Failed to load guests:", error);
+        toast.error("Failed to load guests. Please refresh.");
       }
     };
     fetchGuests();
@@ -74,8 +75,12 @@ export default function ManageGuests() {
 
   const totalPages = Math.ceil(filteredGuests.length / pageSize);
 
+  // ✅ Delete Guest
   const handleDelete = async (userId: number) => {
-    if (!window.confirm("Are you sure you want to delete this guest?")) return;
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this guest?"
+    );
+    if (!confirmDelete) return;
 
     try {
       await deleteUser(token, userId.toString());
@@ -83,12 +88,14 @@ export default function ManageGuests() {
       if ((page - 1) * pageSize >= filteredGuests.length - 1 && page > 1) {
         setPage(page - 1);
       }
+      toast.success("Guest deleted successfully!");
     } catch (error) {
       console.error("Failed to delete guest:", error);
-      alert("Failed to delete guest. Please try again.");
+      toast.error("Failed to delete guest.");
     }
   };
 
+  // ✅ Start editing
   const handleEditClick = (guest: Guest) => {
     setEditingGuest(guest);
     setIsEditing(true);
@@ -100,7 +107,7 @@ export default function ManageGuests() {
     setEditingGuest((prev) => (prev ? { ...prev, [name]: value } : null));
   };
 
-  // 🆕 Save edited guest
+  // ✅ Save edited guest
   const handleSaveEdit = async () => {
     if (!editingGuest) return;
     try {
@@ -112,7 +119,6 @@ export default function ManageGuests() {
         is_verified: editingGuest.isVerified,
       });
 
-      // ✅ Update local guest state safely
       setGuests((prev) =>
         prev.map((g) =>
           g.id === editingGuest.id
@@ -128,17 +134,13 @@ export default function ManageGuests() {
         )
       );
 
-      // ✅ Reset modal first before alert to prevent render crash
+      // ✅ Close modal and show toast
       setEditingGuest(null);
       setIsEditing(false);
-
-      // ✅ Use setTimeout to ensure React state finishes updating before alert
-      setTimeout(() => {
-        toast.success("Guest updated successfully!");
-      }, 100);
+      toast.success("Guest updated successfully!");
     } catch (error) {
       console.error("Failed to update guest:", error);
-      alert("Update failed. Please try again.");
+      toast.error("Failed to update guest.");
     }
   };
 
@@ -146,6 +148,7 @@ export default function ManageGuests() {
     <>
       <AdminNavBar />
       <Toaster position="top-right" />
+
       <div className="manage-guests-container">
         <div className="manage-guests-header">
           <h1>Guest Management</h1>
@@ -272,7 +275,7 @@ export default function ManageGuests() {
         </div>
       </div>
 
-      {/* ✅ Guest Edit Modal with unique classes */}
+      {/* ✅ Guest Edit Modal */}
       {isEditing && editingGuest && (
         <div
           className="guest-edit-overlay"
