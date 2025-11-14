@@ -1150,19 +1150,19 @@ input:checked + .slider:before {
     line-height: 1.6;
   }
 
-  .about-image img {
-    width: 90%;
-    max-width: 280px; /* ✅ CHANGE FROM 100% to 280px */
+  .about-section {
+    grid-template-columns: 1fr;
     height: auto;
-    border-radius: 10px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* ✅ ADD THIS */
+  }
+
+  .about-image {
+    position: static !important;
+    transform: none !important;
+    margin: 20px auto !important;
   }
 
   .about-image img {
-    width: 100%;
-    max-width: 100%;
-    height: auto;
-    border-radius: 10px;
+    width: 100% !important;
   }
 
   /* Why Section */
