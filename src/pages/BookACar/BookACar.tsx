@@ -15,6 +15,7 @@ import { geocodeAddress } from "../../utils/geocode";
 
 // Import your car location fetch service
 import { getCarLocation } from "../../services/carService";
+import CarInfoTabs from "../../components/CarInfoTabs/CarInfoTabs";
 
 const LOCATIONIQ_KEY = import.meta.env.VITE_LOCATIONIQ_TOKEN;
 
@@ -259,11 +260,11 @@ const BookACar: React.FC = () => {
               </button>
             </div>
           )}
-
-          <div className="about-section-1">
-            <h3>About this car</h3>
-            <p>{car.description ?? "No description available."}</p>
-          </div>
+          <CarInfoTabs
+            description={car.description}
+            features={car.features}
+            reviews={[]}
+          />
 
           {/* Trip Section */}
           <div className="trip-section">

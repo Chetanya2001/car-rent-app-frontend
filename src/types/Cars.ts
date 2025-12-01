@@ -15,7 +15,7 @@ export interface Car {
   available_till?: string | null;
   image?: string | null; // single thumbnail if provided
   photos?: string[]; // ✅ array of images
-
+  reviews?: string[];
   documents?: {
     car_id: number;
     rc_image_front: string | null;

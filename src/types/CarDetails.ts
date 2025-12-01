@@ -34,4 +34,5 @@ export interface CarDetailsType {
   location?: string;
   features: CarFeatures;
   photos: CarPhoto[];
+  reviews: string[];
 }

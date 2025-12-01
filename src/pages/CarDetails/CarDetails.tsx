@@ -159,6 +159,9 @@ const CarDetails: React.FC = () => {
             />
           )}
       </div>
+      <div>
+        <button></button>
+      </div>
       <Footer />
     </>
   );

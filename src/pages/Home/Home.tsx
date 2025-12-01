@@ -237,6 +237,9 @@ export default function Home() {
           <Link to="/cars" onClick={() => setIsNavOpen(false)}>
             Cars
           </Link>
+          <Link to="/cars" onClick={() => setIsNavOpen(false)}>
+            Intercity
+          </Link>
           <Link to="/community" onClick={() => setIsNavOpen(false)}>
             Community
           </Link>
