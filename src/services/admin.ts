@@ -10,7 +10,7 @@ export interface User {
   is_verified: boolean;
 }
 
-const API_URL = `${import.meta.env.VITE_API_URL}/api/users`;
+const API_URL = `${import.meta.env.VITE_API_URL}/users`;
 
 export const getAllUsers = async (): Promise<User[]> => {
   const token = localStorage.getItem("token");

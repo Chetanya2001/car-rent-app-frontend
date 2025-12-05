@@ -3,7 +3,7 @@ import type { UserRegister, UserLogin, AuthResponse } from "../types/user";
 import { jwtDecode } from "jwt-decode";
 
 // ✅ Use Vite env variable instead of localhost
-const API_URL = `${import.meta.env.VITE_API_URL}/api/users`;
+const API_URL = `${import.meta.env.VITE_API_URL}/users`;
 
 export const registerUser = async (
   data: UserRegister

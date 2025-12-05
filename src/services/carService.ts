@@ -3,7 +3,7 @@ import type { Car } from "../types/Cars";
 import type { GetAdminCarsResponse } from "../pages/admin/manageCars/manageCars";
 
 // ✅ Use env variable
-const API_URL = `${import.meta.env.VITE_API_URL}/api/cars`;
+const API_URL = `${import.meta.env.VITE_API_URL}/cars`;
 
 export const getCars = async (): Promise<Car[]> => {
   const response = await axios.get<Car[]>(API_URL);

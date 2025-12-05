@@ -2,7 +2,7 @@ import axios from "axios";
 import type { CarFeatures } from "../types/Cars";
 
 // ✅ Use env variable instead of hardcoding
-const API_URL = `${import.meta.env.VITE_API_URL}/api/car-features`;
+const API_URL = `${import.meta.env.VITE_API_URL}/car-features`;
 
 export const addCarFeatures = async (carFeaturesData: CarFeatures) => {
   const token = localStorage.getItem("token");
