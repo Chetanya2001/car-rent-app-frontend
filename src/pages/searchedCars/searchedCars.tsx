@@ -4,8 +4,6 @@ import "./searchedCars.css";
 import Navbar from "../../components/Navbar/Navbar";
 import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
 import LocationPicker from "../../components/Map/LocationPicker";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import { searchCars } from "../../services/carService";
 
 interface Car {
@@ -20,17 +18,28 @@ interface Car {
   availableTo: string;
 }
 
-// Helper to format date and time to YYYY-MM-DD and HH:MM
+/* -------------------- CITY → STATIONS MAP -------------------- */
+const CITY_STATIONS: Record<string, string[]> = {
+  Delhi: [
+    "New Delhi Railway Station",
+    "Old Delhi Railway Station",
+    "Hazrat Nizamuddin",
+    "IGI Airport",
+  ],
+  Agra: ["Agra Cantt", "Agra Fort", "Kheria Airport"],
+  Jaipur: ["Jaipur Junction", "Gandhi Nagar", "Jaipur Airport"],
+  Noida: ["Noida Sector 18", "Noida City Center"],
+};
+
+/* -------------------- DATE UTILS -------------------- */
 function getDateAndTime(dateObj: Date) {
-  const pad = (num: number) => num.toString().padStart(2, "0");
-  const yyyy = dateObj.getFullYear();
-  const mm = pad(dateObj.getMonth() + 1);
-  const dd = pad(dateObj.getDate());
-  const date = `${yyyy}-${mm}-${dd}`;
-  const hh = pad(dateObj.getHours());
-  const mins = pad(dateObj.getMinutes());
-  const time = `${hh}:${mins}`;
-  return { date, time };
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return {
+    date: `${dateObj.getFullYear()}-${pad(dateObj.getMonth() + 1)}-${pad(
+      dateObj.getDate()
+    )}`,
+    time: `${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}`,
+  };
 }
 
 export default function SearchedCars() {
@@ -38,131 +47,106 @@ export default function SearchedCars() {
   const navigate = useNavigate();
 
   const now = new Date();
-
-  // Pickup default
   const { date: todayDate } = getDateAndTime(now);
-  const pickupTimeDefault = "09:00";
 
-  // Dropoff default (today + 4 days)
-  const dropDefault = new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000);
-  const { date: dropDateDefault } = getDateAndTime(dropDefault);
-  const dropTimeDefault = "17:00";
+  const [tripType, setTripType] = useState<"selfdrive" | "intercity">(
+    "selfdrive"
+  );
 
   const [cars, setCars] = useState<Car[]>(location.state?.cars || []);
-  const bookingDetails = location.state?.bookingDetails || {};
 
   const [filters, setFilters] = useState({
-    city: bookingDetails.city || "Delhi",
-    pickupDate: bookingDetails.pickupDate || todayDate,
-    pickupTime: bookingDetails.pickupTime || pickupTimeDefault,
-    dropDate: bookingDetails.dropDate || dropDateDefault,
-    dropTime: bookingDetails.dropTime || dropTimeDefault,
-    insureTrip: bookingDetails.insureTrip ?? true, // default true
-    driverRequired: bookingDetails.driverRequired ?? false,
-    differentDrop: bookingDetails.differentDrop ?? false,
+    city: "Delhi",
+    pickupLocation: "",
+    pickupDate: todayDate,
+    pickupTime: "09:00",
+    dropDate: todayDate,
+    dropTime: "17:00",
+    insureTrip: true,
+    driverRequired: false,
+    differentDrop: false,
   });
 
-  const [dropCity, setDropCity] = useState(
-    location.state?.bookingDetails?.dropCity || ""
-  );
+  const [dropCity, setDropCity] = useState("");
   const [showDropMap, setShowDropMap] = useState(false);
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, type, checked, value } = e.target;
-    setFilters((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
+  /* -------------------- HANDLERS -------------------- */
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target as HTMLInputElement;
+    setFilters((p) => ({
+      ...p,
+      [name]:
+        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
-  };
-
-  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFilters((prev) => ({
-      ...prev,
-      city: e.target.value,
-    }));
-  };
-
-  const handleDropCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setDropCity(e.target.value);
   };
 
   const handleSearch = async () => {
-    if (!filters.city || !filters.pickupDate || !filters.dropDate) {
-      alert("Please fill all fields");
-      return;
-    }
-
     try {
       const data = await searchCars({
         city: filters.city,
-        pickup_datetime: filters.pickupDate + "T" + filters.pickupTime,
-        dropoff_datetime: filters.dropDate + "T" + filters.dropTime,
+        pickup_datetime: `${filters.pickupDate}T${filters.pickupTime}`,
+        dropoff_datetime: `${filters.dropDate}T${filters.dropTime}`,
       });
       setCars(data.cars || []);
-    } catch (err) {
-      console.error("❌ Error searching cars:", err);
-      alert("Failed to fetch cars. Try again.");
+    } catch {
+      alert("Failed to fetch cars");
     }
   };
 
-  const filteredCars = useMemo(() => {
-    return cars.filter((car) => {
-      if (
-        filters.city &&
-        car.city &&
-        car.city.toLowerCase() !== filters.city.toLowerCase()
-      ) {
-        return false;
-      }
+  /* -------------------- FILTERED CARS -------------------- */
+  const filteredCars = useMemo(() => cars, [cars]);
 
-      if (
-        filters.pickupDate &&
-        filters.pickupTime &&
-        filters.dropDate &&
-        filters.dropTime
-      ) {
-        const pickup = new Date(`${filters.pickupDate}T${filters.pickupTime}`);
-        const drop = new Date(`${filters.dropDate}T${filters.dropTime}`);
-
-        if (car.availableFrom && car.availableTo) {
-          const availableFrom = new Date(car.availableFrom);
-          const availableTo = new Date(car.availableTo);
-
-          if (pickup < availableFrom || drop > availableTo) {
-            return false;
-          }
-        }
-      }
-
-      return true;
-    });
-  }, [cars, filters]);
-
+  /* -------------------- UI -------------------- */
   return (
     <>
       <Navbar />
 
-      {/* Filters with Search Button */}
+      {/* -------- Trip Toggle -------- */}
+      <div className="trip-toggle">
+        <button
+          className={tripType === "selfdrive" ? "active" : ""}
+          onClick={() => setTripType("selfdrive")}
+        >
+          Self Drive
+        </button>
+        <button
+          className={tripType === "intercity" ? "active" : ""}
+          onClick={() => setTripType("intercity")}
+        >
+          Intercity
+        </button>
+      </div>
+
+      {/* -------- Filters -------- */}
       <div className="searched-filters-panel">
+        {/* Pickup City */}
         <label>
-          City:
-          <select
-            name="city"
-            value={filters.city}
-            onChange={handleCityChange}
-            style={{ padding: "6px", fontSize: "1rem" }}
-          >
-            <option value="" disabled>
-              Select City
-            </option>
-            <option value="Delhi">Delhi</option>
-            <option value="Gurgaon">Gurgaon</option>
-            <option value="Noida">Noida</option>
-            <option value="Agra">Agra</option>
-            <option value="Ahmedabad">Ahmedabad</option>
-            <option value="Jaipur">Jaipur</option>
+          Pickup City:
+          <select name="city" value={filters.city} onChange={handleChange}>
+            {Object.keys(CITY_STATIONS).map((c) => (
+              <option key={c}>{c}</option>
+            ))}
           </select>
         </label>
+
+        {/* Intercity Pickup Location */}
+        {tripType === "intercity" && (
+          <label>
+            Pickup Location:
+            <select
+              name="pickupLocation"
+              value={filters.pickupLocation}
+              onChange={handleChange}
+            >
+              <option value="">Select Station</option>
+              {CITY_STATIONS[filters.city]?.map((s) => (
+                <option key={s}>{s}</option>
+              ))}
+            </select>
+          </label>
+        )}
 
         <label>
           Pickup Date:
@@ -170,213 +154,105 @@ export default function SearchedCars() {
             type="date"
             name="pickupDate"
             value={filters.pickupDate}
-            onChange={handleFilterChange}
+            onChange={handleChange}
           />
         </label>
+
         <label>
           Pickup Time:
           <input
             type="time"
             name="pickupTime"
             value={filters.pickupTime}
-            onChange={handleFilterChange}
-          />
-        </label>
-        <label>
-          Dropoff Date:
-          <input
-            type="date"
-            name="dropDate"
-            value={filters.dropDate}
-            onChange={handleFilterChange}
-          />
-        </label>
-        <label>
-          Dropoff Time:
-          <input
-            type="time"
-            name="dropTime"
-            value={filters.dropTime}
-            onChange={handleFilterChange}
+            onChange={handleChange}
           />
         </label>
 
-        {/* Toggles */}
-        <label className="searched-switch-label">
-          Insure Trip:
-          <span className="searched-switch">
-            <input
-              type="checkbox"
-              name="insureTrip"
-              checked={filters.insureTrip}
-              onChange={handleFilterChange}
-            />
-            <span className="searched-slider"></span>
-          </span>
-        </label>
-        <label className="searched-switch-label">
-          Driver Required:
-          <span className="searched-switch">
-            <input
-              type="checkbox"
-              name="driverRequired"
-              checked={filters.driverRequired}
-              onChange={handleFilterChange}
-            />
-            <span className="searched-slider"></span>
-          </span>
-        </label>
-        <label className="searched-switch-label">
-          Different Drop Location:
-          <span className="searched-switch">
-            <input
-              type="checkbox"
-              name="differentDrop"
-              checked={filters.differentDrop}
-              onChange={handleFilterChange}
-            />
-            <span className="searched-slider"></span>
-          </span>
-        </label>
-
-        {filters.differentDrop && (
-          <div style={{ display: "flex", alignItems: "center" }}>
+        {/* Drop City (Intercity only) */}
+        {tripType === "intercity" && (
+          <label>
+            Drop City:
             <select
               value={dropCity}
-              onChange={handleDropCityChange}
-              style={{ flexGrow: 1, padding: "6px", fontSize: "1rem" }}
+              onChange={(e) => setDropCity(e.target.value)}
             >
-              <option value="" disabled>
-                Select Drop-off City
-              </option>
-              <option value="Noida">Noida</option>
-              <option value="Gurgaon">Gurgaon</option>
-              <option value="Delhi">Delhi</option>
-              <option value="Agra">Agra</option>
-              <option value="Meerut">Meerut</option>
+              <option value="">Select</option>
+              {Object.keys(CITY_STATIONS)
+                .filter((c) => c !== filters.city)
+                .map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
             </select>
-            <FontAwesomeIcon
-              icon={faMapMarkerAlt}
-              style={{ marginLeft: "8px", cursor: "pointer" }}
-              onClick={() => setShowDropMap(true)}
-            />
-          </div>
+          </label>
         )}
 
-        <button className="searched-search-btn" onClick={handleSearch}>
-          Search
-        </button>
+        {/* Self Drive options */}
+        {tripType === "selfdrive" && (
+          <>
+            <label>
+              Driver Required:
+              <input
+                type="checkbox"
+                name="driverRequired"
+                checked={filters.driverRequired}
+                onChange={handleChange}
+              />
+            </label>
+
+            <label>
+              Insure Trip:
+              <input
+                type="checkbox"
+                name="insureTrip"
+                checked={filters.insureTrip}
+                onChange={handleChange}
+              />
+            </label>
+          </>
+        )}
+
+        <button onClick={handleSearch}>Search</button>
       </div>
 
-      {/* Banner */}
-      <div className="searched-results-banner">
-        <div className="searched-banner-content">
-          <h2>Your Search results</h2>
-          <p>
-            Found {filteredCars.length.toString().padStart(2, "0")} cars for
-            your dates &amp; location, happy Zipping!
-          </p>
-        </div>
-      </div>
-
-      {/* Car Listing */}
+      {/* -------- Cars -------- */}
       <div className="searched-cars-container">
-        {filteredCars.length === 0 ? (
-          <p className="searched-no-cars">
-            No cars found for the selected criteria.
-          </p>
-        ) : (
-          <div className="searched-car-list">
-            {filteredCars.map((car) => (
-              <div key={car.id} className="searched-car-card">
-                <div className="searched-car-image-wrapper">
-                  {car.photos && car.photos.length > 0 ? (
-                    <img
-                      src={car.photos[0]}
-                      alt={`${car.make} ${car.model}`}
-                      className="searched-car-image"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/placeholder.png";
-                      }}
-                    />
-                  ) : (
-                    <div className="searched-car-placeholder">No Image</div>
-                  )}
-                </div>
-                <div className="searched-car-info">
-                  <h3>
-                    {car.make} {car.model}
-                  </h3>
-                  <p>Year: {car.year}</p>
-                  <p className="searched-car-price">
-                    ₹{car.price_per_hour} / hour
-                  </p>
-                </div>
-                <div className="searched-car-actions">
-                  <button
-                    className="searched-btn-book"
-                    onClick={() =>
-                      navigate("/bookAcar", {
-                        state: {
-                          carId: car.id,
-                          pricePerHour: car.price_per_hour,
-                          bookingDetails: {
-                            pickupDate: filters.pickupDate,
-                            pickupTime: filters.pickupTime,
-                            dropDate: filters.dropDate,
-                            dropTime: filters.dropTime,
-                            insureTrip: filters.insureTrip,
-                            driverRequired: filters.driverRequired,
-                            differentDrop: filters.differentDrop,
-                            dropCity: dropCity,
-                          },
-                        },
-                      })
-                    }
-                  >
-                    Book now
-                  </button>
-                  <button
-                    className="searched-btn-details"
-                    onClick={() =>
-                      navigate(`/car-details/${car.id}`, {
-                        state: {
-                          pickup_datetime:
-                            filters.pickupDate + "T" + filters.pickupTime,
-                          dropoff_datetime:
-                            filters.dropDate + "T" + filters.dropTime,
-                          insurance: filters.insureTrip,
-                          driver: filters.driverRequired,
-                          differentDrop: filters.differentDrop,
-                          dropCity: dropCity,
-                          price_per_hour: car.price_per_hour,
-                        },
-                      })
-                    }
-                  >
-                    Details
-                  </button>
-                </div>
-              </div>
-            ))}
+        {filteredCars.map((car) => (
+          <div key={car.id} className="searched-car-card">
+            <img src={car.photos?.[0]} alt="" />
+            <h3>
+              {car.make} {car.model}
+            </h3>
+            <p>₹{car.price_per_hour}/hr</p>
+
+            <button
+              onClick={() =>
+                navigate("/bookAcar", {
+                  state: {
+                    carId: car.id,
+                    tripType,
+                    bookingDetails: {
+                      ...filters,
+                      dropCity,
+                      driverRequired:
+                        tripType === "intercity"
+                          ? false
+                          : filters.driverRequired,
+                      insureTrip:
+                        tripType === "intercity" ? true : filters.insureTrip,
+                    },
+                  },
+                })
+              }
+            >
+              Book Now
+            </button>
           </div>
-        )}
+        ))}
       </div>
 
-      {/* Drop-off Map Modal */}
       {showDropMap && (
         <ModalWrapper onClose={() => setShowDropMap(false)}>
-          <LocationPicker
-            onSelect={(loc: any) => {
-              const locationName =
-                loc.city && loc.state
-                  ? `${loc.city}, ${loc.state}`
-                  : loc.city || loc.state || loc.country || "";
-
-              setDropCity(locationName);
-              setShowDropMap(false);
-            }}
-          />
+          <LocationPicker onSelect={() => setShowDropMap(false)} />
         </ModalWrapper>
       )}
     </>
