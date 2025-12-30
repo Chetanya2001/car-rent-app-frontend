@@ -5,7 +5,7 @@ import "./Navbar.css";
 import Login from "../../pages/auth/Login/Login";
 import Register from "../../pages/auth/Register/Register";
 import ModalWrapper from "../ModalWrapper/ModalWrapper";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -28,27 +28,18 @@ interface TokenPayload {
 }
 
 interface NavbarProps {
-  profilePicUrl?: string | null; // Add new prop for profile picture URL
+  profilePicUrl?: string | null;
 }
-const hostMenu = [
-  "Add a Car",
-  "My Cars",
-  "My Bookings",
-  // "My Payments",
-  // "Notifications",
-  "Logout",
-];
 
+const hostMenu = ["Add a Car", "My Cars", "My Bookings", "Logout"];
 const guestMenu = [
   "Book a Car",
   "My Bookings",
+  "Support",
   "My Documents",
-  // "My Payments",
-  // "Notifications",
   "Logout",
 ];
-
-const AdminMenu = [
+const adminMenu = [
   "Cars",
   "Bookings",
   "Guests",
@@ -74,23 +65,26 @@ export default function Navbar({
   profilePicUrl: propProfilePicUrl,
 }: NavbarProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<"host" | "guest" | "admin" | null>(null);
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null
   );
-  const [remark, setRemark] = useState(""); // <--- Add remark state here
+  const [remark, setRemark] = useState("");
   const [showMenu, setShowMenu] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(
     propProfilePicUrl ?? null
   );
+
   const profileMenuRef = useRef<HTMLUListElement | null>(null);
   const hamburgerRef = useRef<HTMLDivElement | null>(null);
   const navMenuRef = useRef<HTMLUListElement | null>(null);
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    const handleClickOutside = (event: MouseEvent) => {
       if (
         profileMenuRef.current &&
         !profileMenuRef.current.contains(event.target as Node)
@@ -105,7 +99,7 @@ export default function Navbar({
       ) {
         setNavOpen(false);
       }
-    }
+    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -123,31 +117,24 @@ export default function Navbar({
       }
     }
   }, []);
+
   useEffect(() => {
-    // Function to fetch and set profile pic
     const loadUserProfile = async () => {
       const token = localStorage.getItem("token");
       if (!token) return;
-
       try {
         const profile = await fetchUserProfile(token);
         setUser(profile);
         if (profile.profile_pic) {
           setProfilePicUrl(profile.profile_pic);
-          // Optionally update localStorage for consistency
           localStorage.setItem("profilePicUrl", profile.profile_pic);
-        } else {
-          setProfilePicUrl(null);
         }
-
-        // Decode role from token
         const decoded = jwtDecode<TokenPayload>(token);
         setRole(decoded.role);
       } catch (err) {
         console.error("Failed to load user profile", err);
       }
     };
-
     loadUserProfile();
   }, []);
 
@@ -173,7 +160,7 @@ export default function Navbar({
         console.error("Invalid token after login", err);
       }
     }
-    setRemark(""); // Clear remark on login success
+    setRemark("");
     setActiveModal(null);
   };
 
@@ -183,7 +170,7 @@ export default function Navbar({
       : role === "guest"
       ? guestMenu
       : role === "admin"
-      ? AdminMenu
+      ? adminMenu
       : [];
 
   const handleMenuClick = (item: string) => {
@@ -195,11 +182,8 @@ export default function Navbar({
         navigate("/my-cars");
         break;
       case "My Bookings":
-        if (role === "host") {
-          navigate("/host-mybookings");
-        } else {
-          navigate("/guest-mybookings");
-        }
+        if (role === "host") navigate("/host-mybookings");
+        else navigate("/guest-mybookings");
         break;
       case "Logout":
         handleLogout();
@@ -214,11 +198,8 @@ export default function Navbar({
         navigate("/notifications");
         break;
       case "Support":
-        if (role === "admin") {
-          navigate("/admin/manage-support");
-        } else {
-          navigate("/support");
-        }
+        if (role === "admin") navigate("/admin/manage-support");
+        else navigate("/support");
         break;
       case "Cars":
         navigate("/admin/manage-cars");
@@ -263,9 +244,7 @@ export default function Navbar({
             navOpen ? "Close navigation menu" : "Open navigation menu"
           }
           onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              setNavOpen((prev) => !prev);
-            }
+            if (e.key === "Enter" || e.key === " ") setNavOpen((prev) => !prev);
           }}
         >
           <FontAwesomeIcon icon={navOpen ? faTimes : faBars} size="lg" />
@@ -280,7 +259,6 @@ export default function Navbar({
             <NavLink
               to="/"
               className={({ isActive }) => (isActive ? "active" : "")}
-              onClick={() => setNavOpen(false)}
             >
               Home
             </NavLink>
@@ -289,29 +267,28 @@ export default function Navbar({
             <NavLink
               to="/cars"
               className={({ isActive }) => (isActive ? "active" : "")}
-              onClick={() => setNavOpen(false)}
             >
-              Cars
+              SelfDrive-Car
             </NavLink>
           </li>
           <li>
             <NavLink
               to="/community"
               className={({ isActive }) => (isActive ? "active" : "")}
-              onClick={() => setNavOpen(false)}
             >
               Community
             </NavLink>
           </li>
-          <li>
-            <NavLink
-              to="/support"
-              className={({ isActive }) => (isActive ? "active" : "")}
-              onClick={() => setNavOpen(false)}
-            >
-              Support
-            </NavLink>
-          </li>
+          {role !== "host" && (
+            <li>
+              <NavLink
+                to="/support"
+                className={({ isActive }) => (isActive ? "active" : "")}
+              >
+                Support
+              </NavLink>
+            </li>
+          )}
         </ul>
 
         {/* Login/Profile */}
@@ -339,9 +316,8 @@ export default function Navbar({
                       role="menuitem"
                       onClick={() => handleMenuClick(item)}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
+                        if (e.key === "Enter" || e.key === " ")
                           handleMenuClick(item);
-                        }
                       }}
                     >
                       <FontAwesomeIcon
@@ -377,7 +353,7 @@ export default function Navbar({
                 setRemark("");
               }}
               onLoginSuccess={handleUserLogin}
-              remark={remark} // <--- Pass remark prop here
+              remark={remark}
             />
           ) : (
             <Register
