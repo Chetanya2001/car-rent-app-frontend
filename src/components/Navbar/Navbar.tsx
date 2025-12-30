@@ -56,6 +56,7 @@ export default function Navbar({
   ];
 
   const hostNavItems = [
+    { label: "Home", path: "/" },
     { label: "Add a Car", path: "/add-car", icon: faPlus },
     { label: "My Cars", path: "/my-cars", icon: faCar },
     { label: "My Bookings", path: "/host-mybookings", icon: faCalendarAlt },
@@ -63,6 +64,7 @@ export default function Navbar({
   ];
 
   const guestNavItems = [
+    { label: "Home", path: "/" },
     { label: "Book a Car", path: "/searched-cars", icon: faCar },
     { label: "My Bookings", path: "/guest-mybookings", icon: faCalendarAlt },
     { label: "Support", path: "/support", icon: faLifeRing },
@@ -221,9 +223,9 @@ export default function Navbar({
                 </NavLink>
               </li>
               <li>
-                <button className="nav-logout-btn" onClick={handleLogout}>
+                <NavLink to="/" onClick={handleLogout}>
                   Logout
-                </button>
+                </NavLink>
               </li>
             </>
           )}
