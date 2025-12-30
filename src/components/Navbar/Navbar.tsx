@@ -6,7 +6,7 @@ import Login from "../../pages/auth/Login/Login";
 import Register from "../../pages/auth/Register/Register";
 import ModalWrapper from "../ModalWrapper/ModalWrapper";
 import { NavLink, useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode"; // ✅ Fixed import
+import { jwtDecode } from "jwt-decode";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCar,
@@ -15,8 +15,6 @@ import {
   faDoorOpen,
   faPlus,
   faBars,
-  faTimes,
-  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import type { User } from "../../types/user";
 import { fetchUserProfile } from "../../services/auth";
@@ -49,7 +47,26 @@ export default function Navbar({
   const hamburgerRef = useRef<HTMLDivElement | null>(null);
   const navMenuRef = useRef<HTMLUListElement | null>(null);
 
-  // Close menus when clicking outside
+  // Role-based top nav items
+  const hostNavItems = [
+    { label: "Add a Car", path: "/add-car", icon: faPlus },
+    { label: "My Cars", path: "/my-cars", icon: faCar },
+    { label: "My Bookings", path: "/host-mybookings", icon: faCalendarAlt },
+    { label: "Support", path: "/support", icon: faLifeRing },
+  ];
+
+  const guestNavItems = [
+    { label: "Book a Car", path: "/searched-cars", icon: faCar },
+    { label: "My Bookings", path: "/guest-mybookings", icon: faCalendarAlt },
+    { label: "Support", path: "/support", icon: faLifeRing },
+  ];
+
+  const profileDropdownItems = [
+    { label: "My Profile", path: "/my-profile" },
+    { label: "Logout", action: () => handleLogout() },
+  ];
+
+  // Handle outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -71,7 +88,7 @@ export default function Navbar({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Load user from localStorage and decode role
+  // Load user from localStorage + token
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -86,7 +103,7 @@ export default function Navbar({
     }
   }, []);
 
-  // Fetch profile picture from backend
+  // Fetch profile pic
   useEffect(() => {
     const loadUserProfile = async () => {
       const token = localStorage.getItem("token");
@@ -95,7 +112,12 @@ export default function Navbar({
       try {
         const profile = await fetchUserProfile(token);
         setUser(profile);
-        setProfilePicUrl(profile.profile_pic || null);
+        if (profile.profile_pic) {
+          setProfilePicUrl(profile.profile_pic);
+          localStorage.setItem("profilePicUrl", profile.profile_pic);
+        } else {
+          setProfilePicUrl(null);
+        }
 
         const decoded = jwtDecode<TokenPayload>(token);
         setRole(decoded.role);
@@ -103,7 +125,6 @@ export default function Navbar({
         console.error("Failed to load user profile", err);
       }
     };
-
     loadUserProfile();
   }, []);
 
@@ -133,61 +154,6 @@ export default function Navbar({
     setActiveModal(null);
   };
 
-  // Menu items per role
-  const menuItems =
-    role === "host"
-      ? [
-          "Add a Car",
-          "My Cars",
-          "My Bookings",
-          "My Profile",
-          "Support",
-          "Logout",
-        ]
-      : role === "guest"
-      ? ["Book a Car", "My Bookings", "My Profile", "Support", "Logout"]
-      : [];
-
-  const iconMap: Record<string, any> = {
-    "Add a Car": faPlus,
-    "My Cars": faCar,
-    "My Bookings": faCalendarAlt,
-    "My Profile": faUser,
-    Support: faLifeRing,
-    Logout: faDoorOpen,
-    "Book a Car": faCar,
-  };
-
-  const handleMenuClick = (item: string) => {
-    switch (item) {
-      case "Add a Car":
-        navigate("/add-car");
-        break;
-      case "My Cars":
-        navigate("/my-cars");
-        break;
-      case "My Bookings":
-        navigate(role === "host" ? "/host-mybookings" : "/guest-mybookings");
-        break;
-      case "Book a Car":
-        navigate("/searched-cars");
-        break;
-      case "My Profile":
-        navigate("/my-profile");
-        break;
-      case "Support":
-        navigate("/support");
-        break;
-      case "Logout":
-        handleLogout();
-        break;
-      default:
-        break;
-    }
-    setShowMenu(false);
-    setNavOpen(false);
-  };
-
   return (
     <>
       <nav className="scroll-navbar">
@@ -195,7 +161,7 @@ export default function Navbar({
           <img src={logo} alt="Logo" />
         </div>
 
-        {/* Hamburger button */}
+        {/* Hamburger */}
         <div
           className="scroll-navbar-hamburger"
           onClick={() => setNavOpen((prev) => !prev)}
@@ -209,53 +175,51 @@ export default function Navbar({
             if (e.key === "Enter" || e.key === " ") setNavOpen((prev) => !prev);
           }}
         >
-          <FontAwesomeIcon icon={navOpen ? faTimes : faBars} size="lg" />
+          <FontAwesomeIcon icon={navOpen ? faDoorOpen : faBars} size="lg" />
         </div>
 
-        {/* Navigation Links */}
+        {/* Top nav */}
         <ul
           className={`scroll-navbar-links${navOpen ? " active" : ""}`}
           ref={navMenuRef}
         >
           <li>
-            <NavLink
-              to="/"
-              className={({ isActive }) => (isActive ? "active" : "")}
-              onClick={() => setNavOpen(false)}
-            >
+            <NavLink to="/" onClick={() => setNavOpen(false)}>
               Home
             </NavLink>
           </li>
           <li>
-            <NavLink
-              to="/cars"
-              className={({ isActive }) => (isActive ? "active" : "")}
-              onClick={() => setNavOpen(false)}
-            >
+            <NavLink to="/cars" onClick={() => setNavOpen(false)}>
               SelfDrive-Car
             </NavLink>
           </li>
           <li>
-            <NavLink
-              to="/community"
-              className={({ isActive }) => (isActive ? "active" : "")}
-              onClick={() => setNavOpen(false)}
-            >
+            <NavLink to="/community" onClick={() => setNavOpen(false)}>
               Community
             </NavLink>
           </li>
           <li>
-            <NavLink
-              to="/support"
-              className={({ isActive }) => (isActive ? "active" : "")}
-              onClick={() => setNavOpen(false)}
-            >
+            <NavLink to="/support" onClick={() => setNavOpen(false)}>
               Support
             </NavLink>
           </li>
+
+          {/* Role-specific items */}
+          {role === "host" &&
+            hostNavItems.map((item) => (
+              <li key={item.label}>
+                <NavLink to={item.path}>{item.label}</NavLink>
+              </li>
+            ))}
+          {role === "guest" &&
+            guestNavItems.map((item) => (
+              <li key={item.label}>
+                <NavLink to={item.path}>{item.label}</NavLink>
+              </li>
+            ))}
         </ul>
 
-        {/* Login/Profile */}
+        {/* Profile */}
         <div className="scroll-navbar-login">
           {!user ? (
             <button
@@ -273,22 +237,14 @@ export default function Navbar({
               />
               {showMenu && (
                 <ul className="profile-menu-outside" ref={profileMenuRef}>
-                  {menuItems.map((item, idx) => (
+                  {profileDropdownItems.map((item, idx) => (
                     <li
                       key={idx}
-                      tabIndex={0}
-                      role="menuitem"
-                      onClick={() => handleMenuClick(item)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ")
-                          handleMenuClick(item);
-                      }}
+                      onClick={() =>
+                        item.action ? item.action() : navigate(item.path)
+                      }
                     >
-                      <FontAwesomeIcon
-                        icon={iconMap[item]}
-                        className="menu-icon"
-                      />{" "}
-                      {item}
+                      {item.label}
                     </li>
                   ))}
                 </ul>
