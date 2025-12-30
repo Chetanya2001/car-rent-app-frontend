@@ -20,7 +20,7 @@ import {
   faCar,
   // faCalendarAlt,
   // faLifeRing,
-  faDoorOpen,
+  // faDoorOpen,
   // faPlus,
   // faFile,
 } from "@fortawesome/free-solid-svg-icons";
@@ -212,25 +212,59 @@ export default function Home() {
         >
           {isNavOpen ? "✖" : "☰"}
         </div>
+
         <nav className={`home-nav ${isNavOpen ? "active" : ""}`}>
-          {/* Common Links */}
+          {/* Top links based on role */}
           <Link to="/" onClick={() => setIsNavOpen(false)}>
             Home
           </Link>
 
-          {role === "host" ? (
+          {!user && (
             <>
+              <Link to="/cars" onClick={() => setIsNavOpen(false)}>
+                SelfDrive-Car
+              </Link>
+              <Link to="/cars" onClick={() => setIsNavOpen(false)}>
+                Intercity
+              </Link>
+              <Link to="/community" onClick={() => setIsNavOpen(false)}>
+                Community
+              </Link>
+              <a
+                href="#login"
+                className="login-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveModal("login");
+                  setIsNavOpen(false);
+                }}
+              >
+                Login
+              </a>
+            </>
+          )}
+
+          {user && role === "host" && (
+            <>
+              <Link to="/cars" onClick={() => setIsNavOpen(false)}>
+                SelfDrive-Car
+              </Link>
               <Link to="/add-car" onClick={() => setIsNavOpen(false)}>
                 Add a Car
-              </Link>
-              <Link to="/my-cars" onClick={() => setIsNavOpen(false)}>
-                My Cars
               </Link>
               <Link to="/host-mybookings" onClick={() => setIsNavOpen(false)}>
                 My Bookings
               </Link>
+              <Link to="/cars" onClick={() => setIsNavOpen(false)}>
+                Intercity
+              </Link>
+              <Link to="/community" onClick={() => setIsNavOpen(false)}>
+                Community
+              </Link>
             </>
-          ) : (
+          )}
+
+          {user && role === "guest" && (
             <>
               <Link to="/searched-cars" onClick={() => setIsNavOpen(false)}>
                 Book a Car
@@ -238,39 +272,17 @@ export default function Home() {
               <Link to="/guest-mybookings" onClick={() => setIsNavOpen(false)}>
                 My Bookings
               </Link>
-              <Link to="/my-documents" onClick={() => setIsNavOpen(false)}>
-                My Documents
+              <Link to="/cars" onClick={() => setIsNavOpen(false)}>
+                Intercity
               </Link>
-              <Link to="/support" onClick={() => setIsNavOpen(false)}>
-                Support
+              <Link to="/community" onClick={() => setIsNavOpen(false)}>
+                Community
               </Link>
             </>
           )}
 
-          {/* Links for everyone */}
-          <Link to="/cars" onClick={() => setIsNavOpen(false)}>
-            SelfDrive-Car
-          </Link>
-          <Link to="/cars" onClick={() => setIsNavOpen(false)}>
-            Intercity
-          </Link>
-          <Link to="/community" onClick={() => setIsNavOpen(false)}>
-            Community
-          </Link>
-
-          {!user ? (
-            <a
-              href="#login"
-              className="login-link"
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveModal("login");
-                setIsNavOpen(false);
-              }}
-            >
-              Login
-            </a>
-          ) : (
+          {/* Profile dropdown for logged-in users */}
+          {user && (
             <div
               className="user-profile"
               onClick={() => setShowMenu((prev) => !prev)}
@@ -282,9 +294,14 @@ export default function Home() {
               />
               {showMenu && (
                 <ul className="profile-menu">
-                  <li onClick={handleLogout}>
-                    <FontAwesomeIcon icon={faDoorOpen} /> Logout
-                  </li>
+                  <li onClick={() => navigate("/my-profile")}>Profile</li>
+                  {role === "host" && (
+                    <li onClick={() => navigate("/support")}>Support</li>
+                  )}
+                  {role === "guest" && (
+                    <li onClick={() => navigate("/support")}>Support</li>
+                  )}
+                  <li onClick={handleLogout}>Logout</li>
                 </ul>
               )}
             </div>
