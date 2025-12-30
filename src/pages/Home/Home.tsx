@@ -1,25 +1,35 @@
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import "./Home.css";
+import logo from "../../assets/logo.png";
 import pickupIcon from "../../assets/smart-transportation.png";
 import bestdealIcon from "../../assets/communication.png";
 import carrentIcon from "../../assets/car-rent.png";
 import aboutImage from "../../assets/bg_3.jpg";
+import defaultAvatar from "../../assets/user.png";
 import Testimonials from "../../components/Testimonials/Testimonial";
 import Stats from "../../components/Stats/Stats";
 import Footer from "../../components/Footer/Footer";
-import Navbar from "../../components/Navbar/Navbar";
 import Login from "../auth/Login/Login";
 import Register from "../auth/Register/Register";
 import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import LocationPicker from "../../components/Map/LocationPicker";
 import { useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCar } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCar,
+  faCalendarAlt,
+  faCreditCard,
+  faBell,
+  faLifeRing,
+  faDoorOpen,
+  faPlus,
+  faFile, // Document icon added
+} from "@fortawesome/free-solid-svg-icons";
 
-import { searchCars } from "../../services/carService";
+import { searchCars } from "../../services/carService"; // ✅ Import API
 import { fetchUserProfile } from "../../services/auth";
 
 type TokenPayload = {
@@ -32,12 +42,14 @@ export default function Home() {
     null
   );
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
-  const [remark, setRemark] = useState("");
+  const [remark, setRemark] = useState(""); // Info message for the login modal
 
   const [user, setUser] = useState<{ name?: string; avatar?: string } | null>(
     null
   );
   const [role, setRole] = useState<"host" | "guest" | "admin" | null>(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isNavOpen, setIsNavOpen] = useState(false);
   const [showPickupMap, setShowPickupMap] = useState(false);
   const [showDropMap, setShowDropMap] = useState(false);
   const [dropCity, setDropCity] = useState("");
@@ -53,7 +65,6 @@ export default function Home() {
   const [differentDrop, setDifferentDrop] = useState(false);
 
   const location = useLocation();
-
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const showLogin = params.get("showLogin");
@@ -62,11 +73,19 @@ export default function Home() {
       setProfilePicUrl(storedProfilePic);
     }
     if (showLogin === "true") {
-      setActiveModal("login");
+      setActiveModal("login"); // opens login modal automatically
+      // Clean the URL so it doesn't stay in address bar
       navigate("/", { replace: true });
     }
   }, [location, navigate]);
-
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setUser(null);
+    setRole(null);
+    setShowMenu(false);
+    navigate("/"); // Redirect on logout
+  };
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -75,7 +94,7 @@ export default function Home() {
           setUser(userData);
           if (userData.profile_pic) {
             setProfilePicUrl(userData.profile_pic);
-            localStorage.setItem("profilePicUrl", userData.profile_pic);
+            localStorage.setItem("profilePicUrl", userData.profile_pic); // optional, sync with localStorage
           }
         })
         .catch((err) => console.error("Profile fetch error:", err));
@@ -102,6 +121,7 @@ export default function Home() {
         differentDrop,
       });
 
+      // 👉 Send everything in state
       navigate("/searched-cars", {
         state: {
           cars: data.cars,
@@ -136,6 +156,7 @@ export default function Home() {
       }
     }
 
+    // ✅ set default current time for pickup & drop
     const now = new Date();
     now.setHours(now.getHours() + 2);
     const hours = String(now.getHours()).padStart(2, "0");
@@ -146,10 +167,234 @@ export default function Home() {
     setDropTime(currentTime);
   }, []);
 
+  const hostMenu = [
+    "Add a Car",
+    "My Cars",
+    "My Bookings",
+    // "My Payments",
+    // "Notifications",
+    "Logout",
+  ];
+  const guestMenu = [
+    "Book a Car",
+    "My Bookings",
+    "My Documents",
+    // "My Payments",
+    // "Notifications",
+    "Logout",
+  ];
+  const AdminMenu = [
+    "Cars",
+    "Bookings",
+    "Guests",
+    "Hosts",
+    "Payments",
+    "Support",
+    "Logout",
+  ];
+  const menuItems =
+    role === "host"
+      ? hostMenu
+      : role === "guest"
+      ? guestMenu
+      : role === "admin"
+      ? AdminMenu
+      : [];
+
+  const iconMap: Record<string, any> = {
+    "Add a Car": faPlus,
+    "My Cars": faCar,
+    "My Bookings": faCalendarAlt,
+    "My Payments": faCreditCard,
+    Notifications: faBell,
+    Support: faLifeRing,
+    Logout: faDoorOpen,
+    "Book a Car": faCar,
+    "My Documents": faFile,
+  };
+
   return (
     <div className="home-container">
-      {/* Navbar Component with blur background */}
-      <Navbar profilePicUrl={profilePicUrl} />
+      {/* Header */}
+      <header className="home-header">
+        {/* Logo */}
+        <img src={logo} alt="Logo" className="home-logo" />
+        {/* Hamburger (mobile only) */}
+        <div
+          className="hamburger"
+          onClick={() => setIsNavOpen((prev) => !prev)}
+        >
+          {isNavOpen ? "✖" : "☰"}
+        </div>
+
+        {/* Navigation */}
+        <nav className={`home-nav ${isNavOpen ? "active" : ""}`}>
+          <Link to="/" onClick={() => setIsNavOpen(false)}>
+            Home
+          </Link>
+          <Link to="/cars" onClick={() => setIsNavOpen(false)}>
+            SelfDrive-Car
+          </Link>
+          <Link to="/cars" onClick={() => setIsNavOpen(false)}>
+            Intercity
+          </Link>
+          <Link to="/community" onClick={() => setIsNavOpen(false)}>
+            Community
+          </Link>
+          <Link to="/support" onClick={() => setIsNavOpen(false)}>
+            Support
+          </Link>
+
+          {!user ? (
+            <a
+              href="#login"
+              className="login-link"
+              onClick={(e) => {
+                e.preventDefault();
+                setIsNavOpen(false);
+                setActiveModal("login");
+              }}
+            >
+              Login
+            </a>
+          ) : (
+            <div
+              className="user-profile"
+              onClick={() => setShowMenu((prev) => !prev)}
+            >
+              <img
+                src={profilePicUrl || user.avatar || defaultAvatar}
+                alt="Profile"
+                className={`profile-avatar ${
+                  !profilePicUrl && !user.avatar ? "default-avatar" : ""
+                }`}
+              />
+
+              {showMenu && (
+                <ul className="profile-menu">
+                  {menuItems.map((item, idx) => {
+                    if (item === "Logout") {
+                      return (
+                        <li
+                          key={idx}
+                          onClick={handleLogout}
+                          tabIndex={0}
+                          role="menuitem"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ")
+                              handleLogout();
+                          }}
+                        >
+                          <FontAwesomeIcon
+                            icon={iconMap[item]}
+                            className="menu-icon"
+                          />{" "}
+                          {item}
+                        </li>
+                      );
+                    }
+
+                    // Role-based routing for "My Bookings"
+                    if (item === "My Bookings") {
+                      const bookingsPath =
+                        role === "host"
+                          ? "/host-mybookings"
+                          : role === "guest"
+                          ? "/guest-mybookings"
+                          : "/";
+
+                      return (
+                        <li
+                          key={idx}
+                          onClick={() => navigate(bookingsPath)}
+                          tabIndex={0}
+                          role="menuitem"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ")
+                              navigate(bookingsPath);
+                          }}
+                        >
+                          <FontAwesomeIcon
+                            icon={iconMap[item]}
+                            className="menu-icon"
+                          />{" "}
+                          {item}
+                        </li>
+                      );
+                    }
+
+                    const adminNavMap: Record<string, string> = {
+                      Cars: "/admin/manage-cars",
+                      Bookings: "/admin/manage-bookings",
+                      Guests: "/admin/manage-guests",
+                      Hosts: "/admin/manage-hosts",
+                      Payments: "/admin/manage-payments",
+                      Support: "/admin/manage-support",
+                    };
+
+                    if (
+                      item === "Add a Car" ||
+                      item === "My Cars" ||
+                      item === "Book a Car" ||
+                      item === "My Documents" ||
+                      adminNavMap[item]
+                    ) {
+                      const path =
+                        item === "Add a Car"
+                          ? "/add-car"
+                          : item === "My Cars"
+                          ? "/my-cars"
+                          : item === "My Documents"
+                          ? "/my-documents"
+                          : item === "Book a Car"
+                          ? "/searched-cars"
+                          : adminNavMap[item];
+
+                      return (
+                        <li
+                          key={idx}
+                          onClick={() => navigate(path)}
+                          tabIndex={0}
+                          role="menuitem"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ")
+                              navigate(path);
+                          }}
+                        >
+                          <FontAwesomeIcon
+                            icon={iconMap[item]}
+                            className="menu-icon"
+                          />{" "}
+                          {item}
+                        </li>
+                      );
+                    }
+
+                    return (
+                      <li
+                        key={idx}
+                        tabIndex={0}
+                        role="menuitem"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            // No-op or extend if needed
+                          }
+                        }}
+                      >
+                        <FontAwesomeIcon
+                          icon={iconMap[item]}
+                          className="menu-icon"
+                        />{" "}
+                        {item}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          )}
+        </nav>
+      </header>
 
       {/* Modal */}
       {activeModal && (
@@ -183,7 +428,7 @@ export default function Home() {
                   }
                 }
               }}
-              remark={remark}
+              remark={remark} // Pass the verification message here
             />
           ) : (
             <Register
@@ -193,6 +438,7 @@ export default function Home() {
                 setRemark("");
               }}
               onRegisterSuccess={() => {
+                // Set verification message and open login modal
                 setRemark(
                   "Verification link sent to your email/phone. Complete the verification to enable login"
                 );
@@ -446,13 +692,13 @@ export default function Home() {
 
       {/* Footer */}
       <Footer />
-
       {/* Pickup Map Modal */}
       {showPickupMap && (
         <ModalWrapper onClose={() => setShowPickupMap(false)}>
           <LocationPicker
             onSelect={(loc: any) => {
               console.log("Selected:", loc);
+              // Use city + state or fallback to country
               const locationName =
                 loc.city && loc.state
                   ? `${loc.city}, ${loc.state}`
