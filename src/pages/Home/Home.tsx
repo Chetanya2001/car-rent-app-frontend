@@ -44,7 +44,7 @@ export default function Home() {
     null
   );
   const [role, setRole] = useState<"host" | "guest" | "admin" | null>(null);
-  const [showMenu, setShowMenu] = useState(false);
+  const [, setShowMenu] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [showPickupMap, setShowPickupMap] = useState(false);
   const [showDropMap, setShowDropMap] = useState(false);
@@ -203,9 +203,9 @@ export default function Home() {
   return (
     <div className="home-container">
       {/* Transparent Navbar */}
-      {/* Transparent Navbar */}
       <header className="home-header transparent">
         <img src={logo} alt="Logo" className="home-logo" />
+
         <div
           className="hamburger"
           onClick={() => setIsNavOpen((prev) => !prev)}
@@ -214,17 +214,18 @@ export default function Home() {
         </div>
 
         <nav className={`home-nav ${isNavOpen ? "active" : ""}`}>
-          {/* Top links based on role */}
+          {/* HOME always visible */}
           <Link to="/" onClick={() => setIsNavOpen(false)}>
             Home
           </Link>
 
+          {/* ---------------- PUBLIC (NOT LOGGED IN) ---------------- */}
           {!user && (
             <>
-              <Link to="/cars" onClick={() => setIsNavOpen(false)}>
-                SelfDrive-Car
+              <Link to="/searched-cars" onClick={() => setIsNavOpen(false)}>
+                SelfDrive
               </Link>
-              <Link to="/cars" onClick={() => setIsNavOpen(false)}>
+              <Link to="/intercity" onClick={() => setIsNavOpen(false)}>
                 Intercity
               </Link>
               <Link to="/community" onClick={() => setIsNavOpen(false)}>
@@ -244,26 +245,28 @@ export default function Home() {
             </>
           )}
 
+          {/* ---------------- HOST ---------------- */}
           {user && role === "host" && (
             <>
-              <Link to="/searched-cars" onClick={() => setIsNavOpen(false)}>
-                SelfDrive-Car
-              </Link>
               <Link to="/add-car" onClick={() => setIsNavOpen(false)}>
                 Add a Car
               </Link>
               <Link to="/host-mybookings" onClick={() => setIsNavOpen(false)}>
                 My Bookings
               </Link>
-              <Link to="/cars" onClick={() => setIsNavOpen(false)}>
-                Intercity
+              <Link to="/support" onClick={() => setIsNavOpen(false)}>
+                Support
               </Link>
-              <Link to="/community" onClick={() => setIsNavOpen(false)}>
-                Community
+              <Link to="/my-documents" onClick={() => setIsNavOpen(false)}>
+                Profile
+              </Link>
+              <Link to="/" onClick={handleLogout}>
+                Logout
               </Link>
             </>
           )}
 
+          {/* ---------------- GUEST ---------------- */}
           {user && role === "guest" && (
             <>
               <Link to="/searched-cars" onClick={() => setIsNavOpen(false)}>
@@ -272,41 +275,30 @@ export default function Home() {
               <Link to="/guest-mybookings" onClick={() => setIsNavOpen(false)}>
                 My Bookings
               </Link>
-              <Link to="/cars" onClick={() => setIsNavOpen(false)}>
+              <Link to="/intercity" onClick={() => setIsNavOpen(false)}>
                 Intercity
               </Link>
-              <Link to="/community" onClick={() => setIsNavOpen(false)}>
-                Community
+              <Link to="/support" onClick={() => setIsNavOpen(false)}>
+                Support
               </Link>
+              <Link to="/my-documents" onClick={() => setIsNavOpen(false)}>
+                Profile
+              </Link>
+              <button className="nav-logout-btn" onClick={handleLogout}>
+                Logout
+              </button>
             </>
           )}
-
-          {/* Profile dropdown for logged-in users */}
-          {user && (
-            <div
-              className="user-profile"
-              onClick={() => setShowMenu((prev) => !prev)}
-            >
-              <img
-                src={profilePicUrl || user.avatar || defaultAvatar}
-                alt="Profile"
-                className="profile-avatar"
-              />
-              {showMenu && (
-                <ul className="profile-menu">
-                  <li onClick={() => navigate("/my-documents")}>Profile</li>
-                  {role === "host" && (
-                    <li onClick={() => navigate("/support")}>Support</li>
-                  )}
-                  {role === "guest" && (
-                    <li onClick={() => navigate("/support")}>Support</li>
-                  )}
-                  <li onClick={handleLogout}>Logout</li>
-                </ul>
-              )}
-            </div>
-          )}
         </nav>
+
+        {/* Avatar (visual only) */}
+        {user && (
+          <img
+            src={profilePicUrl || user.avatar || defaultAvatar}
+            alt="Profile"
+            className="profile-avatar"
+          />
+        )}
       </header>
 
       {/* Login/Register Modals */}
