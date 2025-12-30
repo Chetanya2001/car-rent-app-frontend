@@ -294,7 +294,7 @@ export default function Home() {
               />
               {showMenu && (
                 <ul className="profile-menu">
-                  <li onClick={() => navigate("/my-profile")}>Profile</li>
+                  <li onClick={() => navigate("/my-documents")}>Profile</li>
                   {role === "host" && (
                     <li onClick={() => navigate("/support")}>Support</li>
                   )}
