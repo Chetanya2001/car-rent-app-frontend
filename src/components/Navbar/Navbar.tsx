@@ -31,23 +31,30 @@ export default function Navbar({
   profilePicUrl: propProfilePicUrl,
 }: NavbarProps) {
   const navigate = useNavigate();
+
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<"host" | "guest" | "admin" | null>(null);
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null
   );
   const [remark, setRemark] = useState("");
-  const [showMenu, setShowMenu] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(
     propProfilePicUrl ?? null
   );
 
-  const profileMenuRef = useRef<HTMLUListElement | null>(null);
   const hamburgerRef = useRef<HTMLDivElement | null>(null);
   const navMenuRef = useRef<HTMLUListElement | null>(null);
 
-  // Role-based top nav items
+  /* ---------------- NAV CONFIG ---------------- */
+
+  const publicNavItems = [
+    { label: "Home", path: "/" },
+    { label: "SelfDrive", path: "/searched-cars" },
+    { label: "Intercity", path: "/intercity" },
+    { label: "Community", path: "/community" },
+  ];
+
   const hostNavItems = [
     { label: "Add a Car", path: "/add-car", icon: faPlus },
     { label: "My Cars", path: "/my-cars", icon: faCar },
@@ -61,20 +68,10 @@ export default function Navbar({
     { label: "Support", path: "/support", icon: faLifeRing },
   ];
 
-  const profileDropdownItems = [
-    { label: "My Profile", path: "/my-documents" },
-    { label: "Logout", action: () => handleLogout() },
-  ];
+  /* ---------------- OUTSIDE CLICK ---------------- */
 
-  // Handle outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        profileMenuRef.current &&
-        !profileMenuRef.current.contains(event.target as Node)
-      ) {
-        setShowMenu(false);
-      }
       if (
         hamburgerRef.current &&
         !hamburgerRef.current.contains(event.target as Node) &&
@@ -88,11 +85,14 @@ export default function Navbar({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Load user from localStorage + token
+  /* ---------------- LOAD USER ---------------- */
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
+
     if (storedUser) setUser(JSON.parse(storedUser));
+
     if (token) {
       try {
         const decoded = jwtDecode<TokenPayload>(token);
@@ -103,7 +103,8 @@ export default function Navbar({
     }
   }, []);
 
-  // Fetch profile pic
+  /* ---------------- FETCH PROFILE ---------------- */
+
   useEffect(() => {
     const loadUserProfile = async () => {
       const token = localStorage.getItem("token");
@@ -112,11 +113,9 @@ export default function Navbar({
       try {
         const profile = await fetchUserProfile(token);
         setUser(profile);
+
         if (profile.profile_pic) {
           setProfilePicUrl(profile.profile_pic);
-          localStorage.setItem("profilePicUrl", profile.profile_pic);
-        } else {
-          setProfilePicUrl(null);
         }
 
         const decoded = jwtDecode<TokenPayload>(token);
@@ -125,15 +124,17 @@ export default function Navbar({
         console.error("Failed to load user profile", err);
       }
     };
+
     loadUserProfile();
   }, []);
+
+  /* ---------------- ACTIONS ---------------- */
 
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     setUser(null);
     setRole(null);
-    setShowMenu(false);
     setNavOpen(false);
     navigate("/");
   };
@@ -141,6 +142,7 @@ export default function Navbar({
   const handleUserLogin = (userData: User) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
+
     const token = localStorage.getItem("token");
     if (token) {
       try {
@@ -150,9 +152,12 @@ export default function Navbar({
         console.error("Invalid token after login", err);
       }
     }
+
     setRemark("");
     setActiveModal(null);
   };
+
+  /* ---------------- JSX ---------------- */
 
   return (
     <>
@@ -168,118 +173,100 @@ export default function Navbar({
           ref={hamburgerRef}
           role="button"
           tabIndex={0}
-          aria-label={
-            navOpen ? "Close navigation menu" : "Open navigation menu"
-          }
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") setNavOpen((prev) => !prev);
-          }}
         >
           <FontAwesomeIcon icon={navOpen ? faDoorOpen : faBars} size="lg" />
         </div>
 
-        {/* Top nav */}
+        {/* NAV LINKS */}
         <ul
           className={`scroll-navbar-links${navOpen ? " active" : ""}`}
           ref={navMenuRef}
         >
-          <li>
-            <NavLink to="/" onClick={() => setNavOpen(false)}>
-              Home
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/searched-cars" onClick={() => setNavOpen(false)}>
-              SelfDrive-Car
-            </NavLink>
-          </li>
-          {/* Role-specific items */}
+          {/* Public (only before login) */}
+          {!user &&
+            publicNavItems.map((item) => (
+              <li key={item.label}>
+                <NavLink to={item.path} onClick={() => setNavOpen(false)}>
+                  {item.label}
+                </NavLink>
+              </li>
+            ))}
+
+          {/* Host */}
           {role === "host" &&
             hostNavItems.map((item) => (
               <li key={item.label}>
-                <NavLink to={item.path}>{item.label}</NavLink>
+                <NavLink to={item.path} onClick={() => setNavOpen(false)}>
+                  {item.label}
+                </NavLink>
               </li>
             ))}
+
+          {/* Guest */}
           {role === "guest" &&
             guestNavItems.map((item) => (
               <li key={item.label}>
-                <NavLink to={item.path}>{item.label}</NavLink>
+                <NavLink to={item.path} onClick={() => setNavOpen(false)}>
+                  {item.label}
+                </NavLink>
               </li>
             ))}
-          <li>
-            <NavLink to="/community" onClick={() => setNavOpen(false)}>
-              Community
-            </NavLink>
-          </li>
+
+          {/* Profile & Logout */}
+          {user && (
+            <>
+              <li>
+                <NavLink to="/my-documents" onClick={() => setNavOpen(false)}>
+                  Profile
+                </NavLink>
+              </li>
+              <li>
+                <button className="nav-logout-btn" onClick={handleLogout}>
+                  Logout
+                </button>
+              </li>
+            </>
+          )}
         </ul>
 
-        {/* Profile */}
-        <div className="scroll-navbar-login">
-          {!user ? (
+        {/* LOGIN BUTTON */}
+        {!user && (
+          <div className="scroll-navbar-login">
             <button
               className="btn btn-custom"
               onClick={() => setActiveModal("login")}
             >
               Login
             </button>
-          ) : (
-            <div className="user-profile-wrapper">
-              <img
-                src={profilePicUrl || user.avatar || defaultAvatar}
-                className="profile-avatar"
-                onClick={() => setShowMenu((prev) => !prev)}
-              />
-              {showMenu && (
-                <ul className="profile-menu-outside" ref={profileMenuRef}>
-                  {profileDropdownItems.map((item, idx) => (
-                    <li
-                      key={idx}
-                      onClick={() =>
-                        item.action ? item.action() : navigate(item.path)
-                      }
-                    >
-                      {item.label}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* Avatar (optional visual only) */}
+        {user && (
+          <img
+            src={profilePicUrl || user.avatar || defaultAvatar}
+            className="profile-avatar"
+            alt="User"
+          />
+        )}
       </nav>
 
-      {/* Login/Register Modal */}
+      {/* AUTH MODAL */}
       {activeModal && (
-        <ModalWrapper
-          onClose={() => {
-            setActiveModal(null);
-            setRemark("");
-          }}
-        >
+        <ModalWrapper onClose={() => setActiveModal(null)}>
           {activeModal === "login" ? (
             <Login
-              onClose={() => {
-                setActiveModal(null);
-                setRemark("");
-              }}
-              onSwitch={() => {
-                setActiveModal("register");
-                setRemark("");
-              }}
+              onClose={() => setActiveModal(null)}
+              onSwitch={() => setActiveModal("register")}
               onLoginSuccess={handleUserLogin}
               remark={remark}
             />
           ) : (
             <Register
               onClose={() => setActiveModal(null)}
-              onSwitch={() => {
-                setActiveModal("login");
-                setRemark("");
-              }}
+              onSwitch={() => setActiveModal("login")}
               onRegisterSuccess={() => {
-                setRemark(
-                  "Verification sent to your email/ phone no. Complete the verification to enable the login"
-                );
+                setRemark("Verification sent. Complete verification to login.");
                 setActiveModal("login");
               }}
             />
