@@ -60,10 +60,9 @@ export default function SearchedCars() {
     dropTime: bookingDetails.dropTime || dropTime,
     driverRequired: bookingDetails.driverRequired ?? false,
     differentDrop: bookingDetails.differentDrop ?? false,
-    // insureTrip removed from state — it's always true now
+    insureTrip: bookingDetails.insureTrip ?? true, // Default ON
   });
 
-  // Specific states for Intercity
   const [pickupLocation, setPickupLocation] = useState<string>("");
   const [dropCity, setDropCity] = useState<string>("");
 
@@ -90,7 +89,6 @@ export default function SearchedCars() {
       return;
     }
 
-    // Validation for intercity
     if (tripType === "intercity") {
       if (filters.city === "Delhi" && !pickupLocation) {
         alert("Please select a pickup location in Delhi");
@@ -217,7 +215,7 @@ export default function SearchedCars() {
           )}
         </label>
 
-        {/* Intercity: Pickup Location in Delhi */}
+        {/* Intercity: Pickup Location */}
         {tripType === "intercity" && filters.city === "Delhi" && (
           <label>
             Pickup Location:
@@ -299,7 +297,7 @@ export default function SearchedCars() {
           </label>
         )}
 
-        {/* Self Drive Only Options */}
+        {/* Common Options: Driver Required (only selfdrive) + Insurance (both) */}
         {tripType === "selfdrive" && (
           <>
             <label className="searched-switch-label">
@@ -354,20 +352,19 @@ export default function SearchedCars() {
           </>
         )}
 
-        {/* Insure Trip is always ON — shown as info (optional) */}
-        <div
-          className="insure-info"
-          style={{
-            gridColumn: "1 / -1",
-            textAlign: "center",
-            color: "#01d28e",
-            fontWeight: "600",
-            fontSize: "1rem",
-            margin: "0.5rem 0",
-          }}
-        >
-          Trip Insurance Included
-        </div>
+        {/* Trip Insurance Toggle — Visible in BOTH modes, default ON */}
+        <label className="searched-switch-label">
+          Insure Trip:
+          <span className="searched-switch">
+            <input
+              type="checkbox"
+              name="insureTrip"
+              checked={filters.insureTrip}
+              onChange={handleFilterChange}
+            />
+            <span className="searched-slider"></span>
+          </span>
+        </label>
 
         <button className="searched-search-btn" onClick={handleSearch}>
           Search
@@ -417,6 +414,17 @@ export default function SearchedCars() {
                   <p className="searched-car-price">
                     ₹{car.price_per_hour} / hour
                   </p>
+                  {filters.insureTrip && (
+                    <p
+                      style={{
+                        color: "#01d28e",
+                        fontSize: "0.9rem",
+                        marginTop: "0.5rem",
+                      }}
+                    >
+                      Trip Insurance Included
+                    </p>
+                  )}
                 </div>
                 <div className="searched-car-actions">
                   <button
@@ -439,7 +447,6 @@ export default function SearchedCars() {
                                 : filters.differentDrop
                                 ? dropCity
                                 : undefined,
-                            insureTrip: true, // Always true
                             driverRequired:
                               tripType === "intercity"
                                 ? false
@@ -458,7 +465,7 @@ export default function SearchedCars() {
                         state: {
                           pickup_datetime: `${filters.pickupDate}T${filters.pickupTime}`,
                           dropoff_datetime: `${filters.dropDate}T${filters.dropTime}`,
-                          insurance: true, // Always insured
+                          insurance: filters.insureTrip,
                           driver:
                             tripType === "intercity"
                               ? false
@@ -484,7 +491,7 @@ export default function SearchedCars() {
         )}
       </div>
 
-      {/* Drop Map Modal - Only for Self Drive different drop */}
+      {/* Drop Map Modal */}
       {showDropMap && tripType === "selfdrive" && (
         <ModalWrapper onClose={() => setShowDropMap(false)}>
           <LocationPicker
