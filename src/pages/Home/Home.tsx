@@ -1,34 +1,23 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import "./Home.css";
-import logo from "../../assets/logo.png";
 import pickupIcon from "../../assets/smart-transportation.png";
 import bestdealIcon from "../../assets/communication.png";
 import carrentIcon from "../../assets/car-rent.png";
 import aboutImage from "../../assets/bg_3.jpg";
-import defaultAvatar from "../../assets/user.png";
 import Testimonials from "../../components/Testimonials/Testimonial";
 import Stats from "../../components/Stats/Stats";
 import Footer from "../../components/Footer/Footer";
+import Navbar from "../../components/Navbar/Navbar";
 import Login from "../auth/Login/Login";
 import Register from "../auth/Register/Register";
 import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import LocationPicker from "../../components/Map/LocationPicker";
 import { useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCar,
-  faCalendarAlt,
-  faCreditCard,
-  faBell,
-  faLifeRing,
-  faDoorOpen,
-  faPlus,
-  faFile,
-  faBars,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCar } from "@fortawesome/free-solid-svg-icons";
 
 import { searchCars } from "../../services/carService";
 import { fetchUserProfile } from "../../services/auth";
@@ -49,8 +38,6 @@ export default function Home() {
     null
   );
   const [role, setRole] = useState<"host" | "guest" | "admin" | null>(null);
-  const [showMenu, setShowMenu] = useState(false);
-  const [isNavOpen, setIsNavOpen] = useState(false);
   const [showPickupMap, setShowPickupMap] = useState(false);
   const [showDropMap, setShowDropMap] = useState(false);
   const [dropCity, setDropCity] = useState("");
@@ -66,50 +53,6 @@ export default function Home() {
   const [differentDrop, setDifferentDrop] = useState(false);
 
   const location = useLocation();
-  const profileMenuRef = useRef<HTMLUListElement | null>(null);
-  const hamburgerRef = useRef<HTMLDivElement | null>(null);
-  const navMenuRef = useRef<HTMLElement | null>(null);
-
-  // Role-based nav items
-  const hostNavItems = [
-    { label: "Add a Car", path: "/add-car" },
-    { label: "My Cars", path: "/my-cars" },
-    { label: "My Bookings", path: "/host-mybookings" },
-    { label: "Support", path: "/support" },
-  ];
-
-  const guestNavItems = [
-    { label: "Book a Car", path: "/searched-cars" },
-    { label: "My Bookings", path: "/guest-mybookings" },
-    { label: "Support", path: "/support" },
-  ];
-
-  const profileDropdownItems = [
-    { label: "My Profile", path: "/my-documents" },
-    { label: "Logout", action: () => handleLogout() },
-  ];
-
-  // Handle outside click
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        profileMenuRef.current &&
-        !profileMenuRef.current.contains(event.target as Node)
-      ) {
-        setShowMenu(false);
-      }
-      if (
-        hamburgerRef.current &&
-        !hamburgerRef.current.contains(event.target as Node) &&
-        navMenuRef.current &&
-        !navMenuRef.current.contains(event.target as Node)
-      ) {
-        setIsNavOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -123,16 +66,6 @@ export default function Home() {
       navigate("/", { replace: true });
     }
   }, [location, navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    setUser(null);
-    setRole(null);
-    setShowMenu(false);
-    setIsNavOpen(false);
-    navigate("/");
-  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -213,136 +146,10 @@ export default function Home() {
     setDropTime(currentTime);
   }, []);
 
-  const hostMenu = ["Add a Car", "My Cars", "My Bookings", "Logout"];
-  const guestMenu = ["Book a Car", "My Bookings", "My Documents", "Logout"];
-  const AdminMenu = [
-    "Cars",
-    "Bookings",
-    "Guests",
-    "Hosts",
-    "Payments",
-    "Support",
-    "Logout",
-  ];
-  const menuItems =
-    role === "host"
-      ? hostMenu
-      : role === "guest"
-      ? guestMenu
-      : role === "admin"
-      ? AdminMenu
-      : [];
-
-  const iconMap: Record<string, any> = {
-    "Add a Car": faPlus,
-    "My Cars": faCar,
-    "My Bookings": faCalendarAlt,
-    "My Payments": faCreditCard,
-    Notifications: faBell,
-    Support: faLifeRing,
-    Logout: faDoorOpen,
-    "Book a Car": faCar,
-    "My Documents": faFile,
-  };
-
   return (
     <div className="home-container">
-      {/* Header - Updated to match Navbar component */}
-      <header className="scroll-navbar">
-        <div className="scroll-navbar-logo">
-          <img src={logo} alt="Logo" />
-        </div>
-
-        {/* Hamburger */}
-        <div
-          className="scroll-navbar-hamburger"
-          onClick={() => setIsNavOpen((prev) => !prev)}
-          ref={hamburgerRef}
-          role="button"
-          tabIndex={0}
-          aria-label={
-            isNavOpen ? "Close navigation menu" : "Open navigation menu"
-          }
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ")
-              setIsNavOpen((prev) => !prev);
-          }}
-        >
-          <FontAwesomeIcon icon={isNavOpen ? faDoorOpen : faBars} size="lg" />
-        </div>
-
-        {/* Navigation */}
-        <nav
-          className={`scroll-navbar-links${isNavOpen ? " active" : ""}`}
-          ref={navMenuRef}
-        >
-          <Link to="/" onClick={() => setIsNavOpen(false)}>
-            Home
-          </Link>
-          <Link to="/cars" onClick={() => setIsNavOpen(false)}>
-            SelfDrive-Car
-          </Link>
-          {/* Role-specific items */}
-          {role === "host" &&
-            hostNavItems.map((item) => (
-              <Link
-                key={item.label}
-                to={item.path}
-                onClick={() => setIsNavOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-          {role === "guest" &&
-            guestNavItems.map((item) => (
-              <Link
-                key={item.label}
-                to={item.path}
-                onClick={() => setIsNavOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-          <Link to="/community" onClick={() => setIsNavOpen(false)}>
-            Community
-          </Link>
-        </nav>
-
-        {/* Profile */}
-        <div className="scroll-navbar-login">
-          {!user ? (
-            <button
-              className="btn btn-custom"
-              onClick={() => setActiveModal("login")}
-            >
-              Login
-            </button>
-          ) : (
-            <div className="user-profile-wrapper">
-              <img
-                src={profilePicUrl || user.avatar || defaultAvatar}
-                alt="Profile"
-                className="profile-avatar"
-                onClick={() => setShowMenu((prev) => !prev)}
-              />
-              {showMenu && (
-                <ul className="profile-menu-outside" ref={profileMenuRef}>
-                  {profileDropdownItems.map((item, idx) => (
-                    <li
-                      key={idx}
-                      onClick={() =>
-                        item.action ? item.action() : navigate(item.path!)
-                      }
-                    >
-                      {item.label}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
-        </div>
-      </header>
+      {/* Navbar Component with blur background */}
+      <Navbar profilePicUrl={profilePicUrl} />
 
       {/* Modal */}
       {activeModal && (
