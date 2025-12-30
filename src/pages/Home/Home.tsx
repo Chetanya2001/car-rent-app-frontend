@@ -210,17 +210,15 @@ export default function Home() {
     Support: faLifeRing,
     Logout: faDoorOpen,
     "Book a Car": faCar,
-    "My Documents": faFile, // icon for documents added
+    "My Documents": faFile,
   };
 
   return (
     <div className="home-container">
       {/* Header */}
-      {/* Header */}
       <header className="home-header">
         {/* Logo */}
         <img src={logo} alt="Logo" className="home-logo" />
-
         {/* Hamburger (mobile only) */}
         <div
           className="hamburger"
@@ -228,7 +226,6 @@ export default function Home() {
         >
           {isNavOpen ? "✖" : "☰"}
         </div>
-
         {/* Navigation */}
         <nav className={`home-nav ${isNavOpen ? "active" : ""}`}>
           <Link to="/" onClick={() => setIsNavOpen(false)}>
