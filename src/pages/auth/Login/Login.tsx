@@ -55,7 +55,7 @@ export default function Login({
       } else if (decoded.role === "host") {
         navigate("/my-cars");
       } else if (decoded.role === "guest") {
-        navigate("/bookAcar");
+        navigate("/searched-cars");
       }
 
       onClose();
