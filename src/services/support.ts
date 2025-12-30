@@ -15,7 +15,7 @@ export interface SupportResponse {
 
 // ================== API BASE URL ====================
 
-const API_URL = `${import.meta.env.VITE_API_URL}/users`;
+const API_URL = `${import.meta.env.VITE_API_URL}/api/users`;
 
 // ================= Support Message API ==============
 

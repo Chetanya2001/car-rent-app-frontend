@@ -2,7 +2,7 @@ import axios from "axios";
 import type { CarDetailsType } from "../types/CarDetails";
 
 // ✅ Use env variable for API base
-const API_URL = `${import.meta.env.VITE_API_URL}/car-details/getCarDetails`;
+const API_URL = `${import.meta.env.VITE_API_URL}/api/car-details/getCarDetails`;
 
 // 📌 Get Car Details by ID (car_id in body)
 export const getCarDetails = async (

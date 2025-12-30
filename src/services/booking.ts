@@ -1,7 +1,7 @@
 // src/services/booking.ts
 import axios from "axios";
 
-const API_URL = `${import.meta.env.VITE_API_URL}/bookings`;
+const API_URL = `${import.meta.env.VITE_API_URL}/api/bookings`;
 
 // The booking input type matches your API needs
 

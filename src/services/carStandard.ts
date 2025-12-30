@@ -12,7 +12,7 @@ export interface CarStandards {
 }
 
 // Use env variable for base URL
-const API_URL = `${import.meta.env.VITE_API_URL}/car-standards`;
+const API_URL = `${import.meta.env.VITE_API_URL}/api/car-standards`;
 
 // POST to add or update car standards
 export const addCarStandards = async (carStandardsData: CarStandards) => {

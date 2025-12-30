@@ -1,9 +1,12 @@
 import { useState } from "react";
 import "./Testimonial.css";
 
-import user1 from "../../assets/amit.jpeg";
-import user2 from "../../assets/ankit.jfif";
-import user3 from "../../assets/ashwani.jpeg";
+import user1 from "../../assets/testimonials_image/amit.jpeg";
+import user2 from "../../assets/testimonials_image/ankit.jfif";
+import user3 from "../../assets/testimonials_image/shubham.jfif";
+import user4 from "../../assets/testimonials_image/krishanu.jpeg";
+import user5 from "../../assets/testimonials_image/mohit.jpeg";
+import user6 from "../../assets/testimonials_image/roger.jpeg";
 
 import type { Testimonial } from "../../types/Testimonial";
 
@@ -12,51 +15,44 @@ export default function Testimonials() {
     {
       img: user1,
       place: "Visited family (Feb 2025)",
-      text: "Seamless experience of renting a self-driven car through Zip Drive. Host dropped the car at airport. Cosy car – easy Zipping!",
-      name: "Ankit Jain",
-      role: "Travel consultant, Melbourne",
+      text: "No more waiting for cabs good service, Will use again!",
+      name: "Amit Garg",
+      role: "CEO AMM GmbH, Hamburg",
     },
     {
       img: user2,
-      place: "Visited Mahakumbh (Feb 2025)",
-      text: "I was always looking for a reliable company to get self drive cars. Delighted I found Zip Drive. Timely Pick/Drop service and clean car made my experience smooth.",
-      name: "Mohit Jain",
-      role: "Marketing Manager, Dubai",
+      place: "Visited Family (Feb 2025)",
+      text: "Seamless experience of renting a self-driven car through Zipdrive. Host Dropped the car at airport . Cozy car-easy Zipping",
+      name: "Ankit Jain",
+      role: "Travel Consultant, Melbourne",
     },
     {
       img: user3,
+      place: "Visited Delhi (Dec 2024)",
+      text: "Seamless experience of renting a self-driven car through Zipdrive. Host Dropped the car at airport . Cozy car-easy Zipping",
+      name: "Shubham Mishra",
+      role: "Director At Novartris, Dublin",
+    },
+    {
+      img: user4,
       place: "NCR Delhi (Feb 2025)",
       text: "I had to come to India for my visa renewal. Zip Drive helped me with the car for 15 days. Excellent customer focus and service.",
       name: "Krishanu",
       role: "Engineer, US",
     },
     {
-      img: user1,
-      place: "Weekend Getaway (Mar 2025)",
-      text: "Zip Drive made our weekend trip unforgettable! The car was in great condition and the service was top-notch.",
-      name: "Riya Sharma",
-      role: "Photographer, New York",
+      img: user5,
+      place: "Visited Mahakumbh (Feb 2025)",
+      text: "I was always looking for reliable company to get a self driven cars. Delighted i found Zip Drive . Timely Pick/Drop service and clean car made my experience smooth.",
+      name: "Mohit Jain",
+      role: "Marketing Manager, Dubai",
     },
     {
-      img: user2,
-      place: "Business Trip (Apr 2025)",
-      text: "I needed a reliable car for my business trip and Zip Drive delivered. The process was smooth and the car was perfect for my needs.",
-      name: "Amit Verma",
-      role: "Entrepreneur, London",
-    },
-    {
-      img: user3,
-      place: "Family Vacation (May 2025)",
-      text: "Our family vacation was made easier with Zip Drive. The car was spacious and comfortable, making our journey enjoyable.",
-      name: "Sneha Kapoor",
-      role: "Teacher, Sydney",
-    },
-    {
-      img: user1,
-      place: "City Exploration (Jun 2025)",
-      text: "Exploring the city was a breeze with Zip Drive. The car was easy to drive and perfect for navigating through traffic.",
-      name: "Vikram Singh",
-      role: "Blogger, Toronto",
+      img: user6,
+      place: "Wah Taj-with family (jan 2025)",
+      text: "Driving is fun in india with excellent expressways now but middle of the trip i needed a chauffeur to help me through the narrow lanes in Delhi. Happy that zipdrive could prompty help. highly recommended.",
+      name: "Roger Scott",
+      role: "Tourist, UK",
     },
   ];
 
