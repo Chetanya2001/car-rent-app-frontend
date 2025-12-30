@@ -38,49 +38,32 @@ export default function SearchedCars() {
   const navigate = useNavigate();
 
   const now = new Date();
+  now.setHours(now.getHours() + 2);
 
-  // Pickup default
-  const { date: todayDate } = getDateAndTime(now);
-  const pickupTimeDefault = "09:00";
+  const { date: todayDate, time: nowTime } = getDateAndTime(now);
 
-  // Dropoff default (today + 4 days)
-  const dropDefault = new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000);
-  const { date: dropDateDefault } = getDateAndTime(dropDefault);
-  const dropTimeDefault = "17:00";
+  const dropDefault = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const { date: tomorrowDate, time: dropTime } = getDateAndTime(dropDefault);
 
   const [cars, setCars] = useState<Car[]>(location.state?.cars || []);
   const bookingDetails = location.state?.bookingDetails || {};
 
-  const [mode, setMode] = useState<"selfdrive" | "intercity">("selfdrive");
-
   const [filters, setFilters] = useState({
     city: bookingDetails.city || "Delhi",
     pickupDate: bookingDetails.pickupDate || todayDate,
-    pickupTime: bookingDetails.pickupTime || pickupTimeDefault,
-    dropDate: bookingDetails.dropDate || dropDateDefault,
-    dropTime: bookingDetails.dropTime || dropTimeDefault,
-    insureTrip: bookingDetails.insureTrip ?? true,
+    pickupTime: bookingDetails.pickupTime || nowTime,
+    dropDate: bookingDetails.dropDate || tomorrowDate,
+    dropTime: bookingDetails.dropTime || dropTime,
+    insureTrip: bookingDetails.insureTrip ?? false,
     driverRequired: bookingDetails.driverRequired ?? false,
     differentDrop: bookingDetails.differentDrop ?? false,
   });
 
-  const [pickupLocation, setPickupLocation] = useState(""); // For Intercity Delhi specific locations
+  // New state for dropCity and drop map modal visibility
   const [dropCity, setDropCity] = useState(
     location.state?.bookingDetails?.dropCity || ""
   );
   const [showDropMap, setShowDropMap] = useState(false);
-
-  // Cities list
-  const cities = ["Delhi", "Gurgaon", "Noida", "Agra", "Ahmedabad", "Jaipur"];
-
-  // Delhi specific pickup points
-  const delhiPickupPoints = [
-    "Indira Gandhi International Airport (DEL)",
-    "New Delhi Railway Station",
-    "Hazrat Nizamuddin Railway Station",
-    "Anand Vihar Railway Station",
-    "Old Delhi Railway Station",
-  ];
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, type, checked, value } = e.target;
@@ -95,9 +78,9 @@ export default function SearchedCars() {
       ...prev,
       city: e.target.value,
     }));
-    setPickupLocation(""); // Reset pickup location when city changes
   };
 
+  // Separate handler for dropCity input to avoid mixing into filters
   const handleDropCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setDropCity(e.target.value);
   };
@@ -109,17 +92,13 @@ export default function SearchedCars() {
     }
 
     try {
-      const searchPayload: any = {
+      // Construct city param: if differentDrop true, use dropCity as 'dropoff' city if you want
+      // but current API expects pickup city; pass dropCity separately if required.
+      const data = await searchCars({
         city: filters.city,
         pickup_datetime: filters.pickupDate + "T" + filters.pickupTime,
         dropoff_datetime: filters.dropDate + "T" + filters.dropTime,
-      };
-
-      if (mode === "intercity" && dropCity) {
-        searchPayload.drop_city = dropCity;
-      }
-
-      const data = await searchCars(searchPayload);
+      });
       setCars(data.cars || []);
     } catch (err) {
       console.error("❌ Error searching cars:", err);
@@ -160,284 +139,129 @@ export default function SearchedCars() {
     });
   }, [cars, filters]);
 
-  // Effective values for intercity mode
-  const effectiveInsureTrip = mode === "intercity" ? true : filters.insureTrip;
-  const effectiveDriverRequired =
-    mode === "intercity" ? false : filters.driverRequired;
-
   return (
     <>
       <Navbar />
 
-      {/* Mode Toggle */}
-      <div className="searched-filters-panel" style={{ paddingTop: "10px" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "20px",
-            marginBottom: "15px",
-          }}
-        >
-          <span
-            style={{ fontWeight: mode === "selfdrive" ? "bold" : "normal" }}
+      {/* Filters with Search Button */}
+      <div className="searched-filters-panel">
+        <label>
+          City:
+          <select
+            name="city"
+            value={filters.city}
+            onChange={handleCityChange}
+            style={{ padding: "6px", fontSize: "1rem" }}
           >
-            Self Drive
-          </span>
-          <label className="searched-switch-label" style={{ margin: 0 }}>
+            <option value="" disabled>
+              Select City
+            </option>
+            <option value="Delhi">Delhi</option>
+            <option value="Gurgaon">Gurgaon</option>
+            <option value="Noida">Noida</option>
+            <option value="Agra">Agra</option>
+            <option value="Ahmedabad">Ahmedabad</option>
+            <option value="Jaipur">Jaipur</option>
+          </select>
+        </label>
+
+        <label>
+          Pickup Date:
+          <input
+            type="date"
+            name="pickupDate"
+            value={filters.pickupDate}
+            onChange={handleFilterChange}
+          />
+        </label>
+        <label>
+          Pickup Time:
+          <input
+            type="time"
+            name="pickupTime"
+            value={filters.pickupTime}
+            onChange={handleFilterChange}
+          />
+        </label>
+        <label>
+          Dropoff Date:
+          <input
+            type="date"
+            name="dropDate"
+            value={filters.dropDate}
+            onChange={handleFilterChange}
+          />
+        </label>
+        <label>
+          Dropoff Time:
+          <input
+            type="time"
+            name="dropTime"
+            value={filters.dropTime}
+            onChange={handleFilterChange}
+          />
+        </label>
+
+        {/* Toggles */}
+        <label className="searched-switch-label">
+          Insure Trip:
+          <span className="searched-switch">
             <input
               type="checkbox"
-              checked={mode === "intercity"}
-              onChange={(e) =>
-                setMode(e.target.checked ? "intercity" : "selfdrive")
-              }
+              name="insureTrip"
+              checked={filters.insureTrip}
+              onChange={handleFilterChange}
             />
-            <span
-              className="searched-slider"
-              style={{ transform: "scale(1.2)" }}
-            ></span>
-          </label>
-          <span
-            style={{ fontWeight: mode === "intercity" ? "bold" : "normal" }}
-          >
-            Intercity Self Drive
+            <span className="searched-slider"></span>
           </span>
-        </div>
+        </label>
+        <label className="searched-switch-label">
+          Driver Required:
+          <span className="searched-switch">
+            <input
+              type="checkbox"
+              name="driverRequired"
+              checked={filters.driverRequired}
+              onChange={handleFilterChange}
+            />
+            <span className="searched-slider"></span>
+          </span>
+        </label>
+        <label className="searched-switch-label">
+          Different Drop Location:
+          <span className="searched-switch">
+            <input
+              type="checkbox"
+              name="differentDrop"
+              checked={filters.differentDrop}
+              onChange={handleFilterChange}
+            />
+            <span className="searched-slider"></span>
+          </span>
+        </label>
 
-        {/* Conditional Filters based on Mode */}
-        {mode === "selfdrive" ? (
-          <>
-            <label>
-              City:
-              <select
-                name="city"
-                value={filters.city}
-                onChange={handleCityChange}
-                style={{ padding: "6px", fontSize: "1rem" }}
-              >
-                <option value="" disabled>
-                  Select City
-                </option>
-                {cities.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              Pickup Date:
-              <input
-                type="date"
-                name="pickupDate"
-                value={filters.pickupDate}
-                onChange={handleFilterChange}
-              />
-            </label>
-            <label>
-              Pickup Time:
-              <input
-                type="time"
-                name="pickupTime"
-                value={filters.pickupTime}
-                onChange={handleFilterChange}
-              />
-            </label>
-            <label>
-              Dropoff Date:
-              <input
-                type="date"
-                name="dropDate"
-                value={filters.dropDate}
-                onChange={handleFilterChange}
-              />
-            </label>
-            <label>
-              Dropoff Time:
-              <input
-                type="time"
-                name="dropTime"
-                value={filters.dropTime}
-                onChange={handleFilterChange}
-              />
-            </label>
-
-            {/* Self Drive Toggles */}
-            <label className="searched-switch-label">
-              Insure Trip:
-              <span className="searched-switch">
-                <input
-                  type="checkbox"
-                  name="insureTrip"
-                  checked={filters.insureTrip}
-                  onChange={handleFilterChange}
-                />
-                <span className="searched-slider"></span>
-              </span>
-            </label>
-            <label className="searched-switch-label">
-              Driver Required:
-              <span className="searched-switch">
-                <input
-                  type="checkbox"
-                  name="driverRequired"
-                  checked={filters.driverRequired}
-                  onChange={handleFilterChange}
-                />
-                <span className="searched-slider"></span>
-              </span>
-            </label>
-            <label className="searched-switch-label">
-              Different Drop Location:
-              <span className="searched-switch">
-                <input
-                  type="checkbox"
-                  name="differentDrop"
-                  checked={filters.differentDrop}
-                  onChange={handleFilterChange}
-                />
-                <span className="searched-slider"></span>
-              </span>
-            </label>
-
-            {filters.differentDrop && (
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <select
-                  value={dropCity}
-                  onChange={handleDropCityChange}
-                  style={{ flexGrow: 1, padding: "6px", fontSize: "1rem" }}
-                >
-                  <option value="" disabled>
-                    Select Drop-off City
-                  </option>
-                  {cities
-                    .filter((c) => c !== filters.city)
-                    .map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                </select>
-                <FontAwesomeIcon
-                  icon={faMapMarkerAlt}
-                  style={{ marginLeft: "8px", cursor: "pointer" }}
-                  onClick={() => setShowDropMap(true)}
-                />
-              </div>
-            )}
-          </>
-        ) : (
-          /* Intercity Mode */
-          <>
-            <label>
-              Pickup City:
-              <select
-                name="city"
-                value={filters.city}
-                onChange={handleCityChange}
-                style={{ padding: "6px", fontSize: "1rem" }}
-              >
-                <option value="" disabled>
-                  Select Pickup City
-                </option>
-                {cities.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            {/* Delhi Specific Pickup Points */}
-            {filters.city === "Delhi" && (
-              <label>
-                Pickup Location:
-                <select
-                  value={pickupLocation}
-                  onChange={(e) => setPickupLocation(e.target.value)}
-                  style={{ padding: "6px", fontSize: "1rem" }}
-                >
-                  <option value="" disabled>
-                    Select Location
-                  </option>
-                  {delhiPickupPoints.map((loc) => (
-                    <option key={loc} value={loc}>
-                      {loc}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-
-            <label>
-              Pickup Date:
-              <input
-                type="date"
-                name="pickupDate"
-                value={filters.pickupDate}
-                onChange={handleFilterChange}
-              />
-            </label>
-            <label>
-              Pickup Time:
-              <input
-                type="time"
-                name="pickupTime"
-                value={filters.pickupTime}
-                onChange={handleFilterChange}
-              />
-            </label>
-
-            <label>
-              Drop City:
-              <select
-                value={dropCity}
-                onChange={handleDropCityChange}
-                style={{ padding: "6px", fontSize: "1rem" }}
-              >
-                <option value="" disabled>
-                  Select Drop City
-                </option>
-                {cities
-                  .filter((c) => c !== filters.city)
-                  .map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-              </select>
-            </label>
-
-            <label>
-              Dropoff Date:
-              <input
-                type="date"
-                name="dropDate"
-                value={filters.dropDate}
-                onChange={handleFilterChange}
-              />
-            </label>
-            <label>
-              Dropoff Time:
-              <input
-                type="time"
-                name="dropTime"
-                value={filters.dropTime}
-                onChange={handleFilterChange}
-              />
-            </label>
-
-            {/* Fixed for Intercity */}
-            <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
-              <span>
-                Insure Trip: <strong>ON</strong>
-              </span>
-              <span>
-                Driver Required: <strong>NO</strong>
-              </span>
-            </div>
-          </>
+        {filters.differentDrop && (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <select
+              value={dropCity}
+              onChange={handleDropCityChange}
+              style={{ flexGrow: 1, padding: "6px", fontSize: "1rem" }}
+            >
+              <option value="" disabled>
+                Select Drop-off City
+              </option>
+              <option value="Noida">Noida</option>
+              <option value="Gurgaon">Gurgaon</option>
+              <option value="Delhi">Delhi</option>
+              <option value="Agra">Agra</option>
+              <option value="Meerut">Meerut</option>
+            </select>
+            <FontAwesomeIcon
+              icon={faMapMarkerAlt}
+              style={{ marginLeft: "8px", cursor: "pointer" }}
+              onClick={() => setShowDropMap(true)}
+            />
+          </div>
         )}
 
         <button className="searched-search-btn" onClick={handleSearch}>
@@ -498,24 +322,14 @@ export default function SearchedCars() {
                           carId: car.id,
                           pricePerHour: car.price_per_hour,
                           bookingDetails: {
-                            mode,
                             pickupDate: filters.pickupDate,
                             pickupTime: filters.pickupTime,
                             dropDate: filters.dropDate,
                             dropTime: filters.dropTime,
-                            city: filters.city,
-                            dropCity:
-                              mode === "intercity" ? dropCity : undefined,
-                            pickupLocation:
-                              mode === "intercity" && filters.city === "Delhi"
-                                ? pickupLocation
-                                : undefined,
-                            insureTrip: effectiveInsureTrip,
-                            driverRequired: effectiveDriverRequired,
-                            differentDrop:
-                              mode === "selfdrive"
-                                ? filters.differentDrop
-                                : false,
+                            insureTrip: filters.insureTrip,
+                            driverRequired: filters.driverRequired,
+                            differentDrop: filters.differentDrop,
+                            dropCity: dropCity,
                           },
                         },
                       })
@@ -532,13 +346,10 @@ export default function SearchedCars() {
                             filters.pickupDate + "T" + filters.pickupTime,
                           dropoff_datetime:
                             filters.dropDate + "T" + filters.dropTime,
-                          insurance: effectiveInsureTrip,
-                          driver: effectiveDriverRequired,
-                          differentDrop:
-                            mode === "selfdrive"
-                              ? filters.differentDrop
-                              : false,
-                          dropCity: mode === "intercity" ? dropCity : undefined,
+                          insurance: filters.insureTrip,
+                          driver: filters.driverRequired,
+                          differentDrop: filters.differentDrop,
+                          dropCity: dropCity,
                           price_per_hour: car.price_per_hour,
                         },
                       })
@@ -553,8 +364,8 @@ export default function SearchedCars() {
         )}
       </div>
 
-      {/* Drop-off Map Modal (only for Self Drive different drop) */}
-      {showDropMap && mode === "selfdrive" && (
+      {/* Drop-off Map Modal */}
+      {showDropMap && (
         <ModalWrapper onClose={() => setShowDropMap(false)}>
           <LocationPicker
             onSelect={(loc: any) => {
@@ -562,6 +373,7 @@ export default function SearchedCars() {
                 loc.city && loc.state
                   ? `${loc.city}, ${loc.state}`
                   : loc.city || loc.state || loc.country || "";
+
               setDropCity(locationName);
               setShowDropMap(false);
             }}
