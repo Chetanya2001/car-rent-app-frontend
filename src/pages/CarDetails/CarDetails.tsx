@@ -46,7 +46,6 @@ const CarDetails: React.FC = () => {
   if (loading) return <p>Loading car details...</p>;
   if (!car) return <p>No car found.</p>;
 
-  // 🧾 Charges (only if state exists)
   let carCharges = 0,
     insuranceCharges = 0,
     driverCharges = 0,

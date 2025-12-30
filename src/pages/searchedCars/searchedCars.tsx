@@ -94,40 +94,25 @@ export default function SearchedCars() {
   };
 
   const handleSearch = async () => {
-    if (!filters.city || !filters.pickupDate || !filters.dropDate) {
-      alert("Please fill all required fields");
-      return;
-    }
-
-    if (tripType === "intercity") {
-      if (filters.city === "Delhi" && !pickupLocation) {
-        alert("Please select a pickup location in Delhi");
-        return;
-      }
-      if (!dropCity) {
-        alert("Please select a drop city");
-        return;
-      }
-    }
-
     try {
-      const searchParams: any = {
+      const pickupDateTime = new Date(
+        `${filters.pickupDate}T${filters.pickupTime}`
+      ).toISOString();
+
+      const dropoffDateTime = new Date(
+        `${filters.dropDate}T${filters.dropTime}`
+      ).toISOString();
+
+      const data = await searchCars({
         city: filters.city,
-        pickup_datetime: `${filters.pickupDate}T${filters.pickupTime}`,
-        dropoff_datetime: `${filters.dropDate}T${filters.dropTime}`,
-      };
+        pickup_datetime: pickupDateTime,
+        dropoff_datetime: dropoffDateTime,
+      });
 
-      if (tripType === "intercity") {
-        searchParams.intercity = true;
-        if (pickupLocation) searchParams.pickup_location = pickupLocation;
-        if (dropCity) searchParams.drop_city = dropCity;
-      }
-
-      const data = await searchCars(searchParams);
       setCars(data.cars || []);
     } catch (err) {
-      console.error("Error searching cars:", err);
-      alert("Failed to fetch cars. Try again.");
+      console.error(err);
+      alert("Failed to fetch cars");
     }
   };
 
