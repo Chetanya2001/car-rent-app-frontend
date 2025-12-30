@@ -13,37 +13,33 @@ import Footer from "../../components/Footer/Footer";
 import Login from "../auth/Login/Login";
 import Register from "../auth/Register/Register";
 import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
-import { Link, useNavigate } from "react-router-dom";
-import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
-import LocationPicker from "../../components/Map/LocationPicker";
-import { useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faMapMarkerAlt,
   faCar,
   faCalendarAlt,
-  faCreditCard,
-  faBell,
   faLifeRing,
   faDoorOpen,
   faPlus,
-  faFile, // Document icon added
+  faFile,
 } from "@fortawesome/free-solid-svg-icons";
 
-import { searchCars } from "../../services/carService"; // ✅ Import API
+import { searchCars } from "../../services/carService";
 import { fetchUserProfile } from "../../services/auth";
+import LocationPicker from "../../components/Map/LocationPicker";
 
-type TokenPayload = {
-  role: "host" | "guest" | "admin";
-};
+type TokenPayload = { role: "host" | "guest" | "admin" };
 
 export default function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null
   );
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
-  const [remark, setRemark] = useState(""); // Info message for the login modal
-
+  const [remark, setRemark] = useState("");
   const [user, setUser] = useState<{ name?: string; avatar?: string } | null>(
     null
   );
@@ -64,43 +60,75 @@ export default function Home() {
   const [driverRequired, setDriverRequired] = useState(false);
   const [differentDrop, setDifferentDrop] = useState(false);
 
-  const location = useLocation();
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const showLogin = params.get("showLogin");
-    const storedProfilePic = localStorage.getItem("profilePicUrl");
-    if (storedProfilePic) {
-      setProfilePicUrl(storedProfilePic);
-    }
-    if (showLogin === "true") {
-      setActiveModal("login"); // opens login modal automatically
-      // Clean the URL so it doesn't stay in address bar
-      navigate("/", { replace: true });
-    }
-  }, [location, navigate]);
+  // Handle logout
   const handleLogout = () => {
-    localStorage.removeItem("user");
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("profilePicUrl");
     setUser(null);
     setRole(null);
     setShowMenu(false);
-    navigate("/"); // Redirect on logout
+    navigate("/");
   };
+
+  // Init: check token & fetch profile safely
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+    const storedProfilePic = localStorage.getItem("profilePicUrl");
+
+    if (storedProfilePic) setProfilePicUrl(storedProfilePic);
+    if (storedUser) setUser(JSON.parse(storedUser));
+
     if (token) {
-      fetchUserProfile(token)
-        .then((userData) => {
-          setUser(userData);
-          if (userData.profile_pic) {
-            setProfilePicUrl(userData.profile_pic);
-            localStorage.setItem("profilePicUrl", userData.profile_pic); // optional, sync with localStorage
-          }
-        })
-        .catch((err) => console.error("Profile fetch error:", err));
+      try {
+        const decoded = jwtDecode<TokenPayload>(token);
+        setRole(decoded.role);
+
+        fetchUserProfile(token)
+          .then((data) => {
+            setUser(data);
+            if (data.profile_pic) {
+              setProfilePicUrl(data.profile_pic);
+              localStorage.setItem("profilePicUrl", data.profile_pic);
+            }
+          })
+          .catch((err) => {
+            if (err.response?.status === 403) {
+              // Invalid or expired token
+              handleLogout();
+            } else {
+              console.error("Profile fetch error:", err);
+            }
+          });
+      } catch (err) {
+        console.error("Invalid token:", err);
+        handleLogout();
+      }
     }
   }, []);
 
+  // Check URL for showLogin param
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("showLogin") === "true") {
+      setActiveModal("login");
+      navigate("/", { replace: true });
+    }
+  }, [location, navigate]);
+
+  // Set default pickup/drop time
+  useEffect(() => {
+    const now = new Date();
+    now.setHours(now.getHours() + 2);
+    const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(
+      now.getMinutes()
+    ).padStart(2, "0")}`;
+    setPickupTime(currentTime);
+    setDropTime(currentTime);
+  }, []);
+
+  // Search cars safely
   const handleSearch = async () => {
     if (!city || !pickupDate || !dropDate) {
       alert("Please fill all fields");
@@ -114,14 +142,6 @@ export default function Home() {
         dropoff_datetime: dropDate,
       });
 
-      console.log("✅ Cars fetched from API:", data.cars);
-      console.log("🔹 Extra Booking Info:", {
-        insureTrip,
-        driverRequired,
-        differentDrop,
-      });
-
-      // 👉 Send everything in state
       navigate("/searched-cars", {
         state: {
           cars: data.cars,
@@ -134,56 +154,25 @@ export default function Home() {
             insureTrip,
             driverRequired,
             differentDrop,
+            dropCity,
           },
         },
       });
-    } catch (err) {
-      console.error("❌ Error searching cars:", err);
-      alert("Failed to fetch cars. Try again.");
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        alert("Session expired. Please login again.");
+        handleLogout();
+      } else {
+        console.error("Error searching cars:", err);
+        alert("Failed to fetch cars. Try again.");
+      }
     }
   };
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-    if (storedUser && token) {
-      setUser(JSON.parse(storedUser));
-      try {
-        const decoded = jwtDecode<TokenPayload>(token);
-        setRole(decoded.role);
-      } catch (err) {
-        console.error("Invalid token");
-      }
-    }
-
-    // ✅ set default current time for pickup & drop
-    const now = new Date();
-    now.setHours(now.getHours() + 2);
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const currentTime = `${hours}:${minutes}`;
-
-    setPickupTime(currentTime);
-    setDropTime(currentTime);
-  }, []);
-
-  const hostMenu = [
-    "Add a Car",
-    "My Cars",
-    "My Bookings",
-    // "My Payments",
-    // "Notifications",
-    "Logout",
-  ];
-  const guestMenu = [
-    "Book a Car",
-    "My Bookings",
-    "My Documents",
-    // "My Payments",
-    // "Notifications",
-    "Logout",
-  ];
-  const AdminMenu = [
+  // Menu items
+  const hostMenu = ["Add a Car", "My Cars", "My Bookings", "Logout"];
+  const guestMenu = ["Book a Car", "My Bookings", "My Documents", "Logout"];
+  const adminMenu = [
     "Cars",
     "Bookings",
     "Guests",
@@ -198,36 +187,30 @@ export default function Home() {
       : role === "guest"
       ? guestMenu
       : role === "admin"
-      ? AdminMenu
+      ? adminMenu
       : [];
 
   const iconMap: Record<string, any> = {
     "Add a Car": faPlus,
     "My Cars": faCar,
     "My Bookings": faCalendarAlt,
-    "My Payments": faCreditCard,
-    Notifications: faBell,
-    Support: faLifeRing,
-    Logout: faDoorOpen,
     "Book a Car": faCar,
     "My Documents": faFile,
+    Logout: faDoorOpen,
+    Support: faLifeRing,
   };
 
   return (
     <div className="home-container">
-      {/* Header */}
-      <header className="home-header">
-        {/* Logo */}
+      {/* Transparent Navbar */}
+      <header className="home-header transparent">
         <img src={logo} alt="Logo" className="home-logo" />
-        {/* Hamburger (mobile only) */}
         <div
           className="hamburger"
           onClick={() => setIsNavOpen((prev) => !prev)}
         >
           {isNavOpen ? "✖" : "☰"}
         </div>
-
-        {/* Navigation */}
         <nav className={`home-nav ${isNavOpen ? "active" : ""}`}>
           <Link to="/" onClick={() => setIsNavOpen(false)}>
             Home
@@ -251,8 +234,8 @@ export default function Home() {
               className="login-link"
               onClick={(e) => {
                 e.preventDefault();
-                setIsNavOpen(false);
                 setActiveModal("login");
+                setIsNavOpen(false);
               }}
             >
               Login
@@ -265,127 +248,39 @@ export default function Home() {
               <img
                 src={profilePicUrl || user.avatar || defaultAvatar}
                 alt="Profile"
-                className={`profile-avatar ${
-                  !profilePicUrl && !user.avatar ? "default-avatar" : ""
-                }`}
+                className="profile-avatar"
               />
-
               {showMenu && (
                 <ul className="profile-menu">
                   {menuItems.map((item, idx) => {
-                    if (item === "Logout") {
+                    if (item === "Logout")
                       return (
-                        <li
-                          key={idx}
-                          onClick={handleLogout}
-                          tabIndex={0}
-                          role="menuitem"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ")
-                              handleLogout();
-                          }}
-                        >
-                          <FontAwesomeIcon
-                            icon={iconMap[item]}
-                            className="menu-icon"
-                          />{" "}
-                          {item}
+                        <li key={idx} onClick={handleLogout}>
+                          <FontAwesomeIcon icon={iconMap[item]} /> {item}
                         </li>
                       );
-                    }
-
-                    // Role-based routing for "My Bookings"
-                    if (item === "My Bookings") {
-                      const bookingsPath =
-                        role === "host"
-                          ? "/host-mybookings"
-                          : role === "guest"
-                          ? "/guest-mybookings"
-                          : "/";
-
-                      return (
-                        <li
-                          key={idx}
-                          onClick={() => navigate(bookingsPath)}
-                          tabIndex={0}
-                          role="menuitem"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ")
-                              navigate(bookingsPath);
-                          }}
-                        >
-                          <FontAwesomeIcon
-                            icon={iconMap[item]}
-                            className="menu-icon"
-                          />{" "}
-                          {item}
-                        </li>
-                      );
-                    }
-
-                    const adminNavMap: Record<string, string> = {
+                    const pathMap: Record<string, string> = {
+                      "Add a Car": "/add-car",
+                      "My Cars": "/my-cars",
+                      "Book a Car": "/searched-cars",
+                      "My Documents": "/my-documents",
                       Cars: "/admin/manage-cars",
                       Bookings: "/admin/manage-bookings",
                       Guests: "/admin/manage-guests",
                       Hosts: "/admin/manage-hosts",
                       Payments: "/admin/manage-payments",
                       Support: "/admin/manage-support",
+                      "My Bookings":
+                        role === "host"
+                          ? "/host-mybookings"
+                          : "/guest-mybookings",
                     };
-
-                    if (
-                      item === "Add a Car" ||
-                      item === "My Cars" ||
-                      item === "Book a Car" ||
-                      item === "My Documents" ||
-                      adminNavMap[item]
-                    ) {
-                      const path =
-                        item === "Add a Car"
-                          ? "/add-car"
-                          : item === "My Cars"
-                          ? "/my-cars"
-                          : item === "My Documents"
-                          ? "/my-documents"
-                          : item === "Book a Car"
-                          ? "/searched-cars"
-                          : adminNavMap[item];
-
-                      return (
-                        <li
-                          key={idx}
-                          onClick={() => navigate(path)}
-                          tabIndex={0}
-                          role="menuitem"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ")
-                              navigate(path);
-                          }}
-                        >
-                          <FontAwesomeIcon
-                            icon={iconMap[item]}
-                            className="menu-icon"
-                          />{" "}
-                          {item}
-                        </li>
-                      );
-                    }
-
                     return (
                       <li
                         key={idx}
-                        tabIndex={0}
-                        role="menuitem"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            // No-op or extend if needed
-                          }
-                        }}
+                        onClick={() => navigate(pathMap[item] || "/")}
                       >
-                        <FontAwesomeIcon
-                          icon={iconMap[item]}
-                          className="menu-icon"
-                        />{" "}
-                        {item}
+                        <FontAwesomeIcon icon={iconMap[item]} /> {item}
                       </li>
                     );
                   })}
@@ -396,52 +291,31 @@ export default function Home() {
         </nav>
       </header>
 
-      {/* Modal */}
+      {/* Login/Register Modals */}
       {activeModal && (
-        <ModalWrapper
-          onClose={() => {
-            setActiveModal(null);
-            setRemark("");
-          }}
-        >
+        <ModalWrapper onClose={() => setActiveModal(null)}>
           {activeModal === "login" ? (
             <Login
-              onClose={() => {
-                setActiveModal(null);
-                setRemark("");
-              }}
-              onSwitch={() => {
-                setActiveModal("register");
-                setRemark("");
-              }}
+              onClose={() => setActiveModal(null)}
+              onSwitch={() => setActiveModal("register")}
               onLoginSuccess={(userData) => {
                 setUser(userData);
                 setActiveModal(null);
-                setRemark("");
                 const token = localStorage.getItem("token");
                 if (token) {
                   try {
-                    const decoded = jwtDecode<TokenPayload>(token);
-                    setRole(decoded.role);
-                  } catch {
-                    console.error("Invalid token after login");
-                  }
+                    setRole(jwtDecode<TokenPayload>(token).role);
+                  } catch {}
                 }
               }}
-              remark={remark} // Pass the verification message here
+              remark={remark}
             />
           ) : (
             <Register
               onClose={() => setActiveModal(null)}
-              onSwitch={() => {
-                setActiveModal("login");
-                setRemark("");
-              }}
+              onSwitch={() => setActiveModal("login")}
               onRegisterSuccess={() => {
-                // Set verification message and open login modal
-                setRemark(
-                  "Verification link sent to your email/phone. Complete the verification to enable login"
-                );
+                setRemark("Verification link sent. Complete to enable login");
                 setActiveModal("login");
               }}
             />
@@ -697,30 +571,17 @@ export default function Home() {
         <ModalWrapper onClose={() => setShowPickupMap(false)}>
           <LocationPicker
             onSelect={(loc: any) => {
-              console.log("Selected:", loc);
-              // Use city + state or fallback to country
-              const locationName =
-                loc.city && loc.state
-                  ? `${loc.city}, ${loc.state}`
-                  : loc.city || loc.state || loc.country || "";
-
-              setCity(locationName);
+              setCity(loc.city || loc.state || loc.country || "");
               setShowPickupMap(false);
             }}
           />
         </ModalWrapper>
       )}
-
       {showDropMap && (
         <ModalWrapper onClose={() => setShowDropMap(false)}>
           <LocationPicker
             onSelect={(loc: any) => {
-              const locationName =
-                loc.city && loc.state
-                  ? `${loc.city}, ${loc.state}`
-                  : loc.city || loc.state || loc.country || "";
-
-              setDropCity(locationName);
+              setDropCity(loc.city || loc.state || loc.country || "");
               setShowDropMap(false);
             }}
           />
