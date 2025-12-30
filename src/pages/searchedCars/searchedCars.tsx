@@ -38,12 +38,15 @@ export default function SearchedCars() {
   const navigate = useNavigate();
 
   const now = new Date();
-  now.setHours(now.getHours() + 2);
 
-  const { date: todayDate, time: nowTime } = getDateAndTime(now);
+  // Pickup default
+  const { date: todayDate } = getDateAndTime(now);
+  const pickupTimeDefault = "09:00";
 
-  const dropDefault = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-  const { date: tomorrowDate, time: dropTime } = getDateAndTime(dropDefault);
+  // Dropoff default (today + 4 days)
+  const dropDefault = new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000);
+  const { date: dropDateDefault } = getDateAndTime(dropDefault);
+  const dropTimeDefault = "17:00";
 
   const [cars, setCars] = useState<Car[]>(location.state?.cars || []);
   const bookingDetails = location.state?.bookingDetails || {};
@@ -51,15 +54,14 @@ export default function SearchedCars() {
   const [filters, setFilters] = useState({
     city: bookingDetails.city || "Delhi",
     pickupDate: bookingDetails.pickupDate || todayDate,
-    pickupTime: bookingDetails.pickupTime || nowTime,
-    dropDate: bookingDetails.dropDate || tomorrowDate,
-    dropTime: bookingDetails.dropTime || dropTime,
-    insureTrip: bookingDetails.insureTrip ?? false,
+    pickupTime: bookingDetails.pickupTime || pickupTimeDefault,
+    dropDate: bookingDetails.dropDate || dropDateDefault,
+    dropTime: bookingDetails.dropTime || dropTimeDefault,
+    insureTrip: bookingDetails.insureTrip ?? true, // default true
     driverRequired: bookingDetails.driverRequired ?? false,
     differentDrop: bookingDetails.differentDrop ?? false,
   });
 
-  // New state for dropCity and drop map modal visibility
   const [dropCity, setDropCity] = useState(
     location.state?.bookingDetails?.dropCity || ""
   );
@@ -80,7 +82,6 @@ export default function SearchedCars() {
     }));
   };
 
-  // Separate handler for dropCity input to avoid mixing into filters
   const handleDropCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setDropCity(e.target.value);
   };
@@ -92,8 +93,6 @@ export default function SearchedCars() {
     }
 
     try {
-      // Construct city param: if differentDrop true, use dropCity as 'dropoff' city if you want
-      // but current API expects pickup city; pass dropCity separately if required.
       const data = await searchCars({
         city: filters.city,
         pickup_datetime: filters.pickupDate + "T" + filters.pickupTime,
