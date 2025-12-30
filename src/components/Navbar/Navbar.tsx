@@ -62,7 +62,7 @@ export default function Navbar({
   ];
 
   const profileDropdownItems = [
-    { label: "My Profile", path: "/my-profile" },
+    { label: "My Profile", path: "/my-documents" },
     { label: "Logout", action: () => handleLogout() },
   ];
 
@@ -193,17 +193,6 @@ export default function Navbar({
               SelfDrive-Car
             </NavLink>
           </li>
-          <li>
-            <NavLink to="/community" onClick={() => setNavOpen(false)}>
-              Community
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/support" onClick={() => setNavOpen(false)}>
-              Support
-            </NavLink>
-          </li>
-
           {/* Role-specific items */}
           {role === "host" &&
             hostNavItems.map((item) => (
@@ -217,6 +206,11 @@ export default function Navbar({
                 <NavLink to={item.path}>{item.label}</NavLink>
               </li>
             ))}
+          <li>
+            <NavLink to="/community" onClick={() => setNavOpen(false)}>
+              Community
+            </NavLink>
+          </li>
         </ul>
 
         {/* Profile */}
