@@ -13,10 +13,12 @@ import Footer from "../../components/Footer/Footer";
 import Login from "../auth/Login/Login";
 import Register from "../auth/Register/Register";
 import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
+import LocationPicker from "../../components/Map/LocationPicker";
+import { useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faMapMarkerAlt,
   faCar,
   faCalendarAlt,
   faCreditCard,
@@ -24,10 +26,10 @@ import {
   faLifeRing,
   faDoorOpen,
   faPlus,
-  faFile,
+  faFile, // Document icon added
 } from "@fortawesome/free-solid-svg-icons";
-import LocationPicker from "../../components/Map/LocationPicker";
-import { searchCars } from "../../services/carService";
+
+import { searchCars } from "../../services/carService"; // ✅ Import API
 import { fetchUserProfile } from "../../services/auth";
 
 type TokenPayload = {
@@ -36,27 +38,23 @@ type TokenPayload = {
 
 export default function Home() {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // --- STATE ---
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null
   );
-  const [user, setUser] = useState<{
-    name?: string;
-    avatar?: string;
-    profile_pic?: string;
-  } | null>(null);
-  const [role, setRole] = useState<"host" | "guest" | "admin" | null>(null);
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
+  const [remark, setRemark] = useState(""); // Info message for the login modal
+
+  const [user, setUser] = useState<{ name?: string; avatar?: string } | null>(
+    null
+  );
+  const [role, setRole] = useState<"host" | "guest" | "admin" | null>(null);
   const [showMenu, setShowMenu] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
-  const [remark, setRemark] = useState("");
-
   const [showPickupMap, setShowPickupMap] = useState(false);
   const [showDropMap, setShowDropMap] = useState(false);
+  const [dropCity, setDropCity] = useState("");
 
-  // Booking form
+  // Booking form state
   const [city, setCity] = useState("");
   const [pickupDate, setPickupDate] = useState("");
   const [pickupTime, setPickupTime] = useState("");
@@ -65,109 +63,65 @@ export default function Home() {
   const [insureTrip, setInsureTrip] = useState(false);
   const [driverRequired, setDriverRequired] = useState(false);
   const [differentDrop, setDifferentDrop] = useState(false);
-  const [dropCity, setDropCity] = useState("");
 
-  // --- MENU ---
-  const hostMenu = [
-    "Add a Car",
-    "My Cars",
-    "My Bookings",
-    "My Profile",
-    "Logout",
-  ];
-  const guestMenu = ["Book a Car", "My Bookings", "My Profile", "Logout"];
-  const adminMenu = [
-    "Cars",
-    "Bookings",
-    "Guests",
-    "Hosts",
-    "Payments",
-    "Support",
-    "Logout",
-  ];
-
-  const menuItems =
-    role === "host"
-      ? hostMenu
-      : role === "guest"
-      ? guestMenu
-      : role === "admin"
-      ? adminMenu
-      : [];
-
-  const iconMap: Record<string, any> = {
-    "Add a Car": faPlus,
-    "My Cars": faCar,
-    "My Bookings": faCalendarAlt,
-    "Book a Car": faCar,
-    "My Profile": faFile,
-    Cars: faCar,
-    Guests: faCar,
-    Hosts: faCar,
-    Bookings: faCalendarAlt,
-    Payments: faCreditCard,
-    Support: faLifeRing,
-    Logout: faDoorOpen,
-  };
-
-  // --- EFFECTS ---
+  const location = useLocation();
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const showLogin = params.get("showLogin");
     const storedProfilePic = localStorage.getItem("profilePicUrl");
-    if (storedProfilePic) setProfilePicUrl(storedProfilePic);
+    if (storedProfilePic) {
+      setProfilePicUrl(storedProfilePic);
+    }
     if (showLogin === "true") {
-      setActiveModal("login");
+      setActiveModal("login"); // opens login modal automatically
+      // Clean the URL so it doesn't stay in address bar
       navigate("/", { replace: true });
     }
   }, [location, navigate]);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) setUser(JSON.parse(storedUser));
-
-    if (token) {
-      try {
-        const decoded = jwtDecode<TokenPayload>(token);
-        setRole(decoded.role);
-      } catch (err) {
-        console.error("Invalid token", err);
-      }
-
-      fetchUserProfile(token)
-        .then((profile) => {
-          setUser(profile);
-          if (profile.profile_pic) {
-            setProfilePicUrl(profile.profile_pic);
-            localStorage.setItem("profilePicUrl", profile.profile_pic);
-          }
-        })
-        .catch((err) => console.error("Failed to fetch profile", err));
-    }
-  }, []);
-
-  // --- FUNCTIONS ---
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     setUser(null);
     setRole(null);
     setShowMenu(false);
-    navigate("/");
+    navigate("/"); // Redirect on logout
   };
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetchUserProfile(token)
+        .then((userData) => {
+          setUser(userData);
+          if (userData.profile_pic) {
+            setProfilePicUrl(userData.profile_pic);
+            localStorage.setItem("profilePicUrl", userData.profile_pic); // optional, sync with localStorage
+          }
+        })
+        .catch((err) => console.error("Profile fetch error:", err));
+    }
+  }, []);
 
   const handleSearch = async () => {
     if (!city || !pickupDate || !dropDate) {
       alert("Please fill all fields");
       return;
     }
+
     try {
       const data = await searchCars({
         city,
         pickup_datetime: pickupDate,
         dropoff_datetime: dropDate,
       });
+
+      console.log("✅ Cars fetched from API:", data.cars);
+      console.log("🔹 Extra Booking Info:", {
+        insureTrip,
+        driverRequired,
+        differentDrop,
+      });
+
+      // 👉 Send everything in state
       navigate("/searched-cars", {
         state: {
           cars: data.cars,
@@ -184,67 +138,96 @@ export default function Home() {
         },
       });
     } catch (err) {
-      console.error(err);
-      alert("Failed to fetch cars.");
+      console.error("❌ Error searching cars:", err);
+      alert("Failed to fetch cars. Try again.");
     }
   };
 
-  const handleMenuClick = (item: string) => {
-    switch (item) {
-      case "Add a Car":
-        navigate("/add-car");
-        break;
-      case "My Cars":
-        navigate("/my-cars");
-        break;
-      case "My Bookings":
-        navigate(role === "host" ? "/host-mybookings" : "/guest-mybookings");
-        break;
-      case "Book a Car":
-        navigate("/searched-cars");
-        break;
-      case "My Profile":
-        navigate("/my-documents");
-        break;
-      case "Cars":
-        navigate("/admin/manage-cars");
-        break;
-      case "Bookings":
-        navigate("/admin/manage-bookings");
-        break;
-      case "Guests":
-        navigate("/admin/manage-guests");
-        break;
-      case "Hosts":
-        navigate("/admin/manage-hosts");
-        break;
-      case "Payments":
-        navigate("/admin/manage-payments");
-        break;
-      case "Support":
-        navigate("/admin/manage-support");
-        break;
-      case "Logout":
-        handleLogout();
-        break;
-      default:
-        break;
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+    if (storedUser && token) {
+      setUser(JSON.parse(storedUser));
+      try {
+        const decoded = jwtDecode<TokenPayload>(token);
+        setRole(decoded.role);
+      } catch (err) {
+        console.error("Invalid token");
+      }
     }
-    setShowMenu(false);
-    setIsNavOpen(false);
+
+    // ✅ set default current time for pickup & drop
+    const now = new Date();
+    now.setHours(now.getHours() + 2);
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const currentTime = `${hours}:${minutes}`;
+
+    setPickupTime(currentTime);
+    setDropTime(currentTime);
+  }, []);
+
+  const hostMenu = [
+    "Add a Car",
+    "My Cars",
+    "My Bookings",
+    // "My Payments",
+    // "Notifications",
+    "Logout",
+  ];
+  const guestMenu = [
+    "Book a Car",
+    "My Bookings",
+    "My Documents",
+    // "My Payments",
+    // "Notifications",
+    "Logout",
+  ];
+  const AdminMenu = [
+    "Cars",
+    "Bookings",
+    "Guests",
+    "Hosts",
+    "Payments",
+    "Support",
+    "Logout",
+  ];
+  const menuItems =
+    role === "host"
+      ? hostMenu
+      : role === "guest"
+      ? guestMenu
+      : role === "admin"
+      ? AdminMenu
+      : [];
+
+  const iconMap: Record<string, any> = {
+    "Add a Car": faPlus,
+    "My Cars": faCar,
+    "My Bookings": faCalendarAlt,
+    "My Payments": faCreditCard,
+    Notifications: faBell,
+    Support: faLifeRing,
+    Logout: faDoorOpen,
+    "Book a Car": faCar,
+    "My Documents": faFile,
   };
 
   return (
     <div className="home-container">
-      {/* HEADER */}
+      {/* Header */}
       <header className="home-header">
+        {/* Logo */}
         <img src={logo} alt="Logo" className="home-logo" />
+        {/* Hamburger (mobile only) */}
         <div
           className="hamburger"
           onClick={() => setIsNavOpen((prev) => !prev)}
         >
           {isNavOpen ? "✖" : "☰"}
         </div>
+
+        {/* Navigation */}
         <nav className={`home-nav ${isNavOpen ? "active" : ""}`}>
           <Link to="/" onClick={() => setIsNavOpen(false)}>
             Home
@@ -258,11 +241,9 @@ export default function Home() {
           <Link to="/community" onClick={() => setIsNavOpen(false)}>
             Community
           </Link>
-          {user && (
-            <Link to="/support" onClick={() => setIsNavOpen(false)}>
-              Support
-            </Link>
-          )}
+          <Link to="/support" onClick={() => setIsNavOpen(false)}>
+            Support
+          </Link>
 
           {!user ? (
             <a
@@ -270,8 +251,8 @@ export default function Home() {
               className="login-link"
               onClick={(e) => {
                 e.preventDefault();
-                setActiveModal("login");
                 setIsNavOpen(false);
+                setActiveModal("login");
               }}
             >
               Login
@@ -284,28 +265,130 @@ export default function Home() {
               <img
                 src={profilePicUrl || user.avatar || defaultAvatar}
                 alt="Profile"
-                className="profile-avatar"
+                className={`profile-avatar ${
+                  !profilePicUrl && !user.avatar ? "default-avatar" : ""
+                }`}
               />
+
               {showMenu && (
                 <ul className="profile-menu">
-                  {menuItems.map((item, idx) => (
-                    <li
-                      key={idx}
-                      onClick={() => handleMenuClick(item)}
-                      tabIndex={0}
-                      role="menuitem"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ")
-                          handleMenuClick(item);
-                      }}
-                    >
-                      <FontAwesomeIcon
-                        icon={iconMap[item]}
-                        className="menu-icon"
-                      />{" "}
-                      {item}
-                    </li>
-                  ))}
+                  {menuItems.map((item, idx) => {
+                    if (item === "Logout") {
+                      return (
+                        <li
+                          key={idx}
+                          onClick={handleLogout}
+                          tabIndex={0}
+                          role="menuitem"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ")
+                              handleLogout();
+                          }}
+                        >
+                          <FontAwesomeIcon
+                            icon={iconMap[item]}
+                            className="menu-icon"
+                          />{" "}
+                          {item}
+                        </li>
+                      );
+                    }
+
+                    // Role-based routing for "My Bookings"
+                    if (item === "My Bookings") {
+                      const bookingsPath =
+                        role === "host"
+                          ? "/host-mybookings"
+                          : role === "guest"
+                          ? "/guest-mybookings"
+                          : "/";
+
+                      return (
+                        <li
+                          key={idx}
+                          onClick={() => navigate(bookingsPath)}
+                          tabIndex={0}
+                          role="menuitem"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ")
+                              navigate(bookingsPath);
+                          }}
+                        >
+                          <FontAwesomeIcon
+                            icon={iconMap[item]}
+                            className="menu-icon"
+                          />{" "}
+                          {item}
+                        </li>
+                      );
+                    }
+
+                    const adminNavMap: Record<string, string> = {
+                      Cars: "/admin/manage-cars",
+                      Bookings: "/admin/manage-bookings",
+                      Guests: "/admin/manage-guests",
+                      Hosts: "/admin/manage-hosts",
+                      Payments: "/admin/manage-payments",
+                      Support: "/admin/manage-support",
+                    };
+
+                    if (
+                      item === "Add a Car" ||
+                      item === "My Cars" ||
+                      item === "Book a Car" ||
+                      item === "My Documents" ||
+                      adminNavMap[item]
+                    ) {
+                      const path =
+                        item === "Add a Car"
+                          ? "/add-car"
+                          : item === "My Cars"
+                          ? "/my-cars"
+                          : item === "My Documents"
+                          ? "/my-documents"
+                          : item === "Book a Car"
+                          ? "/searched-cars"
+                          : adminNavMap[item];
+
+                      return (
+                        <li
+                          key={idx}
+                          onClick={() => navigate(path)}
+                          tabIndex={0}
+                          role="menuitem"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ")
+                              navigate(path);
+                          }}
+                        >
+                          <FontAwesomeIcon
+                            icon={iconMap[item]}
+                            className="menu-icon"
+                          />{" "}
+                          {item}
+                        </li>
+                      );
+                    }
+
+                    return (
+                      <li
+                        key={idx}
+                        tabIndex={0}
+                        role="menuitem"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            // No-op or extend if needed
+                          }
+                        }}
+                      >
+                        <FontAwesomeIcon
+                          icon={iconMap[item]}
+                          className="menu-icon"
+                        />{" "}
+                        {item}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
@@ -313,7 +396,7 @@ export default function Home() {
         </nav>
       </header>
 
-      {/* MODALS */}
+      {/* Modal */}
       {activeModal && (
         <ModalWrapper
           onClose={() => {
@@ -334,15 +417,18 @@ export default function Home() {
               onLoginSuccess={(userData) => {
                 setUser(userData);
                 setActiveModal(null);
+                setRemark("");
                 const token = localStorage.getItem("token");
                 if (token) {
                   try {
                     const decoded = jwtDecode<TokenPayload>(token);
                     setRole(decoded.role);
-                  } catch {}
+                  } catch {
+                    console.error("Invalid token after login");
+                  }
                 }
               }}
-              remark={remark}
+              remark={remark} // Pass the verification message here
             />
           ) : (
             <Register
@@ -352,6 +438,7 @@ export default function Home() {
                 setRemark("");
               }}
               onRegisterSuccess={() => {
+                // Set verification message and open login modal
                 setRemark(
                   "Verification link sent to your email/phone. Complete the verification to enable login"
                 );
@@ -361,6 +448,7 @@ export default function Home() {
           )}
         </ModalWrapper>
       )}
+
       {/* Hero */}
       <div className="hero-wrapper">
         <div className="home-overlay"></div>
@@ -609,16 +697,20 @@ export default function Home() {
         <ModalWrapper onClose={() => setShowPickupMap(false)}>
           <LocationPicker
             onSelect={(loc: any) => {
+              console.log("Selected:", loc);
+              // Use city + state or fallback to country
               const locationName =
                 loc.city && loc.state
                   ? `${loc.city}, ${loc.state}`
                   : loc.city || loc.state || loc.country || "";
+
               setCity(locationName);
               setShowPickupMap(false);
             }}
           />
         </ModalWrapper>
       )}
+
       {showDropMap && (
         <ModalWrapper onClose={() => setShowDropMap(false)}>
           <LocationPicker
@@ -627,6 +719,7 @@ export default function Home() {
                 loc.city && loc.state
                   ? `${loc.city}, ${loc.state}`
                   : loc.city || loc.state || loc.country || "";
+
               setDropCity(locationName);
               setShowDropMap(false);
             }}
