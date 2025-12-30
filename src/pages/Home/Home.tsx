@@ -203,6 +203,7 @@ export default function Home() {
   return (
     <div className="home-container">
       {/* Transparent Navbar */}
+      {/* Transparent Navbar */}
       <header className="home-header transparent">
         <img src={logo} alt="Logo" className="home-logo" />
         <div
@@ -212,6 +213,7 @@ export default function Home() {
           {isNavOpen ? "✖" : "☰"}
         </div>
         <nav className={`home-nav ${isNavOpen ? "active" : ""}`}>
+          {/* Main links */}
           <Link to="/" onClick={() => setIsNavOpen(false)}>
             Home
           </Link>
@@ -252,35 +254,49 @@ export default function Home() {
               />
               {showMenu && (
                 <ul className="profile-menu">
-                  {menuItems.map((item, idx) => {
-                    if (item === "Logout")
+                  {(role === "host"
+                    ? [
+                        "Add a Car",
+                        "My Cars",
+                        "My Bookings",
+                        "My Profile",
+                        "Logout",
+                      ]
+                    : [
+                        "Book a Car",
+                        "My Bookings",
+                        "My Documents",
+                        "My Profile",
+                        "Logout",
+                      ]
+                  ).map((item, idx) => {
+                    if (item === "Logout") {
                       return (
                         <li key={idx} onClick={handleLogout}>
-                          <FontAwesomeIcon icon={iconMap[item]} /> {item}
+                          <FontAwesomeIcon icon={iconMap[item] || faDoorOpen} />{" "}
+                          {item}
                         </li>
                       );
+                    }
+
                     const pathMap: Record<string, string> = {
                       "Add a Car": "/add-car",
                       "My Cars": "/my-cars",
                       "Book a Car": "/searched-cars",
                       "My Documents": "/my-documents",
-                      Cars: "/admin/manage-cars",
-                      Bookings: "/admin/manage-bookings",
-                      Guests: "/admin/manage-guests",
-                      Hosts: "/admin/manage-hosts",
-                      Payments: "/admin/manage-payments",
-                      Support: "/admin/manage-support",
                       "My Bookings":
                         role === "host"
                           ? "/host-mybookings"
                           : "/guest-mybookings",
+                      "My Profile": "/profile",
                     };
+
                     return (
                       <li
                         key={idx}
                         onClick={() => navigate(pathMap[item] || "/")}
                       >
-                        <FontAwesomeIcon icon={iconMap[item]} /> {item}
+                        <FontAwesomeIcon icon={iconMap[item] || faCar} /> {item}
                       </li>
                     );
                   })}
