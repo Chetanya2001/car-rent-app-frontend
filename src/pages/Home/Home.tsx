@@ -18,11 +18,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMapMarkerAlt,
   faCar,
-  faCalendarAlt,
-  faLifeRing,
+  // faCalendarAlt,
+  // faLifeRing,
   faDoorOpen,
-  faPlus,
-  faFile,
+  // faPlus,
+  // faFile,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { searchCars } from "../../services/carService";
@@ -190,15 +190,15 @@ export default function Home() {
   //     ? adminMenu
   //     : [];
 
-  const iconMap: Record<string, any> = {
-    "Add a Car": faPlus,
-    "My Cars": faCar,
-    "My Bookings": faCalendarAlt,
-    "Book a Car": faCar,
-    "My Documents": faFile,
-    Logout: faDoorOpen,
-    Support: faLifeRing,
-  };
+  // const iconMap: Record<string, any> = {
+  //   "Add a Car": faPlus,
+  //   "My Cars": faCar,
+  //   "My Bookings": faCalendarAlt,
+  //   "Book a Car": faCar,
+  //   "My Documents": faFile,
+  //   Logout: faDoorOpen,
+  //   Support: faLifeRing,
+  // };
 
   return (
     <div className="home-container">
@@ -213,10 +213,41 @@ export default function Home() {
           {isNavOpen ? "✖" : "☰"}
         </div>
         <nav className={`home-nav ${isNavOpen ? "active" : ""}`}>
-          {/* Main links */}
+          {/* Common Links */}
           <Link to="/" onClick={() => setIsNavOpen(false)}>
             Home
           </Link>
+
+          {role === "host" ? (
+            <>
+              <Link to="/add-car" onClick={() => setIsNavOpen(false)}>
+                Add a Car
+              </Link>
+              <Link to="/my-cars" onClick={() => setIsNavOpen(false)}>
+                My Cars
+              </Link>
+              <Link to="/host-mybookings" onClick={() => setIsNavOpen(false)}>
+                My Bookings
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link to="/searched-cars" onClick={() => setIsNavOpen(false)}>
+                Book a Car
+              </Link>
+              <Link to="/guest-mybookings" onClick={() => setIsNavOpen(false)}>
+                My Bookings
+              </Link>
+              <Link to="/my-documents" onClick={() => setIsNavOpen(false)}>
+                My Documents
+              </Link>
+              <Link to="/support" onClick={() => setIsNavOpen(false)}>
+                Support
+              </Link>
+            </>
+          )}
+
+          {/* Links for everyone */}
           <Link to="/cars" onClick={() => setIsNavOpen(false)}>
             SelfDrive-Car
           </Link>
@@ -225,9 +256,6 @@ export default function Home() {
           </Link>
           <Link to="/community" onClick={() => setIsNavOpen(false)}>
             Community
-          </Link>
-          <Link to="/support" onClick={() => setIsNavOpen(false)}>
-            Support
           </Link>
 
           {!user ? (
@@ -254,52 +282,9 @@ export default function Home() {
               />
               {showMenu && (
                 <ul className="profile-menu">
-                  {(role === "host"
-                    ? [
-                        "Add a Car",
-                        "My Cars",
-                        "My Bookings",
-                        "My Profile",
-                        "Logout",
-                      ]
-                    : [
-                        "Book a Car",
-                        "My Bookings",
-                        "My Documents",
-                        "My Profile",
-                        "Logout",
-                      ]
-                  ).map((item, idx) => {
-                    if (item === "Logout") {
-                      return (
-                        <li key={idx} onClick={handleLogout}>
-                          <FontAwesomeIcon icon={iconMap[item] || faDoorOpen} />{" "}
-                          {item}
-                        </li>
-                      );
-                    }
-
-                    const pathMap: Record<string, string> = {
-                      "Add a Car": "/add-car",
-                      "My Cars": "/my-cars",
-                      "Book a Car": "/searched-cars",
-                      "My Documents": "/my-documents",
-                      "My Bookings":
-                        role === "host"
-                          ? "/host-mybookings"
-                          : "/guest-mybookings",
-                      "My Profile": "/profile",
-                    };
-
-                    return (
-                      <li
-                        key={idx}
-                        onClick={() => navigate(pathMap[item] || "/")}
-                      >
-                        <FontAwesomeIcon icon={iconMap[item] || faCar} /> {item}
-                      </li>
-                    );
-                  })}
+                  <li onClick={handleLogout}>
+                    <FontAwesomeIcon icon={faDoorOpen} /> Logout
+                  </li>
                 </ul>
               )}
             </div>
