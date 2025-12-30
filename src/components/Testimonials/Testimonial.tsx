@@ -6,7 +6,7 @@ import user2 from "../../assets/testimonials_image/ankit.jfif";
 import user3 from "../../assets/testimonials_image/shubham.jfif";
 import user4 from "../../assets/testimonials_image/krishanu.jpeg";
 import user5 from "../../assets/testimonials_image/mohit.jpeg";
-import user6 from "../../assets/testimonials_image/roger.jpeg";
+import user6 from "../../assets/testimonials_image/roger.jfif";
 
 import type { Testimonial } from "../../types/Testimonial";
 
