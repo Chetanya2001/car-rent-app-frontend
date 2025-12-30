@@ -37,11 +37,21 @@ export default function SearchedCars() {
   const navigate = useNavigate();
 
   const now = new Date();
-  now.setHours(now.getHours() + 2);
 
-  const { date: todayDate, time: nowTime } = getDateAndTime(now);
-  const dropDefault = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-  const { date: tomorrowDate, time: dropTime } = getDateAndTime(dropDefault);
+  // Default Pickup: Tomorrow at 09:00 AM
+  const pickupDefault = new Date(now);
+  pickupDefault.setDate(pickupDefault.getDate() + 1);
+  pickupDefault.setHours(9, 0, 0, 0);
+
+  // Default Dropoff: Today + 4 days at 17:00 (5 PM)
+  const dropoffDefault = new Date(now);
+  dropoffDefault.setDate(dropoffDefault.getDate() + 4);
+  dropoffDefault.setHours(17, 0, 0, 0);
+
+  const { date: defaultPickupDate, time: defaultPickupTime } =
+    getDateAndTime(pickupDefault);
+  const { date: defaultDropoffDate, time: defaultDropoffTime } =
+    getDateAndTime(dropoffDefault);
 
   const bookingDetails = location.state?.bookingDetails || {};
   const initialCars = location.state?.cars || [];
@@ -54,10 +64,10 @@ export default function SearchedCars() {
 
   const [filters, setFilters] = useState({
     city: bookingDetails.city || "Delhi",
-    pickupDate: bookingDetails.pickupDate || todayDate,
-    pickupTime: bookingDetails.pickupTime || nowTime,
-    dropDate: bookingDetails.dropDate || tomorrowDate,
-    dropTime: bookingDetails.dropTime || dropTime,
+    pickupDate: bookingDetails.pickupDate || defaultPickupDate,
+    pickupTime: bookingDetails.pickupTime || defaultPickupTime, // 09:00
+    dropDate: bookingDetails.dropDate || defaultDropoffDate,
+    dropTime: bookingDetails.dropTime || defaultDropoffTime, // 17:00
     driverRequired: bookingDetails.driverRequired ?? false,
     differentDrop: bookingDetails.differentDrop ?? false,
     insureTrip: bookingDetails.insureTrip ?? true, // Default ON
@@ -161,6 +171,9 @@ export default function SearchedCars() {
     "Amritsar",
   ];
 
+  // Updated city list as requested
+  const cities = ["Delhi", "Gurgaon", "Noida", "Agra", "Ahmedabad", "Jaipur"];
+
   return (
     <>
       <Navbar />
@@ -205,12 +218,11 @@ export default function SearchedCars() {
               <option value="" disabled>
                 Select City
               </option>
-              <option value="Delhi">Delhi</option>
-              <option value="Gurgaon">Gurgaon</option>
-              <option value="Noida">Noida</option>
-              <option value="Agra">Agra</option>
-              <option value="Ahmedabad">Ahmedabad</option>
-              <option value="Jaipur">Jaipur</option>
+              {cities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
             </select>
           )}
         </label>
@@ -297,7 +309,7 @@ export default function SearchedCars() {
           </label>
         )}
 
-        {/* Common Options: Driver Required (only selfdrive) + Insurance (both) */}
+        {/* Self Drive Only Options */}
         {tripType === "selfdrive" && (
           <>
             <label className="searched-switch-label">
@@ -336,11 +348,11 @@ export default function SearchedCars() {
                   <option value="" disabled>
                     Select Drop-off City
                   </option>
-                  <option value="Noida">Noida</option>
-                  <option value="Gurgaon">Gurgaon</option>
-                  <option value="Delhi">Delhi</option>
-                  <option value="Agra">Agra</option>
-                  <option value="Meerut">Meerut</option>
+                  {cities.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
                 </select>
                 <FontAwesomeIcon
                   icon={faMapMarkerAlt}
