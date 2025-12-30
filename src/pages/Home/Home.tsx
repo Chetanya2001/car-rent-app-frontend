@@ -275,9 +275,6 @@ export default function Home() {
               <Link to="/guest-mybookings" onClick={() => setIsNavOpen(false)}>
                 My Bookings
               </Link>
-              <Link to="/intercity" onClick={() => setIsNavOpen(false)}>
-                Intercity
-              </Link>
               <Link to="/support" onClick={() => setIsNavOpen(false)}>
                 Support
               </Link>
