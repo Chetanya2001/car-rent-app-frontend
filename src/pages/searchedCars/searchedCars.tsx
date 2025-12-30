@@ -46,7 +46,6 @@ export default function SearchedCars() {
   const bookingDetails = location.state?.bookingDetails || {};
   const initialCars = location.state?.cars || [];
 
-  // New: Trip Type Toggle
   const [tripType, setTripType] = useState<"selfdrive" | "intercity">(
     "selfdrive"
   );
@@ -59,9 +58,9 @@ export default function SearchedCars() {
     pickupTime: bookingDetails.pickupTime || nowTime,
     dropDate: bookingDetails.dropDate || tomorrowDate,
     dropTime: bookingDetails.dropTime || dropTime,
-    insureTrip: bookingDetails.insureTrip ?? false,
     driverRequired: bookingDetails.driverRequired ?? false,
     differentDrop: bookingDetails.differentDrop ?? false,
+    // insureTrip removed from state — it's always true now
   });
 
   // Specific states for Intercity
@@ -81,7 +80,7 @@ export default function SearchedCars() {
   const handleCityChange = (value: string) => {
     setFilters((prev) => ({ ...prev, city: value }));
     if (tripType === "intercity" && value !== "Delhi") {
-      setPickupLocation(""); // Reset if not Delhi
+      setPickupLocation("");
     }
   };
 
@@ -89,6 +88,18 @@ export default function SearchedCars() {
     if (!filters.city || !filters.pickupDate || !filters.dropDate) {
       alert("Please fill all required fields");
       return;
+    }
+
+    // Validation for intercity
+    if (tripType === "intercity") {
+      if (filters.city === "Delhi" && !pickupLocation) {
+        alert("Please select a pickup location in Delhi");
+        return;
+      }
+      if (!dropCity) {
+        alert("Please select a drop city");
+        return;
+      }
     }
 
     try {
@@ -107,7 +118,7 @@ export default function SearchedCars() {
       const data = await searchCars(searchParams);
       setCars(data.cars || []);
     } catch (err) {
-      console.error("❌ Error searching cars:", err);
+      console.error("Error searching cars:", err);
       alert("Failed to fetch cars. Try again.");
     }
   };
@@ -135,7 +146,6 @@ export default function SearchedCars() {
     });
   }, [cars, filters]);
 
-  // Intercity-specific options
   const delhiPickupLocations = [
     "Indira Gandhi International Airport (DEL)",
     "New Delhi Railway Station (NDLS)",
@@ -157,7 +167,7 @@ export default function SearchedCars() {
     <>
       <Navbar />
 
-      {/* Trip Type Toggle - Styled to match design */}
+      {/* Trip Type Toggle */}
       <div className="trip-type-toggle-container">
         <span className={tripType === "selfdrive" ? "active" : ""}>
           Self Drive
@@ -187,7 +197,6 @@ export default function SearchedCars() {
               style={{ padding: "6px", fontSize: "1rem" }}
             >
               <option value="Delhi">Delhi</option>
-              {/* Can extend later */}
             </select>
           ) : (
             <select
@@ -208,7 +217,7 @@ export default function SearchedCars() {
           )}
         </label>
 
-        {/* Intercity: Specific Pickup Location (only if Delhi selected) */}
+        {/* Intercity: Pickup Location in Delhi */}
         {tripType === "intercity" && filters.city === "Delhi" && (
           <label>
             Pickup Location:
@@ -294,19 +303,6 @@ export default function SearchedCars() {
         {tripType === "selfdrive" && (
           <>
             <label className="searched-switch-label">
-              Insure Trip:
-              <span className="searched-switch">
-                <input
-                  type="checkbox"
-                  name="insureTrip"
-                  checked={filters.insureTrip}
-                  onChange={handleFilterChange}
-                />
-                <span className="searched-slider"></span>
-              </span>
-            </label>
-
-            <label className="searched-switch-label">
               Driver Required:
               <span className="searched-switch">
                 <input
@@ -358,6 +354,21 @@ export default function SearchedCars() {
           </>
         )}
 
+        {/* Insure Trip is always ON — shown as info (optional) */}
+        <div
+          className="insure-info"
+          style={{
+            gridColumn: "1 / -1",
+            textAlign: "center",
+            color: "#01d28e",
+            fontWeight: "600",
+            fontSize: "1rem",
+            margin: "0.5rem 0",
+          }}
+        >
+          Trip Insurance Included
+        </div>
+
         <button className="searched-search-btn" onClick={handleSearch}>
           Search
         </button>
@@ -369,7 +380,7 @@ export default function SearchedCars() {
           <h2>Your Search results</h2>
           <p>
             Found {filteredCars.length.toString().padStart(2, "0")} cars for
-            your dates &amp; location, happy Zipping!
+            your dates & location, happy Zipping!
           </p>
         </div>
       </div>
@@ -428,10 +439,7 @@ export default function SearchedCars() {
                                 : filters.differentDrop
                                 ? dropCity
                                 : undefined,
-                            insureTrip:
-                              tripType === "intercity"
-                                ? true
-                                : filters.insureTrip,
+                            insureTrip: true, // Always true
                             driverRequired:
                               tripType === "intercity"
                                 ? false
@@ -450,10 +458,7 @@ export default function SearchedCars() {
                         state: {
                           pickup_datetime: `${filters.pickupDate}T${filters.pickupTime}`,
                           dropoff_datetime: `${filters.dropDate}T${filters.dropTime}`,
-                          insurance:
-                            tripType === "intercity"
-                              ? true
-                              : filters.insureTrip,
+                          insurance: true, // Always insured
                           driver:
                             tripType === "intercity"
                               ? false
@@ -479,7 +484,7 @@ export default function SearchedCars() {
         )}
       </div>
 
-      {/* Drop Map Modal (only used in Self Drive different drop) */}
+      {/* Drop Map Modal - Only for Self Drive different drop */}
       {showDropMap && tripType === "selfdrive" && (
         <ModalWrapper onClose={() => setShowDropMap(false)}>
           <LocationPicker

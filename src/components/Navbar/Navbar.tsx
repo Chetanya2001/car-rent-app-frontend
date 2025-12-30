@@ -189,7 +189,7 @@ export default function Navbar({
             </NavLink>
           </li>
           <li>
-            <NavLink to="/cars" onClick={() => setNavOpen(false)}>
+            <NavLink to="/searched-cars" onClick={() => setNavOpen(false)}>
               SelfDrive-Car
             </NavLink>
           </li>

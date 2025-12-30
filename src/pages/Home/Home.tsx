@@ -246,7 +246,7 @@ export default function Home() {
 
           {user && role === "host" && (
             <>
-              <Link to="/cars" onClick={() => setIsNavOpen(false)}>
+              <Link to="/searched-cars" onClick={() => setIsNavOpen(false)}>
                 SelfDrive-Car
               </Link>
               <Link to="/add-car" onClick={() => setIsNavOpen(false)}>
