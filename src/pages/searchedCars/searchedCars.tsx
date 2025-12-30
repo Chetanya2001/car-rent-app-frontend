@@ -73,6 +73,13 @@ export default function SearchedCars() {
     }));
   };
 
+  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilters((prev) => ({
+      ...prev,
+      city: e.target.value,
+    }));
+  };
+
   // Separate handler for dropCity input to avoid mixing into filters
   const handleDropCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setDropCity(e.target.value);
@@ -140,14 +147,24 @@ export default function SearchedCars() {
       <div className="searched-filters-panel">
         <label>
           City:
-          <input
+          <select
             name="city"
             value={filters.city}
-            onChange={handleFilterChange}
-            placeholder="Enter city"
-            autoComplete="off"
-          />
+            onChange={handleCityChange}
+            style={{ padding: "6px", fontSize: "1rem" }}
+          >
+            <option value="" disabled>
+              Select City
+            </option>
+            <option value="Delhi">Delhi</option>
+            <option value="Gurgaon">Gurgaon</option>
+            <option value="Noida">Noida</option>
+            <option value="Agra">Agra</option>
+            <option value="Ahmedabad">Ahmedabad</option>
+            <option value="Jaipur">Jaipur</option>
+          </select>
         </label>
+
         <label>
           Pickup Date:
           <input
