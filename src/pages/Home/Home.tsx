@@ -14,9 +14,9 @@ import Login from "../auth/Login/Login";
 import Register from "../auth/Register/Register";
 import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faMapMarkerAlt,
   faCar,
   faCalendarAlt,
   faCreditCard,
@@ -38,7 +38,7 @@ export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ----- STATE -----
+  // --- STATE ---
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null
   );
@@ -67,7 +67,7 @@ export default function Home() {
   const [differentDrop, setDifferentDrop] = useState(false);
   const [dropCity, setDropCity] = useState("");
 
-  // ----- MENU -----
+  // --- MENU ---
   const hostMenu = [
     "Add a Car",
     "My Cars",
@@ -110,7 +110,7 @@ export default function Home() {
     Logout: faDoorOpen,
   };
 
-  // ----- EFFECTS -----
+  // --- EFFECTS ---
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const showLogin = params.get("showLogin");
@@ -147,7 +147,7 @@ export default function Home() {
     }
   }, []);
 
-  // ----- FUNCTIONS -----
+  // --- FUNCTIONS ---
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
@@ -234,7 +234,6 @@ export default function Home() {
     setIsNavOpen(false);
   };
 
-  // ----- RENDER -----
   return (
     <div className="home-container">
       {/* HEADER */}
@@ -314,7 +313,7 @@ export default function Home() {
         </nav>
       </header>
 
-      {/* LOGIN/REGISTER MODAL */}
+      {/* MODALS */}
       {activeModal && (
         <ModalWrapper
           onClose={() => {
@@ -335,15 +334,12 @@ export default function Home() {
               onLoginSuccess={(userData) => {
                 setUser(userData);
                 setActiveModal(null);
-                setRemark("");
                 const token = localStorage.getItem("token");
                 if (token) {
                   try {
                     const decoded = jwtDecode<TokenPayload>(token);
                     setRole(decoded.role);
-                  } catch {
-                    console.error("Invalid token after login");
-                  }
+                  } catch {}
                 }
               }}
               remark={remark}
@@ -365,7 +361,6 @@ export default function Home() {
           )}
         </ModalWrapper>
       )}
-
       {/* Hero */}
       <div className="hero-wrapper">
         <div className="home-overlay"></div>
@@ -624,7 +619,6 @@ export default function Home() {
           />
         </ModalWrapper>
       )}
-
       {showDropMap && (
         <ModalWrapper onClose={() => setShowDropMap(false)}>
           <LocationPicker
