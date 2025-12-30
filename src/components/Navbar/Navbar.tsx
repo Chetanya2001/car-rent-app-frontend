@@ -6,19 +6,17 @@ import Login from "../../pages/auth/Login/Login";
 import Register from "../../pages/auth/Register/Register";
 import ModalWrapper from "../ModalWrapper/ModalWrapper";
 import { NavLink, useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // ✅ Fixed import
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCar,
   faCalendarAlt,
-  faCreditCard,
-  faBell,
   faLifeRing,
   faDoorOpen,
   faPlus,
   faBars,
   faTimes,
-  faFile,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import type { User } from "../../types/user";
 import { fetchUserProfile } from "../../services/auth";
@@ -28,47 +26,8 @@ interface TokenPayload {
 }
 
 interface NavbarProps {
-  profilePicUrl?: string | null; // Add new prop for profile picture URL
+  profilePicUrl?: string | null;
 }
-const hostMenu = [
-  "Add a Car",
-  "My Cars",
-  "My Bookings",
-  // "My Payments",
-  // "Notifications",
-  "Logout",
-];
-
-const guestMenu = [
-  "Book a Car",
-  "My Bookings",
-  "My Documents",
-  // "My Payments",
-  // "Notifications",
-  "Logout",
-];
-
-const AdminMenu = [
-  "Cars",
-  "Bookings",
-  "Guests",
-  "Hosts",
-  "Payments",
-  "Support",
-  "Logout",
-];
-
-const iconMap: Record<string, any> = {
-  "Add a Car": faPlus,
-  "My Cars": faCar,
-  "My Bookings": faCalendarAlt,
-  "My Payments": faCreditCard,
-  Notifications: faBell,
-  Support: faLifeRing,
-  Logout: faDoorOpen,
-  "Book a Car": faCar,
-  "My Documents": faFile,
-};
 
 export default function Navbar({
   profilePicUrl: propProfilePicUrl,
@@ -79,16 +38,18 @@ export default function Navbar({
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
     null
   );
-  const [remark, setRemark] = useState(""); // <--- Add remark state here
+  const [remark, setRemark] = useState("");
   const [showMenu, setShowMenu] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(
     propProfilePicUrl ?? null
   );
+
   const profileMenuRef = useRef<HTMLUListElement | null>(null);
   const hamburgerRef = useRef<HTMLDivElement | null>(null);
   const navMenuRef = useRef<HTMLUListElement | null>(null);
 
+  // Close menus when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -110,6 +71,7 @@ export default function Navbar({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Load user from localStorage and decode role
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -123,8 +85,9 @@ export default function Navbar({
       }
     }
   }, []);
+
+  // Fetch profile picture from backend
   useEffect(() => {
-    // Function to fetch and set profile pic
     const loadUserProfile = async () => {
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -132,15 +95,8 @@ export default function Navbar({
       try {
         const profile = await fetchUserProfile(token);
         setUser(profile);
-        if (profile.profile_pic) {
-          setProfilePicUrl(profile.profile_pic);
-          // Optionally update localStorage for consistency
-          localStorage.setItem("profilePicUrl", profile.profile_pic);
-        } else {
-          setProfilePicUrl(null);
-        }
+        setProfilePicUrl(profile.profile_pic || null);
 
-        // Decode role from token
         const decoded = jwtDecode<TokenPayload>(token);
         setRole(decoded.role);
       } catch (err) {
@@ -173,18 +129,34 @@ export default function Navbar({
         console.error("Invalid token after login", err);
       }
     }
-    setRemark(""); // Clear remark on login success
+    setRemark("");
     setActiveModal(null);
   };
 
+  // Menu items per role
   const menuItems =
     role === "host"
-      ? hostMenu
+      ? [
+          "Add a Car",
+          "My Cars",
+          "My Bookings",
+          "My Profile",
+          "Support",
+          "Logout",
+        ]
       : role === "guest"
-      ? guestMenu
-      : role === "admin"
-      ? AdminMenu
+      ? ["Book a Car", "My Bookings", "My Profile", "Support", "Logout"]
       : [];
+
+  const iconMap: Record<string, any> = {
+    "Add a Car": faPlus,
+    "My Cars": faCar,
+    "My Bookings": faCalendarAlt,
+    "My Profile": faUser,
+    Support: faLifeRing,
+    Logout: faDoorOpen,
+    "Book a Car": faCar,
+  };
 
   const handleMenuClick = (item: string) => {
     switch (item) {
@@ -195,48 +167,19 @@ export default function Navbar({
         navigate("/my-cars");
         break;
       case "My Bookings":
-        if (role === "host") {
-          navigate("/host-mybookings");
-        } else {
-          navigate("/guest-mybookings");
-        }
-        break;
-      case "Logout":
-        handleLogout();
+        navigate(role === "host" ? "/host-mybookings" : "/guest-mybookings");
         break;
       case "Book a Car":
         navigate("/searched-cars");
         break;
-      case "My Payments":
-        navigate("/my-payments");
-        break;
-      case "Notifications":
-        navigate("/notifications");
+      case "My Profile":
+        navigate("/my-profile");
         break;
       case "Support":
-        if (role === "admin") {
-          navigate("/admin/manage-support");
-        } else {
-          navigate("/support");
-        }
+        navigate("/support");
         break;
-      case "Cars":
-        navigate("/admin/manage-cars");
-        break;
-      case "Bookings":
-        navigate("/admin/manage-bookings");
-        break;
-      case "Guests":
-        navigate("/admin/manage-guests");
-        break;
-      case "Hosts":
-        navigate("/admin/manage-hosts");
-        break;
-      case "Payments":
-        navigate("/admin/manage-payments");
-        break;
-      case "My Documents":
-        navigate("/my-documents");
+      case "Logout":
+        handleLogout();
         break;
       default:
         break;
@@ -263,9 +206,7 @@ export default function Navbar({
             navOpen ? "Close navigation menu" : "Open navigation menu"
           }
           onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              setNavOpen((prev) => !prev);
-            }
+            if (e.key === "Enter" || e.key === " ") setNavOpen((prev) => !prev);
           }}
         >
           <FontAwesomeIcon icon={navOpen ? faTimes : faBars} size="lg" />
@@ -339,9 +280,8 @@ export default function Navbar({
                       role="menuitem"
                       onClick={() => handleMenuClick(item)}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
+                        if (e.key === "Enter" || e.key === " ")
                           handleMenuClick(item);
-                        }
                       }}
                     >
                       <FontAwesomeIcon
@@ -377,7 +317,7 @@ export default function Navbar({
                 setRemark("");
               }}
               onLoginSuccess={handleUserLogin}
-              remark={remark} // <--- Pass remark prop here
+              remark={remark}
             />
           ) : (
             <Register
