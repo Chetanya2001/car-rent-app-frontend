@@ -58,7 +58,6 @@ export default function Testimonials() {
 
   const [activeIndex, setActiveIndex] = useState<number>(0);
 
-  // Show 3 testimonials at a time
   const visibleTestimonials = testimonials.slice(activeIndex, activeIndex + 3);
 
   const handleNext = () => {
