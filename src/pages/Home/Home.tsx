@@ -284,9 +284,9 @@ export default function Home() {
               <Link to="/my-documents" onClick={() => setIsNavOpen(false)}>
                 Profile
               </Link>
-              <button className="nav-logout-btn" onClick={handleLogout}>
+              <Link to="/" onClick={handleLogout}>
                 Logout
-              </button>
+              </Link>
             </>
           )}
         </nav>
