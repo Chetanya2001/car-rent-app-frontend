@@ -169,26 +169,26 @@ export default function Home() {
     }
   };
 
-  // Menu items
-  const hostMenu = ["Add a Car", "My Cars", "My Bookings", "Logout"];
-  const guestMenu = ["Book a Car", "My Bookings", "My Documents", "Logout"];
-  const adminMenu = [
-    "Cars",
-    "Bookings",
-    "Guests",
-    "Hosts",
-    "Payments",
-    "Support",
-    "Logout",
-  ];
-  const menuItems =
-    role === "host"
-      ? hostMenu
-      : role === "guest"
-      ? guestMenu
-      : role === "admin"
-      ? adminMenu
-      : [];
+  // // Menu items
+  // const hostMenu = ["Add a Car", "My Cars", "My Bookings", "Logout"];
+  // const guestMenu = ["Book a Car", "My Bookings", "My Documents", "Logout"];
+  // const adminMenu = [
+  //   "Cars",
+  //   "Bookings",
+  //   "Guests",
+  //   "Hosts",
+  //   "Payments",
+  //   "Support",
+  //   "Logout",
+  // ];
+  // const menuItems =
+  //   role === "host"
+  //     ? hostMenu
+  //     : role === "guest"
+  //     ? guestMenu
+  //     : role === "admin"
+  //     ? adminMenu
+  //     : [];
 
   const iconMap: Record<string, any> = {
     "Add a Car": faPlus,
