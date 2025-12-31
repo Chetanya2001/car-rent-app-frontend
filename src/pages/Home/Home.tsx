@@ -225,7 +225,7 @@ export default function Home() {
               <Link to="/searched-cars" onClick={() => setIsNavOpen(false)}>
                 SelfDrive
               </Link>
-              <Link to="/intercity" onClick={() => setIsNavOpen(false)}>
+              <Link to="/searched-cars" onClick={() => setIsNavOpen(false)}>
                 Intercity
               </Link>
               <Link to="/community" onClick={() => setIsNavOpen(false)}>
