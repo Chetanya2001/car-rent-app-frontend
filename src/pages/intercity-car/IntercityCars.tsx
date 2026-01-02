@@ -46,7 +46,6 @@ export default function IntercityCars() {
   const [pax, setPax] = useState(1);
   const [luggage, setLuggage] = useState(0);
 
-  /* ✅ CITY → STATIONS (HARDCODED) */
   const cityStations: Record<string, string[]> = {
     Delhi: [
       "Indira Gandhi International Airport (DEL)",
@@ -102,7 +101,6 @@ export default function IntercityCars() {
     return cars.filter((car) => car.city === pickupCity);
   }, [cars, pickupCity]);
 
-  /* ✅ DROP CITY SHOULD NOT INCLUDE PICKUP CITY */
   const availableDropCities = useMemo(() => {
     return allCities.filter((city) => city !== pickupCity);
   }, [pickupCity]);
@@ -131,7 +129,6 @@ export default function IntercityCars() {
           </select>
         </label>
 
-        {/* ✅ PICKUP STATIONS BASED ON PICKUP CITY */}
         <label>
           Pickup Location:
           <select
@@ -168,7 +165,6 @@ export default function IntercityCars() {
           />
         </label>
 
-        {/* ✅ DROP CITY EXCLUDING PICKUP CITY */}
         <label>
           Drop City:
           <select
@@ -187,29 +183,44 @@ export default function IntercityCars() {
           </select>
         </label>
 
+        {/* ✅ PAX (+ -) */}
         <label>
           Passengers (PAX):
-          <select value={pax} onChange={(e) => setPax(Number(e.target.value))}>
-            {[1, 2, 3, 4, 5, 6].map((count) => (
-              <option key={count} value={count}>
-                {count} {count === 1 ? "Passenger" : "Passengers"}
-              </option>
-            ))}
-          </select>
+          <div className="searched-counter">
+            <button
+              type="button"
+              onClick={() => setPax((prev) => Math.max(1, prev - 1))}
+            >
+              −
+            </button>
+            <span>{pax}</span>
+            <button
+              type="button"
+              onClick={() => setPax((prev) => Math.min(6, prev + 1))}
+            >
+              +
+            </button>
+          </div>
         </label>
 
+        {/* ✅ LUGGAGE (+ -) */}
         <label>
           Luggage:
-          <select
-            value={luggage}
-            onChange={(e) => setLuggage(Number(e.target.value))}
-          >
-            {[0, 1, 2, 3, 4, 5].map((count) => (
-              <option key={count} value={count}>
-                {count} {count === 1 ? "Bag" : "Bags"}
-              </option>
-            ))}
-          </select>
+          <div className="searched-counter">
+            <button
+              type="button"
+              onClick={() => setLuggage((prev) => Math.max(0, prev - 1))}
+            >
+              −
+            </button>
+            <span>{luggage}</span>
+            <button
+              type="button"
+              onClick={() => setLuggage((prev) => Math.min(5, prev + 1))}
+            >
+              +
+            </button>
+          </div>
         </label>
 
         <label className="searched-switch-label">
@@ -306,7 +317,7 @@ export default function IntercityCars() {
         )}
       </div>
 
-      {/* Missing Features Section */}
+      {/* Missing Features */}
       {/* <div className="searched-cars-container">
         <h2 style={{ marginBottom: "1rem" }}>
           🚀 Advanced Intercity Features (Coming Soon)
