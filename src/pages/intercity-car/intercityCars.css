@@ -65,7 +65,8 @@
 
 .searched-filters-panel input[type="text"],
 .searched-filters-panel input[type="date"],
-.searched-filters-panel input[type="time"] {
+.searched-filters-panel input[type="time"],
+.searched-filters-panel select {
   margin-top: 0.4rem;
   padding: 0.5rem 0.7rem;
   font-size: 1rem;
@@ -79,7 +80,8 @@
 
 .searched-filters-panel input[type="text"]:focus,
 .searched-filters-panel input[type="date"]:focus,
-.searched-filters-panel input[type="time"]:focus {
+.searched-filters-panel input[type="time"]:focus,
+.searched-filters-panel select:focus {
   border-color: #01d28e;
   box-shadow: 0 0 6px #01d28e;
   outline: none;
@@ -91,6 +93,69 @@
   margin-top: 0.3rem;
   accent-color: #01d28e;
   cursor: pointer;
+}
+
+/* Professional Counter Styles */
+.searched-counter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+  background: #fafafa;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 0.3rem 0.5rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.searched-counter:focus-within {
+  border-color: #01d28e;
+  box-shadow: 0 0 6px #01d28e;
+}
+
+.searched-counter button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+  padding: 0;
+}
+
+.searched-counter button:hover {
+  background: #01d28e;
+  border-color: #01d28e;
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.searched-counter button:active {
+  transform: scale(0.95);
+}
+
+.searched-counter button:disabled {
+  background: #f5f5f5;
+  border-color: #e0e0e0;
+  color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.searched-counter span {
+  min-width: 30px;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
 }
 
 /* Toggle Switch */
