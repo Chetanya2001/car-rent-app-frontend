@@ -43,22 +43,46 @@ export default function IntercityCars() {
   const [pickupTime, setPickupTime] = useState(time);
   const [dropCity, setDropCity] = useState("");
 
-  const delhiPickupLocations = [
-    "Indira Gandhi International Airport (DEL)",
-    "New Delhi Railway Station (NDLS)",
-    "Old Delhi Railway Station (DLI)",
-    "Hazrat Nizamuddin Railway Station (NZM)",
-    "Anand Vihar Terminal (ANVT)",
-  ];
+  const [pax, setPax] = useState(1);
+  const [luggage, setLuggage] = useState(0);
 
-  const intercityDropCities = [
-    "Agra",
-    "Jaipur",
-    "Chandigarh",
-    "Lucknow",
-    "Dehradun",
-    "Amritsar",
-  ];
+  /* ✅ CITY → STATIONS (HARDCODED) */
+  const cityStations: Record<string, string[]> = {
+    Delhi: [
+      "Indira Gandhi International Airport (DEL)",
+      "New Delhi Railway Station (NDLS)",
+      "Old Delhi Railway Station (DLI)",
+      "Hazrat Nizamuddin Railway Station (NZM)",
+      "Anand Vihar Terminal (ANVT)",
+    ],
+    Agra: [
+      "Agra Cantt Railway Station (AGC)",
+      "Agra Fort Railway Station (AF)",
+      "Raja Ki Mandi Railway Station (RKM)",
+      "Pandit Deen Dayal Upadhyaya Airport (AGR)",
+    ],
+    Jaipur: [
+      "Jaipur Junction (JP)",
+      "Gandhi Nagar Railway Station (GADJ)",
+      "Jaipur International Airport (JAI)",
+    ],
+    Chandigarh: [
+      "Chandigarh Railway Station (CDG)",
+      "Chandigarh International Airport (IXC)",
+    ],
+    Lucknow: [
+      "Charbagh Railway Station (LKO)",
+      "Lucknow Junction (LJN)",
+      "Chaudhary Charan Singh Airport (LKO)",
+    ],
+    Dehradun: ["Dehradun Railway Station (DDN)", "Jolly Grant Airport (DED)"],
+    Amritsar: [
+      "Amritsar Junction (ASR)",
+      "Sri Guru Ram Dass Jee International Airport (ATQ)",
+    ],
+  };
+
+  const allCities = Object.keys(cityStations);
 
   const handleSearch = async () => {
     const pickup_datetime = new Date(
@@ -68,7 +92,7 @@ export default function IntercityCars() {
     const data = await searchCars({
       city: pickupCity,
       pickup_datetime,
-      dropoff_datetime: pickup_datetime, // intercity handled per KM later
+      dropoff_datetime: pickup_datetime,
     });
 
     setCars(data.cars || []);
@@ -77,6 +101,11 @@ export default function IntercityCars() {
   const filteredCars = useMemo(() => {
     return cars.filter((car) => car.city === pickupCity);
   }, [cars, pickupCity]);
+
+  /* ✅ DROP CITY SHOULD NOT INCLUDE PICKUP CITY */
+  const availableDropCities = useMemo(() => {
+    return allCities.filter((city) => city !== pickupCity);
+  }, [pickupCity]);
 
   return (
     <>
@@ -91,31 +120,35 @@ export default function IntercityCars() {
             onChange={(e) => {
               setPickupCity(e.target.value);
               setPickupLocation("");
+              setDropCity("");
             }}
           >
-            <option value="Delhi">Delhi</option>
+            {allCities.map((city) => (
+              <option key={city} value={city}>
+                {city}
+              </option>
+            ))}
           </select>
         </label>
 
-        {pickupCity === "Delhi" && (
-          <label>
-            Pickup Location:
-            <select
-              value={pickupLocation}
-              onChange={(e) => setPickupLocation(e.target.value)}
-              required
-            >
-              <option value="" disabled>
-                Select Location
+        {/* ✅ PICKUP STATIONS BASED ON PICKUP CITY */}
+        <label>
+          Pickup Location:
+          <select
+            value={pickupLocation}
+            onChange={(e) => setPickupLocation(e.target.value)}
+            required
+          >
+            <option value="" disabled>
+              Select Location
+            </option>
+            {cityStations[pickupCity]?.map((station) => (
+              <option key={station} value={station}>
+                {station}
               </option>
-              {delhiPickupLocations.map((loc) => (
-                <option key={loc} value={loc}>
-                  {loc}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
+            ))}
+          </select>
+        </label>
 
         <label>
           Pickup Date:
@@ -135,6 +168,7 @@ export default function IntercityCars() {
           />
         </label>
 
+        {/* ✅ DROP CITY EXCLUDING PICKUP CITY */}
         <label>
           Drop City:
           <select
@@ -145,7 +179,7 @@ export default function IntercityCars() {
             <option value="" disabled>
               Select Drop City
             </option>
-            {intercityDropCities.map((city) => (
+            {availableDropCities.map((city) => (
               <option key={city} value={city}>
                 {city}
               </option>
@@ -153,7 +187,31 @@ export default function IntercityCars() {
           </select>
         </label>
 
-        {/* Insurance ON by default */}
+        <label>
+          Passengers (PAX):
+          <select value={pax} onChange={(e) => setPax(Number(e.target.value))}>
+            {[1, 2, 3, 4, 5, 6].map((count) => (
+              <option key={count} value={count}>
+                {count} {count === 1 ? "Passenger" : "Passengers"}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Luggage:
+          <select
+            value={luggage}
+            onChange={(e) => setLuggage(Number(e.target.value))}
+          >
+            {[0, 1, 2, 3, 4, 5].map((count) => (
+              <option key={count} value={count}>
+                {count} {count === 1 ? "Bag" : "Bags"}
+              </option>
+            ))}
+          </select>
+        </label>
+
         <label className="searched-switch-label">
           Insure Trip:
           <span className="searched-switch">
@@ -220,6 +278,8 @@ export default function IntercityCars() {
                           dropCity,
                           pickupDate,
                           pickupTime,
+                          pax,
+                          luggage,
                           insureTrip: true,
                           driverRequired: false,
                         },
@@ -247,7 +307,7 @@ export default function IntercityCars() {
       </div>
 
       {/* Missing Features Section */}
-      <div className="searched-cars-container">
+      {/* <div className="searched-cars-container">
         <h2 style={{ marginBottom: "1rem" }}>
           🚀 Advanced Intercity Features (Coming Soon)
         </h2>
@@ -266,7 +326,7 @@ export default function IntercityCars() {
           <li>Corporate & bulk bookings</li>
           <li>AI-based dynamic pricing</li>
         </ul>
-      </div>
+      </div> */}
     </>
   );
 }
