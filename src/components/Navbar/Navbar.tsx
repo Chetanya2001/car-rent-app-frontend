@@ -51,7 +51,7 @@ export default function Navbar({
   const publicNavItems = [
     { label: "Home", path: "/" },
     { label: "SelfDrive", path: "/searched-cars" },
-    { label: "Intercity", path: "/searched-cars" },
+    { label: "Intercity", path: "/intercity-cars" },
     { label: "Community", path: "/community" },
   ];
 

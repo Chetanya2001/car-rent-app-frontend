@@ -21,6 +21,7 @@ import Community from "../pages/community/community";
 import Dashboard from "../pages/admin/dashboard/dashboard";
 import GuestMyBookings from "../pages/guest-mybookings/guest-mybookings";
 import HostMyBookings from "../pages/host-mybookings/host-mybookings";
+import IntercityCars from "../pages/intercity-car/IntercityCars";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -38,6 +39,7 @@ const AppRoutes = () => (
       <Route path="/bookAcar" element={<BookACar />} />
       <Route path="/guest-mybookings" element={<GuestMyBookings />} />
       <Route path="/host-mybookings" element={<HostMyBookings />} />
+      <Route path="/intercity-cars" element={<IntercityCars />} />
       <Route
         path="/admin/dashboard"
         element={
