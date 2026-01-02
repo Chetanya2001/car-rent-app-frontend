@@ -170,7 +170,7 @@ export default function IntercityCars() {
       {/* Banner */}
       <div className="searched-results-banner">
         <div className="searched-banner-content">
-          <h2>Intercity Cabs Available</h2>
+          <h2>Intercity Cars Available</h2>
           <p>
             Found {filteredCars.length.toString().padStart(2, "0")} intercity
             cars with driver
