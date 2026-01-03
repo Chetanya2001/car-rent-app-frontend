@@ -22,7 +22,10 @@ const LOCATIONIQ_KEY = import.meta.env.VITE_LOCATIONIQ_TOKEN;
 const BookACar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
+  const { state } = useLocation();
+  if (state?.tripType === "intercity") {
+    navigate("/bookAcar", { replace: true });
+  }
   // Get all state passed from Cars component
   const {
     carId,

@@ -15,13 +15,14 @@ import ManagePayments from "../pages/admin/managePayments/managePayments";
 import ManageSupport from "../pages/admin/manageSupport/manageSupport";
 import AdminRoute from "../components/AdminRoute/AdminRoute"; // Make sure path is correct
 import MyDocumentsPage from "../pages/MyDocuments/MyDocuments";
-import BookACar from "../pages/BookACar/BookACar";
+// import BookACar from "../pages/BookACar/BookACar";
 import Support from "../pages/support/support";
 import Community from "../pages/community/community";
 import Dashboard from "../pages/admin/dashboard/dashboard";
 import GuestMyBookings from "../pages/guest-mybookings/guest-mybookings";
 import HostMyBookings from "../pages/host-mybookings/host-mybookings";
 import IntercityCars from "../pages/intercity-car/IntercityCars";
+import BookAcarRouter from "../pages/BookACar/BookAcarRouter";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -36,7 +37,7 @@ const AppRoutes = () => (
       <Route path="/my-documents" element={<MyDocumentsPage />} />
       <Route path="/support" element={<Support />} />
       <Route path="/community" element={<Community />} />
-      <Route path="/bookAcar" element={<BookACar />} />
+      <Route path="/bookAcar" element={<BookAcarRouter />} />
       <Route path="/guest-mybookings" element={<GuestMyBookings />} />
       <Route path="/host-mybookings" element={<HostMyBookings />} />
       <Route path="/intercity-cars" element={<IntercityCars />} />
