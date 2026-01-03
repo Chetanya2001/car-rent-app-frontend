@@ -6,7 +6,7 @@ export default function BookAcarRouter() {
   const { state } = useLocation();
 
   // Safety guard
-  if (!state || !state.tripType) {
+  if (!state) {
     return <Navigate to="/" replace />;
   }
 
