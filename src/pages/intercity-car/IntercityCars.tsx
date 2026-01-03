@@ -109,14 +109,15 @@ export default function IntercityCars() {
 
     setLoading(true);
     try {
-      const pickup_datetime = new Date(
-        `${pickupDate}T${pickupTime}`
-      ).toISOString();
+      const pickup_datetime = new Date(`${pickupDate}T${pickupTime}`);
+
+      const dropoff_datetime = new Date(pickup_datetime);
+      dropoff_datetime.setHours(dropoff_datetime.getHours() + 12); // or 24
 
       const data = await searchCars({
         city: pickupCity,
-        pickup_datetime,
-        dropoff_datetime: pickup_datetime,
+        pickup_datetime: pickup_datetime.toISOString(),
+        dropoff_datetime: dropoff_datetime.toISOString(),
       });
 
       setCars(data.cars || []);
