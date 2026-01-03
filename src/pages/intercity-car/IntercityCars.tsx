@@ -112,7 +112,7 @@ export default function IntercityCars() {
       const pickup_datetime = new Date(`${pickupDate}T${pickupTime}`);
 
       const dropoff_datetime = new Date(pickup_datetime);
-      dropoff_datetime.setHours(dropoff_datetime.getHours() + 12); // or 24
+      dropoff_datetime.setHours(dropoff_datetime.getHours() + 48); // or 24
 
       const data = await searchCars({
         city: pickupCity,
