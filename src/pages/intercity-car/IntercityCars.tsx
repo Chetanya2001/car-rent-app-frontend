@@ -12,8 +12,21 @@ interface Car {
   price_per_hour: number;
   photos: string[];
   city?: string;
-  availableFrom: string;
-  availableTo: string;
+  availableFrom?: string;
+  availableTo?: string;
+  available_from?: string;
+  available_till?: string;
+  documents?: {
+    car_id: number;
+    insurance_company: string;
+    insurance_idv_value: string;
+    insurance_image: string;
+    owner_name: string;
+    rc_image_back: string;
+    rc_image_front: string;
+    rc_number: string;
+    rc_valid_till: string;
+  };
 }
 
 function getDateAndTime(dateObj: Date) {
@@ -45,6 +58,7 @@ export default function IntercityCars() {
 
   const [pax, setPax] = useState(1);
   const [luggage, setLuggage] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const cityStations: Record<string, string[]> = {
     Delhi: [
@@ -84,26 +98,68 @@ export default function IntercityCars() {
   const allCities = Object.keys(cityStations);
 
   const handleSearch = async () => {
-    const pickup_datetime = new Date(
-      `${pickupDate}T${pickupTime}`
-    ).toISOString();
+    if (!pickupLocation) {
+      alert("Please select a pickup location");
+      return;
+    }
+    if (!dropCity) {
+      alert("Please select a drop city");
+      return;
+    }
 
-    const data = await searchCars({
-      city: pickupCity,
-      pickup_datetime,
-      dropoff_datetime: pickup_datetime,
-    });
+    setLoading(true);
+    try {
+      const pickup_datetime = new Date(
+        `${pickupDate}T${pickupTime}`
+      ).toISOString();
 
-    setCars(data.cars || []);
+      const data = await searchCars({
+        city: pickupCity,
+        pickup_datetime,
+        dropoff_datetime: pickup_datetime,
+      });
+
+      setCars(data.cars || []);
+    } catch (error) {
+      console.error("Error searching cars:", error);
+      alert("Failed to search cars. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // SAME LOGIC AS searchedCars.tsx
   const filteredCars = useMemo(() => {
-    return cars.filter((car) => car.city === pickupCity);
-  }, [cars, pickupCity]);
+    return cars.filter((car) => {
+      // City filter - allows cars without city property
+      if (
+        pickupCity &&
+        car.city &&
+        car.city.toLowerCase() !== pickupCity.toLowerCase()
+      )
+        return false;
 
-  const availableDropCities = useMemo(() => {
-    return allCities.filter((city) => city !== pickupCity);
-  }, [pickupCity]);
+      // Date availability check
+      const pickup = new Date(`${pickupDate}T${pickupTime}`);
+
+      if (car.availableFrom && car.availableTo) {
+        const from = new Date(car.availableFrom);
+        const to = new Date(car.availableTo);
+        if (pickup < from || pickup > to) return false;
+      }
+
+      // Check alternative property names
+      if (car.available_from && car.available_till) {
+        const from = new Date(car.available_from);
+        const to = new Date(car.available_till);
+        if (pickup < from || pickup > to) return false;
+      }
+
+      return true;
+    });
+  }, [cars, pickupCity, pickupDate, pickupTime]);
+
+  const availableDropCities = allCities.filter((city) => city !== pickupCity);
 
   return (
     <>
@@ -183,7 +239,7 @@ export default function IntercityCars() {
           </select>
         </label>
 
-        {/* ✅ PAX (+ -) */}
+        {/* PAX (+ -) */}
         <label>
           Passengers (PAX):
           <div className="searched-counter">
@@ -203,7 +259,7 @@ export default function IntercityCars() {
           </div>
         </label>
 
-        {/* ✅ LUGGAGE (+ -) */}
+        {/* LUGGAGE (+ -) */}
         <label>
           Luggage:
           <div className="searched-counter">
@@ -231,8 +287,12 @@ export default function IntercityCars() {
           </span>
         </label>
 
-        <button className="searched-search-btn" onClick={handleSearch}>
-          Search
+        <button
+          className="searched-search-btn"
+          onClick={handleSearch}
+          disabled={loading}
+        >
+          {loading ? "Searching..." : "Search"}
         </button>
       </div>
 
@@ -249,8 +309,12 @@ export default function IntercityCars() {
 
       {/* Cars */}
       <div className="searched-cars-container">
-        {filteredCars.length === 0 ? (
-          <p className="searched-no-cars">No cars available</p>
+        {loading ? (
+          <p className="searched-no-cars">Searching for cars...</p>
+        ) : filteredCars.length === 0 ? (
+          <p className="searched-no-cars">
+            No cars available. Click Search to find cars.
+          </p>
         ) : (
           <div className="searched-car-list">
             {filteredCars.map((car) => (
@@ -259,7 +323,7 @@ export default function IntercityCars() {
                   <img
                     src={car.photos?.[0] || "/placeholder.png"}
                     className="searched-car-image"
-                    alt=""
+                    alt={`${car.make} ${car.model}`}
                   />
                 </div>
 
@@ -316,28 +380,6 @@ export default function IntercityCars() {
           </div>
         )}
       </div>
-
-      {/* Missing Features */}
-      {/* <div className="searched-cars-container">
-        <h2 style={{ marginBottom: "1rem" }}>
-          🚀 Advanced Intercity Features (Coming Soon)
-        </h2>
-        <ul style={{ lineHeight: "1.9", color: "#555" }}>
-          <li>City-to-city distance calculation (Google Maps)</li>
-          <li>Automatic driver allocation</li>
-          <li>One-way / Round-trip selection</li>
-          <li>Multi-city route planner</li>
-          <li>Night driving surcharge</li>
-          <li>Toll & state tax breakdown</li>
-          <li>Driver profile & ratings</li>
-          <li>Live GPS tracking</li>
-          <li>Emergency SOS button</li>
-          <li>Per-KM cancellation rules</li>
-          <li>Open return bookings</li>
-          <li>Corporate & bulk bookings</li>
-          <li>AI-based dynamic pricing</li>
-        </ul>
-      </div> */}
     </>
   );
 }
