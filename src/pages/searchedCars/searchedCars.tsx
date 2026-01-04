@@ -129,23 +129,22 @@ export default function SearchedCars() {
     <>
       <Navbar />
 
-      {/* FILTER PANEL — UNCHANGED */}
+      {/* FILTER PANEL */}
       <div className="searched-filters-panel">
         <label>
           Pickup Address:
-          <div
-            style={{
-              border: "1px solid #ccc",
-              padding: "10px",
-              cursor: "pointer",
-              borderRadius: "4px",
-            }}
+          <input
+            type="text"
+            readOnly
+            value={
+              pickupLocation
+                ? `${pickupLocation.city}, ${pickupLocation.state}`
+                : ""
+            }
+            placeholder="Click to select pickup location"
             onClick={() => setShowPickupOptions(true)}
-          >
-            {pickupLocation
-              ? `${pickupLocation.city}, ${pickupLocation.state}`
-              : "Click to select pickup location"}
-          </div>
+            style={{ cursor: "pointer" }}
+          />
         </label>
 
         <label>
@@ -255,7 +254,7 @@ export default function SearchedCars() {
         </button>
       </div>
 
-      {/* BANNER — KEPT */}
+      {/* BANNER */}
       <div className="searched-results-banner">
         <div className="searched-banner-content">
           <h2>Your Search results</h2>
@@ -266,7 +265,7 @@ export default function SearchedCars() {
         </div>
       </div>
 
-      {/* CAR LIST — KEPT */}
+      {/* CAR LIST */}
       <div className="searched-cars-container">
         {filteredCars.length === 0 ? (
           <p className="searched-no-cars">
@@ -321,58 +320,71 @@ export default function SearchedCars() {
         )}
       </div>
 
-      {/* PICKUP OPTIONS MODAL */}
+      {/* PICKUP OPTIONS MODAL - REDESIGNED */}
       {showPickupOptions && (
         <ModalWrapper onClose={() => setShowPickupOptions(false)}>
-          <div style={{ padding: "20px" }}>
-            <h3>Select Pickup Location</h3>
+          <div className="location-modal">
+            <div className="location-modal-header">
+              <h2>Select Pickup Location</h2>
+              <p>Choose how you'd like to set your pickup address</p>
+            </div>
 
-            <button
-              style={{ width: "100%", marginBottom: "10px" }}
-              onClick={() => {
-                navigator.geolocation.getCurrentPosition(
-                  async (pos) => {
-                    const lat = pos.coords.latitude;
-                    const lng = pos.coords.longitude;
+            <div className="location-modal-body">
+              <button
+                className="location-option-btn current-location"
+                onClick={() => {
+                  navigator.geolocation.getCurrentPosition(
+                    async (pos) => {
+                      const lat = pos.coords.latitude;
+                      const lng = pos.coords.longitude;
 
-                    const res = await fetch(
-                      `https://us1.locationiq.com/v1/reverse?key=${
-                        import.meta.env.VITE_LOCATIONIQ_TOKEN
-                      }&lat=${lat}&lon=${lng}&format=json`
-                    );
+                      const res = await fetch(
+                        `https://us1.locationiq.com/v1/reverse?key=${
+                          import.meta.env.VITE_LOCATIONIQ_TOKEN
+                        }&lat=${lat}&lon=${lng}&format=json`
+                      );
 
-                    const data = await res.json();
+                      const data = await res.json();
 
-                    setPickupLocation({
-                      city:
-                        data.address.city ||
-                        data.address.town ||
-                        data.address.village ||
-                        "",
-                      state: data.address.state || "",
-                      country: data.address.country || "",
-                      lat,
-                      lng,
-                    });
+                      setPickupLocation({
+                        city:
+                          data.address.city ||
+                          data.address.town ||
+                          data.address.village ||
+                          "",
+                        state: data.address.state || "",
+                        country: data.address.country || "",
+                        lat,
+                        lng,
+                      });
 
-                    setShowPickupOptions(false);
-                  },
-                  () => alert("Location permission denied")
-                );
-              }}
-            >
-              📍 Use Current Location
-            </button>
+                      setShowPickupOptions(false);
+                    },
+                    () => alert("Location permission denied")
+                  );
+                }}
+              >
+                <div className="option-icon">📍</div>
+                <div className="option-content">
+                  <h3>Use Current Location</h3>
+                  <p>Automatically detect your current position</p>
+                </div>
+              </button>
 
-            <button
-              style={{ width: "100%" }}
-              onClick={() => {
-                setShowPickupOptions(false);
-                setShowPickupMap(true);
-              }}
-            >
-              🗺️ Pick on Map
-            </button>
+              <button
+                className="location-option-btn map-location"
+                onClick={() => {
+                  setShowPickupOptions(false);
+                  setShowPickupMap(true);
+                }}
+              >
+                <div className="option-icon">🗺️</div>
+                <div className="option-content">
+                  <h3>Pick on Map</h3>
+                  <p>Choose a location by browsing the map</p>
+                </div>
+              </button>
+            </div>
           </div>
         </ModalWrapper>
       )}
@@ -389,7 +401,7 @@ export default function SearchedCars() {
         </ModalWrapper>
       )}
 
-      {/* DROP MAP MODAL (YOUR EXISTING CODE) */}
+      {/* DROP MAP MODAL */}
       {showDropMap && (
         <ModalWrapper onClose={() => setShowDropMap(false)}>
           <LocationPicker
@@ -404,6 +416,137 @@ export default function SearchedCars() {
           />
         </ModalWrapper>
       )}
+
+      <style>{`
+        .location-modal {
+          background: white;
+          border-radius: 16px;
+          max-width: 500px;
+          width: 90%;
+          overflow: hidden;
+        }
+
+        .location-modal-header {
+          background: linear-gradient(135deg, #01d28e 0%, #018f61 100%);
+          color: white;
+          padding: 32px 24px;
+          text-align: center;
+        }
+
+        .location-modal-header h2 {
+          margin: 0 0 8px 0;
+          font-size: 24px;
+          font-weight: 600;
+        }
+
+        .location-modal-header p {
+          margin: 0;
+          font-size: 14px;
+          opacity: 0.95;
+        }
+
+        .location-modal-body {
+          padding: 24px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .location-option-btn {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          padding: 20px;
+          border: 2px solid #e5e7eb;
+          border-radius: 12px;
+          background: white;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-align: left;
+          width: 100%;
+        }
+
+        .location-option-btn:hover {
+          border-color: #01d28e;
+          background: #f0fdf7;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(1, 210, 142, 0.15);
+        }
+
+        .option-icon {
+          font-size: 32px;
+          width: 60px;
+          height: 60px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #f0fdf7;
+          border-radius: 12px;
+          flex-shrink: 0;
+        }
+
+        .current-location:hover .option-icon {
+          background: #01d28e;
+        }
+
+        .map-location:hover .option-icon {
+          background: #01d28e;
+        }
+
+        .option-content {
+          flex: 1;
+        }
+
+        .option-content h3 {
+          margin: 0 0 4px 0;
+          font-size: 18px;
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        .option-content p {
+          margin: 0;
+          font-size: 14px;
+          color: #6b7280;
+        }
+
+        @media (max-width: 600px) {
+          .location-modal {
+            width: 95%;
+          }
+
+          .location-modal-header {
+            padding: 24px 16px;
+          }
+
+          .location-modal-header h2 {
+            font-size: 20px;
+          }
+
+          .location-modal-body {
+            padding: 16px;
+          }
+
+          .location-option-btn {
+            padding: 16px;
+            gap: 16px;
+          }
+
+          .option-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 28px;
+          }
+
+          .option-content h3 {
+            font-size: 16px;
+          }
+
+          .option-content p {
+            font-size: 13px;
+          }
+        }
+      `}</style>
     </>
   );
 }
