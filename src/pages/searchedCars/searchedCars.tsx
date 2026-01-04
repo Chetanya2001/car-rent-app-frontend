@@ -7,6 +7,7 @@ import LocationPicker from "../../components/Map/LocationPicker";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import { searchCars } from "../../services/carService";
+import LocationInput from "../../components/LocationInput/LocationInput";
 
 interface Car {
   id: number;
@@ -133,21 +134,17 @@ export default function SearchedCars() {
       <div className="searched-filters-panel">
         <label>
           Pickup Location:
-          <div className="location-input-container">
-            <input
-              type="text"
-              readOnly
-              value={
-                pickupLocation
-                  ? `${pickupLocation.city}, ${pickupLocation.state}`
-                  : ""
-              }
-              placeholder="Select Pickup Location"
-              onClick={() => setShowPickupOptions(true)}
-              className="location-input-field"
-            />
-            <FontAwesomeIcon icon={faMapMarkerAlt} className="location-icon" />
-          </div>
+          <LocationInput
+            value={
+              pickupLocation
+                ? `${pickupLocation.city}, ${pickupLocation.state}`
+                : ""
+            }
+            placeholder="Select Pickup Location"
+            readOnly
+            onClick={() => setShowPickupOptions(true)}
+            className="location-input-field" // Keep your existing CSS class if needed
+          />
         </label>
 
         <label>
