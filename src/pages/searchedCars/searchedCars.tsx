@@ -137,36 +137,23 @@ export default function SearchedCars() {
 
       {/* FILTER PANEL */}
       <div className="searched-filters-panel">
-        <label>
-          Pickup Address:
+        <div className="pickup-input-wrapper">
           <input
             type="text"
+            placeholder="Select Pickup Location"
             value={
               pickupLocation ? formatShortAddress(pickupLocation.address) : ""
             }
-            placeholder="Click to select pickup location"
-            readOnly={!pickupLocation}
-            onClick={() => {
-              if (!pickupLocation) {
-                setShowPickupOptions(true);
-              }
-            }}
-            onChange={(e) => {
-              if (pickupLocation) {
-                setPickupLocation({
-                  ...pickupLocation,
-                  address: e.target.value,
-                });
-              }
-            }}
-            style={{
-              cursor: pickupLocation ? "text" : "pointer",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
+            readOnly
+            onClick={() => setShowPickupOptions(true)}
+            title={pickupLocation?.address} // hover shows full address
           />
-        </label>
+          <FontAwesomeIcon
+            icon={faMapMarkerAlt}
+            className="pickup-input-icon"
+            onClick={() => setShowPickupOptions(true)}
+          />
+        </div>
 
         <label>
           Pickup Date:
@@ -607,6 +594,36 @@ export default function SearchedCars() {
           .option-content p {
             font-size: 13px;
           }
+            /* SearchedCars.css */
+.pickup-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.pickup-input-wrapper input {
+  width: 100%;
+  padding: 10px 40px 10px 12px; /* right padding for icon */
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  outline: none;
+  font-size: 1rem;
+}
+
+.pickup-input-wrapper input:focus {
+  border-color: #01d28e;
+  box-shadow: 0 0 0 2px rgba(1, 210, 142, 0.2);
+}
+
+.pickup-input-icon {
+  position: absolute;
+  right: 12px;
+  cursor: pointer;
+  color: #01d28e;
+  font-size: 1.2rem;
+}
+
         }
       `}</style>
     </>

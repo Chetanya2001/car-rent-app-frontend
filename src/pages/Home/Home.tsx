@@ -873,6 +873,7 @@ export default function Home() {
             font-size: 13px;
           }
         }
+          
       `}</style>
     </div>
   );
