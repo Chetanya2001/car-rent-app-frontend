@@ -102,12 +102,6 @@ export default function SearchedCars() {
       alert("Failed to fetch cars");
     }
   };
-  const formatShortAddress = (address: string) => {
-    if (!address) return "";
-
-    // Keep natural order, clean spacing
-    return address.replace(/\s+/g, " ").trim();
-  };
 
   const filteredCars = useMemo(() => {
     return cars.filter((car) => {
@@ -138,34 +132,22 @@ export default function SearchedCars() {
       {/* FILTER PANEL */}
       <div className="searched-filters-panel">
         <label>
-          Pickup Address:
-          <input
-            type="text"
-            value={
-              pickupLocation ? formatShortAddress(pickupLocation.address) : ""
-            }
-            placeholder="Click to select pickup location"
-            readOnly={!pickupLocation}
-            onClick={() => {
-              if (!pickupLocation) {
-                setShowPickupOptions(true);
+          Pickup Location:
+          <div className="location-input-container">
+            <input
+              type="text"
+              readOnly
+              value={
+                pickupLocation
+                  ? `${pickupLocation.city}, ${pickupLocation.state}`
+                  : ""
               }
-            }}
-            onChange={(e) => {
-              if (pickupLocation) {
-                setPickupLocation({
-                  ...pickupLocation,
-                  address: e.target.value,
-                });
-              }
-            }}
-            style={{
-              cursor: pickupLocation ? "text" : "pointer",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          />
+              placeholder="Select Pickup Location"
+              onClick={() => setShowPickupOptions(true)}
+              className="location-input-field"
+            />
+            <FontAwesomeIcon icon={faMapMarkerAlt} className="location-icon" />
+          </div>
         </label>
 
         <label>
@@ -341,11 +323,17 @@ export default function SearchedCars() {
         )}
       </div>
 
-      {/* PICKUP OPTIONS MODAL - REDESIGNED */}
+      {/* PICKUP OPTIONS MODAL */}
       {showPickupOptions && (
         <ModalWrapper onClose={() => setShowPickupOptions(false)}>
-          <div className="location-modal-overlay">
-            <div className="location-modal">
+          <div
+            className="location-modal-overlay"
+            onClick={() => setShowPickupOptions(false)}
+          >
+            <div
+              className="location-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="location-modal-header">
                 <h2>Select Pickup Location</h2>
                 <p>Choose how you'd like to set your pickup address</p>
@@ -369,7 +357,6 @@ export default function SearchedCars() {
                         const data = await res.json();
 
                         setPickupLocation({
-                          address: data.display_name, // FULL ADDRESS
                           city:
                             data.address.city ||
                             data.address.town ||
@@ -442,6 +429,7 @@ export default function SearchedCars() {
       )}
 
       <style>{`
+        /* Modal Styling */
         .location-modal-overlay {
           position: fixed;
           top: 0;
@@ -607,36 +595,6 @@ export default function SearchedCars() {
           .option-content p {
             font-size: 13px;
           }
-            /* SearchedCars.css */
-.pickup-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.pickup-input-wrapper input {
-  width: 100%;
-  padding: 10px 40px 10px 12px; /* right padding for icon */
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  outline: none;
-  font-size: 1rem;
-}
-
-.pickup-input-wrapper input:focus {
-  border-color: #01d28e;
-  box-shadow: 0 0 0 2px rgba(1, 210, 142, 0.2);
-}
-
-.pickup-input-icon {
-  position: absolute;
-  right: 12px;
-  cursor: pointer;
-  color: #01d28e;
-  font-size: 1.2rem;
-}
-
         }
       `}</style>
     </>
