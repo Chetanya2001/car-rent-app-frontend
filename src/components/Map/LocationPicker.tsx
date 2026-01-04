@@ -31,16 +31,7 @@ export default function LocationPicker({
   onSelect?: (loc: any) => void;
 }) {
   const [position, setPosition] = useState({ lat: 28.6139, lng: 77.209 }); // Default: New Delhi
-  const [address, setAddress] = useState<{
-    city: string;
-    state: string;
-    country: string;
-    lat: number;
-    lng: number;
-  }>({
-    city: "",
-    state: "",
-    country: "",
+  const [address, setAddress] = useState<LocationData>({
     lat: 28.6139,
     lng: 77.209,
   });
@@ -58,6 +49,7 @@ export default function LocationPicker({
       const data = await res.json();
 
       const addr = {
+        address: data.display_name, // FULL ADDRESS
         city:
           data.address.city ||
           data.address.town ||
@@ -126,8 +118,7 @@ export default function LocationPicker({
 
       {address.city && (
         <div style={{ marginTop: "10px" }}>
-          <strong>Selected Location:</strong> {address.city}, {address.state},{" "}
-          {address.country}
+          <strong>Selected Location:</strong> {address.address}
         </div>
       )}
     </div>

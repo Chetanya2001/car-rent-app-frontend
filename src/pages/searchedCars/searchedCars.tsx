@@ -136,11 +136,7 @@ export default function SearchedCars() {
           <input
             type="text"
             readOnly
-            value={
-              pickupLocation
-                ? `${pickupLocation.city}, ${pickupLocation.state}`
-                : ""
-            }
+            value={pickupLocation?.address || ""}
             placeholder="Click to select pickup location"
             onClick={() => setShowPickupOptions(true)}
             style={{ cursor: "pointer" }}
@@ -348,6 +344,7 @@ export default function SearchedCars() {
                         const data = await res.json();
 
                         setPickupLocation({
+                          address: data.display_name, // FULL ADDRESS
                           city:
                             data.address.city ||
                             data.address.town ||
