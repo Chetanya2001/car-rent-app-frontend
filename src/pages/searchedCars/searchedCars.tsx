@@ -102,6 +102,17 @@ export default function SearchedCars() {
       alert("Failed to fetch cars");
     }
   };
+  const formatShortAddress = (address: string) => {
+    if (!address) return "";
+
+    // Reverse parts to show building / flat first
+    const parts = address
+      .split(",")
+      .map((p) => p.trim())
+      .reverse();
+
+    return parts.join(", ");
+  };
 
   const filteredCars = useMemo(() => {
     return cars.filter((car) => {
@@ -133,11 +144,13 @@ export default function SearchedCars() {
       <div className="searched-filters-panel">
         <label>
           Pickup Address:
-          <textarea
-            readOnly={!pickupLocation} // editable only if filled (explained below)
-            rows={2}
-            value={pickupLocation?.address || ""}
+          <input
+            type="text"
+            value={
+              pickupLocation ? formatShortAddress(pickupLocation.address) : ""
+            }
             placeholder="Click to select pickup location"
+            readOnly={!pickupLocation}
             onClick={() => {
               if (!pickupLocation) {
                 setShowPickupOptions(true);
@@ -153,7 +166,9 @@ export default function SearchedCars() {
             }}
             style={{
               cursor: pickupLocation ? "text" : "pointer",
-              resize: "none",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}
           />
         </label>
