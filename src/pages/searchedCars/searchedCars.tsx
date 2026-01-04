@@ -323,67 +323,69 @@ export default function SearchedCars() {
       {/* PICKUP OPTIONS MODAL - REDESIGNED */}
       {showPickupOptions && (
         <ModalWrapper onClose={() => setShowPickupOptions(false)}>
-          <div className="location-modal">
-            <div className="location-modal-header">
-              <h2>Select Pickup Location</h2>
-              <p>Choose how you'd like to set your pickup address</p>
-            </div>
+          <div className="location-modal-overlay">
+            <div className="location-modal">
+              <div className="location-modal-header">
+                <h2>Select Pickup Location</h2>
+                <p>Choose how you'd like to set your pickup address</p>
+              </div>
 
-            <div className="location-modal-body">
-              <button
-                className="location-option-btn current-location"
-                onClick={() => {
-                  navigator.geolocation.getCurrentPosition(
-                    async (pos) => {
-                      const lat = pos.coords.latitude;
-                      const lng = pos.coords.longitude;
+              <div className="location-modal-body">
+                <button
+                  className="location-option-btn current-location"
+                  onClick={() => {
+                    navigator.geolocation.getCurrentPosition(
+                      async (pos) => {
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
 
-                      const res = await fetch(
-                        `https://us1.locationiq.com/v1/reverse?key=${
-                          import.meta.env.VITE_LOCATIONIQ_TOKEN
-                        }&lat=${lat}&lon=${lng}&format=json`
-                      );
+                        const res = await fetch(
+                          `https://us1.locationiq.com/v1/reverse?key=${
+                            import.meta.env.VITE_LOCATIONIQ_TOKEN
+                          }&lat=${lat}&lon=${lng}&format=json`
+                        );
 
-                      const data = await res.json();
+                        const data = await res.json();
 
-                      setPickupLocation({
-                        city:
-                          data.address.city ||
-                          data.address.town ||
-                          data.address.village ||
-                          "",
-                        state: data.address.state || "",
-                        country: data.address.country || "",
-                        lat,
-                        lng,
-                      });
+                        setPickupLocation({
+                          city:
+                            data.address.city ||
+                            data.address.town ||
+                            data.address.village ||
+                            "",
+                          state: data.address.state || "",
+                          country: data.address.country || "",
+                          lat,
+                          lng,
+                        });
 
-                      setShowPickupOptions(false);
-                    },
-                    () => alert("Location permission denied")
-                  );
-                }}
-              >
-                <div className="option-icon">📍</div>
-                <div className="option-content">
-                  <h3>Use Current Location</h3>
-                  <p>Automatically detect your current position</p>
-                </div>
-              </button>
+                        setShowPickupOptions(false);
+                      },
+                      () => alert("Location permission denied")
+                    );
+                  }}
+                >
+                  <div className="option-icon">📍</div>
+                  <div className="option-content">
+                    <h3>Use Current Location</h3>
+                    <p>Automatically detect your current position</p>
+                  </div>
+                </button>
 
-              <button
-                className="location-option-btn map-location"
-                onClick={() => {
-                  setShowPickupOptions(false);
-                  setShowPickupMap(true);
-                }}
-              >
-                <div className="option-icon">🗺️</div>
-                <div className="option-content">
-                  <h3>Pick on Map</h3>
-                  <p>Choose a location by browsing the map</p>
-                </div>
-              </button>
+                <button
+                  className="location-option-btn map-location"
+                  onClick={() => {
+                    setShowPickupOptions(false);
+                    setShowPickupMap(true);
+                  }}
+                >
+                  <div className="option-icon">🗺️</div>
+                  <div className="option-content">
+                    <h3>Pick on Map</h3>
+                    <p>Choose a location by browsing the map</p>
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
         </ModalWrapper>
@@ -418,12 +420,38 @@ export default function SearchedCars() {
       )}
 
       <style>{`
+        .location-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+          padding: 20px;
+        }
+
         .location-modal {
           background: white;
           border-radius: 16px;
           max-width: 500px;
-          width: 90%;
+          width: 100%;
           overflow: hidden;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-30px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
         }
 
         .location-modal-header {
@@ -437,19 +465,22 @@ export default function SearchedCars() {
           margin: 0 0 8px 0;
           font-size: 24px;
           font-weight: 600;
+          letter-spacing: -0.5px;
         }
 
         .location-modal-header p {
           margin: 0;
           font-size: 14px;
           opacity: 0.95;
+          font-weight: 400;
         }
 
         .location-modal-body {
-          padding: 24px;
+          padding: 28px 24px;
           display: flex;
           flex-direction: column;
           gap: 16px;
+          background: #fafafa;
         }
 
         .location-option-btn {
@@ -464,13 +495,18 @@ export default function SearchedCars() {
           transition: all 0.3s ease;
           text-align: left;
           width: 100%;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
         }
 
         .location-option-btn:hover {
           border-color: #01d28e;
           background: #f0fdf7;
           transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(1, 210, 142, 0.15);
+          box-shadow: 0 6px 16px rgba(1, 210, 142, 0.2);
+        }
+
+        .location-option-btn:active {
+          transform: translateY(0);
         }
 
         .option-icon {
@@ -483,14 +519,12 @@ export default function SearchedCars() {
           background: #f0fdf7;
           border-radius: 12px;
           flex-shrink: 0;
+          transition: all 0.3s ease;
         }
 
-        .current-location:hover .option-icon {
+        .location-option-btn:hover .option-icon {
           background: #01d28e;
-        }
-
-        .map-location:hover .option-icon {
-          background: #01d28e;
+          transform: scale(1.1);
         }
 
         .option-content {
@@ -508,23 +542,29 @@ export default function SearchedCars() {
           margin: 0;
           font-size: 14px;
           color: #6b7280;
+          line-height: 1.4;
         }
 
         @media (max-width: 600px) {
           .location-modal {
-            width: 95%;
+            max-width: 100%;
+            margin: 0 10px;
           }
 
           .location-modal-header {
-            padding: 24px 16px;
+            padding: 24px 20px;
           }
 
           .location-modal-header h2 {
             font-size: 20px;
           }
 
+          .location-modal-header p {
+            font-size: 13px;
+          }
+
           .location-modal-body {
-            padding: 16px;
+            padding: 20px 16px;
           }
 
           .location-option-btn {
@@ -535,7 +575,7 @@ export default function SearchedCars() {
           .option-icon {
             width: 50px;
             height: 50px;
-            font-size: 28px;
+            font-size: 26px;
           }
 
           .option-content h3 {
