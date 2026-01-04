@@ -67,6 +67,7 @@ export default function Home() {
   const [insureTrip, setInsureTrip] = useState(false);
   const [driverRequired, setDriverRequired] = useState(false);
   const [differentDrop, setDifferentDrop] = useState(false);
+  const [showPickupOptions, setShowPickupOptions] = useState(false);
 
   // Handle logout
   const handleLogout = () => {
@@ -381,7 +382,7 @@ export default function Home() {
               readOnly={!pickupLocation}
               onClick={() => {
                 if (!pickupLocation) {
-                  setShowPickupMap(true);
+                  setShowPickupOptions(true); // open the new options modal
                 }
               }}
               onChange={(e) => {
@@ -636,6 +637,72 @@ export default function Home() {
               setShowPickupMap(false);
             }}
           />
+        </ModalWrapper>
+      )}
+      {/* PICKUP OPTIONS MODAL */}
+      {showPickupOptions && (
+        <ModalWrapper onClose={() => setShowPickupOptions(false)}>
+          <div className="location-modal-overlay">
+            <div className="location-modal">
+              <div className="location-modal-header">
+                <h2>Select Pickup Location</h2>
+                <p>Choose how you'd like to set your pickup address</p>
+              </div>
+
+              <div className="location-modal-body">
+                <button
+                  className="location-option-btn current-location"
+                  onClick={() => {
+                    navigator.geolocation.getCurrentPosition(
+                      async (pos) => {
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
+
+                        const res = await fetch(
+                          `https://us1.locationiq.com/v1/reverse?key=${
+                            import.meta.env.VITE_LOCATIONIQ_TOKEN
+                          }&lat=${lat}&lon=${lng}&format=json`
+                        );
+                        const data = await res.json();
+
+                        setPickupLocation({
+                          address: data.display_name,
+                          city: data.address.city || data.address.town || "",
+                          state: data.address.state || "",
+                          country: data.address.country || "",
+                          lat,
+                          lng,
+                        });
+
+                        setShowPickupOptions(false);
+                      },
+                      () => alert("Location permission denied")
+                    );
+                  }}
+                >
+                  <div className="option-icon">📍</div>
+                  <div className="option-content">
+                    <h3>Use Current Location</h3>
+                    <p>Automatically detect your current position</p>
+                  </div>
+                </button>
+
+                <button
+                  className="location-option-btn map-location"
+                  onClick={() => {
+                    setShowPickupOptions(false);
+                    setShowPickupMap(true);
+                  }}
+                >
+                  <div className="option-icon">🗺️</div>
+                  <div className="option-content">
+                    <h3>Pick on Map</h3>
+                    <p>Choose a location by browsing the map</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
         </ModalWrapper>
       )}
     </div>
