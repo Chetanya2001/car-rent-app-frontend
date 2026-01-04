@@ -67,6 +67,9 @@ export default function SearchedCars() {
 
   const [dropCity, setDropCity] = useState("");
   const [showDropMap, setShowDropMap] = useState(false);
+  const [pickupLocation, setPickupLocation] = useState<any>(null);
+  const [showPickupOptions, setShowPickupOptions] = useState(false);
+  const [showPickupMap, setShowPickupMap] = useState(false);
 
   const cities = ["Delhi", "Gurgaon", "Noida", "Agra", "Ahmedabad", "Jaipur"];
 
@@ -129,20 +132,20 @@ export default function SearchedCars() {
       {/* FILTER PANEL — UNCHANGED */}
       <div className="searched-filters-panel">
         <label>
-          Pickup City:
-          <select
-            value={filters.city}
-            onChange={(e) =>
-              setFilters((p) => ({ ...p, city: e.target.value }))
-            }
+          Pickup Address:
+          <div
+            style={{
+              border: "1px solid #ccc",
+              padding: "10px",
+              cursor: "pointer",
+              borderRadius: "4px",
+            }}
+            onClick={() => setShowPickupOptions(true)}
           >
-            <option value="" disabled>
-              Select City
-            </option>
-            {cities.map((city) => (
-              <option key={city}>{city}</option>
-            ))}
-          </select>
+            {pickupLocation
+              ? `${pickupLocation.city}, ${pickupLocation.state}`
+              : "Click to select pickup location"}
+          </div>
         </label>
 
         <label>
@@ -318,6 +321,75 @@ export default function SearchedCars() {
         )}
       </div>
 
+      {/* PICKUP OPTIONS MODAL */}
+      {showPickupOptions && (
+        <ModalWrapper onClose={() => setShowPickupOptions(false)}>
+          <div style={{ padding: "20px" }}>
+            <h3>Select Pickup Location</h3>
+
+            <button
+              style={{ width: "100%", marginBottom: "10px" }}
+              onClick={() => {
+                navigator.geolocation.getCurrentPosition(
+                  async (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+
+                    const res = await fetch(
+                      `https://us1.locationiq.com/v1/reverse?key=${
+                        import.meta.env.VITE_LOCATIONIQ_TOKEN
+                      }&lat=${lat}&lon=${lng}&format=json`
+                    );
+
+                    const data = await res.json();
+
+                    setPickupLocation({
+                      city:
+                        data.address.city ||
+                        data.address.town ||
+                        data.address.village ||
+                        "",
+                      state: data.address.state || "",
+                      country: data.address.country || "",
+                      lat,
+                      lng,
+                    });
+
+                    setShowPickupOptions(false);
+                  },
+                  () => alert("Location permission denied")
+                );
+              }}
+            >
+              📍 Use Current Location
+            </button>
+
+            <button
+              style={{ width: "100%" }}
+              onClick={() => {
+                setShowPickupOptions(false);
+                setShowPickupMap(true);
+              }}
+            >
+              🗺️ Pick on Map
+            </button>
+          </div>
+        </ModalWrapper>
+      )}
+
+      {/* PICKUP MAP MODAL */}
+      {showPickupMap && (
+        <ModalWrapper onClose={() => setShowPickupMap(false)}>
+          <LocationPicker
+            onSelect={(loc: any) => {
+              setPickupLocation(loc);
+              setShowPickupMap(false);
+            }}
+          />
+        </ModalWrapper>
+      )}
+
+      {/* DROP MAP MODAL (YOUR EXISTING CODE) */}
       {showDropMap && (
         <ModalWrapper onClose={() => setShowDropMap(false)}>
           <LocationPicker

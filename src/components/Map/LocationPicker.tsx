@@ -5,6 +5,16 @@ import markerIconPng from "leaflet/dist/images/marker-icon.png";
 import markerShadowPng from "leaflet/dist/images/marker-shadow.png";
 
 // ✅ Fix Leaflet marker icon issue
+// types/location.ts
+export interface LocationData {
+  lat: number;
+  lng: number;
+  city?: string;
+  state?: string;
+  country?: string;
+  address?: string;
+}
+
 const DefaultIcon = L.icon({
   iconUrl: markerIconPng,
   shadowUrl: markerShadowPng,
