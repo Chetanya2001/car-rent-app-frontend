@@ -105,13 +105,8 @@ export default function SearchedCars() {
   const formatShortAddress = (address: string) => {
     if (!address) return "";
 
-    // Reverse parts to show building / flat first
-    const parts = address
-      .split(",")
-      .map((p) => p.trim())
-      .reverse();
-
-    return parts.join(", ");
+    // Keep natural order, clean spacing
+    return address.replace(/\s+/g, " ").trim();
   };
 
   const filteredCars = useMemo(() => {

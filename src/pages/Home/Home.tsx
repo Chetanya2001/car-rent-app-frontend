@@ -49,6 +49,14 @@ export default function Home() {
   const [showPickupMap, setShowPickupMap] = useState(false);
   const [showDropMap, setShowDropMap] = useState(false);
   const [dropCity, setDropCity] = useState("");
+  const [pickupLocation, setPickupLocation] = useState<{
+    address: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    lat?: number;
+    lng?: number;
+  } | null>(null);
 
   // Booking form state
   const [city, setCity] = useState("");
@@ -107,6 +115,12 @@ export default function Home() {
       }
     }
   }, []);
+  const formatDisplayAddress = (address: string) => {
+    if (!address) return "";
+
+    // Keep natural order, just trim extra spaces
+    return address.replace(/\s+/g, " ").trim();
+  };
 
   // Check URL for showLogin param
   useEffect(() => {
@@ -358,15 +372,43 @@ export default function Home() {
           <div style={{ display: "flex", alignItems: "center" }}>
             <input
               type="text"
-              placeholder="City, Airport, Station, etc"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
+              placeholder="Click to select pickup location"
+              value={
+                pickupLocation
+                  ? formatDisplayAddress(pickupLocation.address)
+                  : ""
+              }
+              readOnly={!pickupLocation}
+              onClick={() => {
+                if (!pickupLocation) {
+                  setShowPickupMap(true);
+                }
+              }}
+              onChange={(e) => {
+                if (pickupLocation) {
+                  setPickupLocation({
+                    ...pickupLocation,
+                    address: e.target.value,
+                  });
+                }
+              }}
+              title={pickupLocation?.address} // hover shows full address
+              style={{
+                flexGrow: 1,
+                cursor: pickupLocation ? "text" : "pointer",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
             />
-            <FontAwesomeIcon
-              icon={faMapMarkerAlt}
-              style={{ marginLeft: "8px", cursor: "pointer" }}
-              onClick={() => setShowPickupMap(true)}
-            />
+
+            {!pickupLocation && (
+              <FontAwesomeIcon
+                icon={faMapMarkerAlt}
+                style={{ marginLeft: "8px", cursor: "pointer" }}
+                onClick={() => setShowPickupMap(true)}
+              />
+            )}
           </div>
 
           <div className="date-time">
@@ -578,7 +620,8 @@ export default function Home() {
         <ModalWrapper onClose={() => setShowPickupMap(false)}>
           <LocationPicker
             onSelect={(loc: any) => {
-              setCity(loc.city || loc.state || loc.country || "");
+              setPickupLocation(loc);
+              setCity(loc.city || loc.state || "");
               setShowPickupMap(false);
             }}
           />
@@ -588,8 +631,9 @@ export default function Home() {
         <ModalWrapper onClose={() => setShowDropMap(false)}>
           <LocationPicker
             onSelect={(loc: any) => {
-              setDropCity(loc.city || loc.state || loc.country || "");
-              setShowDropMap(false);
+              setPickupLocation(loc);
+              setCity(loc.city || loc.state || "");
+              setShowPickupMap(false);
             }}
           />
         </ModalWrapper>
