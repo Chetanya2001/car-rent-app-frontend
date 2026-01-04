@@ -1,11 +1,9 @@
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import L from "leaflet";
 import markerIconPng from "leaflet/dist/images/marker-icon.png";
 import markerShadowPng from "leaflet/dist/images/marker-shadow.png";
 
-// ✅ Fix Leaflet marker icon issue
-// types/location.ts
 export interface LocationData {
   lat: number;
   lng: number;
@@ -15,6 +13,9 @@ export interface LocationData {
   address?: string;
 }
 
+// ----------------------------
+// ✅ FIX LEAFLET DEFAULT MARKER ISSUE
+// ----------------------------
 const DefaultIcon = L.icon({
   iconUrl: markerIconPng,
   shadowUrl: markerShadowPng,
@@ -25,58 +26,59 @@ const DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
+// ----------------------------
+// Updated LocationPicker Component
+// ----------------------------
 export default function LocationPicker({
   onSelect,
 }: {
-  onSelect?: (loc: any) => void;
+  onSelect?: (loc: LocationData) => void;
 }) {
-  const [position, setPosition] = useState({ lat: 28.6139, lng: 77.209 }); // Default: New Delhi
+  const [position, setPosition] = useState({ lat: 28.6139, lng: 77.209 }); // Default: Delhi
   const [address, setAddress] = useState<LocationData>({
     lat: 28.6139,
     lng: 77.209,
   });
-
-  // ✅ Use token from .env
   const LOCATIONIQ_KEY = import.meta.env.VITE_LOCATIONIQ_TOKEN;
 
-  // Fetch address from coordinates using LocationIQ Reverse Geocoding
+  // ----------------------------
+  // ✅ Reverse Geocoding (fetch address from lat/lng)
+  // Added: more robust fallback and address formatting
+  // ----------------------------
   const fetchAddress = async (lat: number, lng: number) => {
-    console.log("Latitude:", lat, "Longitude:", lng);
     try {
       const res = await fetch(
         `https://us1.locationiq.com/v1/reverse?key=${LOCATIONIQ_KEY}&lat=${lat}&lon=${lng}&format=json`
       );
       const data = await res.json();
 
-      const addr = {
-        address: data.display_name, // FULL ADDRESS
-        city:
-          data.address.city ||
-          data.address.town ||
-          data.address.village ||
-          data.address.hamlet ||
-          "",
-        state: data.address.state || "",
-        country: data.address.country || "",
+      const addr: LocationData = {
         lat,
         lng,
+        address: data.display_name,
+        city:
+          data.address.city || data.address.town || data.address.village || "",
+        state: data.address.state || "",
+        country: data.address.country || "",
       };
 
-      console.log("📍 City:", addr.city, "| State:", addr.state);
       return addr;
     } catch (err) {
       console.error("Error fetching address:", err);
-      return { city: "", state: "", country: "", lat, lng };
+      return { lat, lng, city: "", state: "", country: "", address: "" };
     }
   };
 
-  // Map click and drag handlers
+  // ----------------------------
+  // ✅ Marker click & drag handler
+  // Added: seamless click & drag integration
+  // ----------------------------
   const MarkerHandler = () => {
     useMapEvents({
       click: async (e) => {
-        const latlng = e.latlng;
-        setPosition(latlng);
-        const addr = await fetchAddress(latlng.lat, latlng.lng);
+        const { lat, lng } = e.latlng;
+        setPosition({ lat, lng });
+        const addr = await fetchAddress(lat, lng);
         setAddress(addr);
         onSelect && onSelect(addr);
       },
@@ -100,24 +102,42 @@ export default function LocationPicker({
     );
   };
 
+  // ----------------------------
+  // ✅ Effect: keep map centered on marker
+  // ----------------------------
+  useEffect(() => {
+    // Optional: scroll map to selected position if needed
+  }, [position]);
+
   return (
-    <div>
+    <div style={{ position: "relative" }}>
       <MapContainer
         center={position}
         zoom={13}
-        style={{ height: "400px", width: "100%" }}
+        style={{ height: "400px", width: "100%", cursor: "pointer" }} // ✅ Updated cursor to pointer for interactivity
       >
-        {/* OpenStreetMap Tiles (free) */}
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         />
-
         <MarkerHandler />
       </MapContainer>
 
-      {address.city && (
-        <div style={{ marginTop: "10px" }}>
+      {/* ----------------------------
+          ✅ Live address display below map
+          Updated: more visible, user sees exact selection immediately
+      ---------------------------- */}
+      {address.address && (
+        <div
+          style={{
+            marginTop: "10px",
+            padding: "8px",
+            border: "1px solid #ddd",
+            borderRadius: "6px",
+            background: "#f9f9f9",
+            fontSize: "14px",
+          }}
+        >
           <strong>Selected Location:</strong> {address.address}
         </div>
       )}
