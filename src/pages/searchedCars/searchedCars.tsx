@@ -133,13 +133,28 @@ export default function SearchedCars() {
       <div className="searched-filters-panel">
         <label>
           Pickup Address:
-          <input
-            type="text"
-            readOnly
+          <textarea
+            readOnly={!pickupLocation} // editable only if filled (explained below)
+            rows={2}
             value={pickupLocation?.address || ""}
             placeholder="Click to select pickup location"
-            onClick={() => setShowPickupOptions(true)}
-            style={{ cursor: "pointer" }}
+            onClick={() => {
+              if (!pickupLocation) {
+                setShowPickupOptions(true);
+              }
+            }}
+            onChange={(e) => {
+              if (pickupLocation) {
+                setPickupLocation({
+                  ...pickupLocation,
+                  address: e.target.value,
+                });
+              }
+            }}
+            style={{
+              cursor: pickupLocation ? "text" : "pointer",
+              resize: "none",
+            }}
           />
         </label>
 
