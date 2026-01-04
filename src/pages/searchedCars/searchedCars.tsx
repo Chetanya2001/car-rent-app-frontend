@@ -7,7 +7,6 @@ import LocationPicker from "../../components/Map/LocationPicker";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import { searchCars } from "../../services/carService";
-import LocationInput from "../../components/LocationInput/LocationInput";
 
 interface Car {
   id: number;
@@ -103,6 +102,12 @@ export default function SearchedCars() {
       alert("Failed to fetch cars");
     }
   };
+  const formatShortAddress = (address: string) => {
+    if (!address) return "";
+
+    // Keep natural order, clean spacing
+    return address.replace(/\s+/g, " ").trim();
+  };
 
   const filteredCars = useMemo(() => {
     return cars.filter((car) => {
@@ -133,18 +138,49 @@ export default function SearchedCars() {
       {/* FILTER PANEL */}
       <div className="searched-filters-panel">
         <label>
-          Pickup Location:
-          <LocationInput
-            value={
-              pickupLocation
-                ? `${pickupLocation.city}, ${pickupLocation.state}`
-                : ""
-            }
-            placeholder="Select Pickup Location"
-            readOnly
+          Pickup Address:
+          <div
+            style={{
+              position: "relative",
+              display: "inline-block",
+              width: "100%", // Makes it fill the label width
+            }}
             onClick={() => setShowPickupOptions(true)}
-            className="location-input-field" // Keep your existing CSS class if needed
-          />
+          >
+            <input
+              type="text"
+              value={
+                pickupLocation ? formatShortAddress(pickupLocation.address) : ""
+              }
+              placeholder="Click to select pickup location"
+              readOnly={true}
+              style={{
+                width: "100%",
+                padding: "12px 40px 12px 12px", // Right padding for icon
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                boxSizing: "border-box",
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+                fontSize: "16px",
+              }}
+            />
+            {/* Location icon inside the input, perfectly centered */}
+            <FontAwesomeIcon
+              icon={faMapMarkerAlt}
+              style={{
+                position: "absolute",
+                right: "12px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "#666",
+                fontSize: "20px",
+                pointerEvents: "none", // Allows clicking through the icon
+              }}
+            />
+          </div>
         </label>
 
         <label>
@@ -320,17 +356,11 @@ export default function SearchedCars() {
         )}
       </div>
 
-      {/* PICKUP OPTIONS MODAL */}
+      {/* PICKUP OPTIONS MODAL - REDESIGNED */}
       {showPickupOptions && (
         <ModalWrapper onClose={() => setShowPickupOptions(false)}>
-          <div
-            className="location-modal-overlay"
-            onClick={() => setShowPickupOptions(false)}
-          >
-            <div
-              className="location-modal"
-              onClick={(e) => e.stopPropagation()}
-            >
+          <div className="location-modal-overlay">
+            <div className="location-modal">
               <div className="location-modal-header">
                 <h2>Select Pickup Location</h2>
                 <p>Choose how you'd like to set your pickup address</p>
@@ -354,6 +384,7 @@ export default function SearchedCars() {
                         const data = await res.json();
 
                         setPickupLocation({
+                          address: data.display_name, // FULL ADDRESS
                           city:
                             data.address.city ||
                             data.address.town ||
@@ -426,7 +457,6 @@ export default function SearchedCars() {
       )}
 
       <style>{`
-        /* Modal Styling */
         .location-modal-overlay {
           position: fixed;
           top: 0;
@@ -592,6 +622,7 @@ export default function SearchedCars() {
           .option-content p {
             font-size: 13px;
           }
+
         }
       `}</style>
     </>
