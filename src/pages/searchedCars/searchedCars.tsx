@@ -102,6 +102,7 @@ export default function SearchedCars() {
       alert("Failed to fetch cars");
     }
   };
+
   const formatShortAddress = (address: string) => {
     if (!address) return "";
 
@@ -142,10 +143,28 @@ export default function SearchedCars() {
           <div
             style={{
               position: "relative",
-              display: "inline-block",
-              width: "100%", // Makes it fill the label width
+              width: "100%",
+              cursor: "pointer",
+              borderRadius: "8px",
+              overflow: "hidden",
             }}
             onClick={() => setShowPickupOptions(true)}
+            onMouseEnter={(e) => {
+              const input = e.currentTarget.querySelector("input");
+              if (input) {
+                input.style.borderColor = "#01d28e";
+                input.style.boxShadow = "0 0 0 3px rgba(1, 210, 142, 0.15)";
+                input.style.backgroundColor = "#f0fdf7";
+              }
+            }}
+            onMouseLeave={(e) => {
+              const input = e.currentTarget.querySelector("input");
+              if (input) {
+                input.style.borderColor = "#d1d5db";
+                input.style.boxShadow = "none";
+                input.style.backgroundColor = "#fff";
+              }
+            }}
           >
             <input
               type="text"
@@ -156,28 +175,30 @@ export default function SearchedCars() {
               readOnly={true}
               style={{
                 width: "100%",
-                padding: "12px 40px 12px 12px", // Right padding for icon
+                padding: "14px 48px 14px 16px",
+                fontSize: "16px",
+                border: "1px solid #d1d5db",
+                borderRadius: "8px",
+                backgroundColor: "#fff",
                 cursor: "pointer",
+                boxSizing: "border-box",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                boxSizing: "border-box",
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                fontSize: "16px",
+                transition: "all 0.2s ease",
               }}
             />
-            {/* Location icon inside the input, perfectly centered */}
             <FontAwesomeIcon
               icon={faMapMarkerAlt}
               style={{
                 position: "absolute",
-                right: "12px",
+                right: "16px",
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: "#666",
+                color: "#01d28e",
                 fontSize: "20px",
-                pointerEvents: "none", // Allows clicking through the icon
+                pointerEvents: "none",
+                transition: "color 0.2s ease",
               }}
             />
           </div>
@@ -356,11 +377,17 @@ export default function SearchedCars() {
         )}
       </div>
 
-      {/* PICKUP OPTIONS MODAL - REDESIGNED */}
+      {/* PICKUP OPTIONS MODAL - FIXED FOR BACKGROUND CLICK */}
       {showPickupOptions && (
         <ModalWrapper onClose={() => setShowPickupOptions(false)}>
-          <div className="location-modal-overlay">
-            <div className="location-modal">
+          <div
+            className="location-modal-overlay"
+            onClick={() => setShowPickupOptions(false)} // Close on background click
+          >
+            <div
+              className="location-modal"
+              onClick={(e) => e.stopPropagation()} // Prevent close when clicking inside
+            >
               <div className="location-modal-header">
                 <h2>Select Pickup Location</h2>
                 <p>Choose how you'd like to set your pickup address</p>
@@ -428,31 +455,51 @@ export default function SearchedCars() {
         </ModalWrapper>
       )}
 
-      {/* PICKUP MAP MODAL */}
+      {/* PICKUP MAP MODAL - FIXED FOR BACKGROUND CLICK */}
       {showPickupMap && (
         <ModalWrapper onClose={() => setShowPickupMap(false)}>
-          <LocationPicker
-            onSelect={(loc: any) => {
-              setPickupLocation(loc);
-              setShowPickupMap(false);
-            }}
-          />
+          <div
+            className="location-modal-overlay"
+            onClick={() => setShowPickupMap(false)} // Close on background click
+          >
+            <div
+              className="location-modal"
+              onClick={(e) => e.stopPropagation()} // Prevent close when clicking inside
+            >
+              <LocationPicker
+                onSelect={(loc: any) => {
+                  setPickupLocation(loc);
+                  setShowPickupMap(false);
+                }}
+              />
+            </div>
+          </div>
         </ModalWrapper>
       )}
 
-      {/* DROP MAP MODAL */}
+      {/* DROP MAP MODAL - FIXED FOR BACKGROUND CLICK */}
       {showDropMap && (
         <ModalWrapper onClose={() => setShowDropMap(false)}>
-          <LocationPicker
-            onSelect={(loc: any) => {
-              setDropCity(
-                loc.city && loc.state
-                  ? `${loc.city}, ${loc.state}`
-                  : loc.city || ""
-              );
-              setShowDropMap(false);
-            }}
-          />
+          <div
+            className="location-modal-overlay"
+            onClick={() => setShowDropMap(false)} // Close on background click
+          >
+            <div
+              className="location-modal"
+              onClick={(e) => e.stopPropagation()} // Prevent close when clicking inside
+            >
+              <LocationPicker
+                onSelect={(loc: any) => {
+                  setDropCity(
+                    loc.city && loc.state
+                      ? `${loc.city}, ${loc.state}`
+                      : loc.city || ""
+                  );
+                  setShowDropMap(false);
+                }}
+              />
+            </div>
+          </div>
         </ModalWrapper>
       )}
 
@@ -622,7 +669,6 @@ export default function SearchedCars() {
           .option-content p {
             font-size: 13px;
           }
-
         }
       `}</style>
     </>
