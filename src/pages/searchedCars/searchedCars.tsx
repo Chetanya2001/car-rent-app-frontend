@@ -137,23 +137,36 @@ export default function SearchedCars() {
 
       {/* FILTER PANEL */}
       <div className="searched-filters-panel">
-        <div className="pickup-input-wrapper">
+        <label>
+          Pickup Address:
           <input
             type="text"
-            placeholder="Select Pickup Location"
             value={
               pickupLocation ? formatShortAddress(pickupLocation.address) : ""
             }
-            readOnly
-            onClick={() => setShowPickupOptions(true)}
-            title={pickupLocation?.address} // hover shows full address
+            placeholder="Click to select pickup location"
+            readOnly={!pickupLocation}
+            onClick={() => {
+              if (!pickupLocation) {
+                setShowPickupOptions(true);
+              }
+            }}
+            onChange={(e) => {
+              if (pickupLocation) {
+                setPickupLocation({
+                  ...pickupLocation,
+                  address: e.target.value,
+                });
+              }
+            }}
+            style={{
+              cursor: pickupLocation ? "text" : "pointer",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
           />
-          <FontAwesomeIcon
-            icon={faMapMarkerAlt}
-            className="pickup-input-icon"
-            onClick={() => setShowPickupOptions(true)}
-          />
-        </div>
+        </label>
 
         <label>
           Pickup Date:
