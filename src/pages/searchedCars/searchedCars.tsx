@@ -382,11 +382,11 @@ export default function SearchedCars() {
         <ModalWrapper onClose={() => setShowPickupOptions(false)}>
           <div
             className="location-modal-overlay"
-            onClick={() => setShowPickupOptions(false)} // Close on background click
+            onClick={() => setShowPickupOptions(false)}
           >
             <div
               className="location-modal"
-              onClick={(e) => e.stopPropagation()} // Prevent close when clicking inside
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="location-modal-header">
                 <h2>Select Pickup Location</h2>
@@ -394,38 +394,85 @@ export default function SearchedCars() {
               </div>
 
               <div className="location-modal-body">
+                {/* ================= CURRENT LOCATION ================= */}
                 <button
                   className="location-option-btn current-location"
                   onClick={() => {
+                    if (!navigator.geolocation) {
+                      alert("Geolocation is not supported on this device");
+                      return;
+                    }
+
                     navigator.geolocation.getCurrentPosition(
                       async (pos) => {
-                        const lat = pos.coords.latitude;
-                        const lng = pos.coords.longitude;
+                        const { latitude, longitude, accuracy } = pos.coords;
 
-                        const res = await fetch(
-                          `https://us1.locationiq.com/v1/reverse?key=${
-                            import.meta.env.VITE_LOCATIONIQ_TOKEN
-                          }&lat=${lat}&lon=${lng}&format=json`
-                        );
-
-                        const data = await res.json();
-
-                        setPickupLocation({
-                          address: data.display_name, // FULL ADDRESS
-                          city:
-                            data.address.city ||
-                            data.address.town ||
-                            data.address.village ||
-                            "",
-                          state: data.address.state || "",
-                          country: data.address.country || "",
-                          lat,
-                          lng,
+                        console.log("📍 Raw GPS:", {
+                          latitude,
+                          longitude,
+                          accuracy,
                         });
 
-                        setShowPickupOptions(false);
+                        // ⚠️ If accuracy is poor, warn user
+                        if (accuracy > 500) {
+                          alert(
+                            "Location accuracy is low. Please turn ON GPS or use 'Pick on Map' for precise location."
+                          );
+                        }
+
+                        try {
+                          const res = await fetch(
+                            `https://us1.locationiq.com/v1/reverse?key=${
+                              import.meta.env.VITE_LOCATIONIQ_TOKEN
+                            }&lat=${latitude}&lon=${longitude}&format=json`
+                          );
+
+                          if (!res.ok) {
+                            throw new Error("Failed to fetch address");
+                          }
+
+                          const data = await res.json();
+
+                          console.log("📍 LocationIQ Response:", data);
+
+                          setPickupLocation({
+                            address: data.display_name || "",
+                            city:
+                              data.address?.city ||
+                              data.address?.town ||
+                              data.address?.village ||
+                              data.address?.suburb ||
+                              "",
+                            state: data.address?.state || "",
+                            country: data.address?.country || "",
+                            lat: latitude,
+                            lng: longitude,
+                          });
+
+                          setShowPickupOptions(false);
+                        } catch (err) {
+                          console.error("Reverse geocoding error:", err);
+                          alert(
+                            "Unable to fetch address. Please try again or pick location on map."
+                          );
+                        }
                       },
-                      () => alert("Location permission denied")
+                      (err) => {
+                        console.error("Geolocation error:", err);
+
+                        if (err.code === 1) {
+                          alert("Location permission denied");
+                        } else if (err.code === 2) {
+                          alert("Location unavailable");
+                        } else {
+                          alert("Unable to fetch location");
+                        }
+                      },
+                      {
+                        enableHighAccuracy: true,
+                        timeout: 15000,
+                        maximumAge: 0,
+                      }
                     );
                   }}
                 >
@@ -436,6 +483,7 @@ export default function SearchedCars() {
                   </div>
                 </button>
 
+                {/* ================= PICK ON MAP ================= */}
                 <button
                   className="location-option-btn map-location"
                   onClick={() => {
