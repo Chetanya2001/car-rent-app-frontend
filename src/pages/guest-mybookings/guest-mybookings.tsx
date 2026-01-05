@@ -58,14 +58,9 @@ export default function GuestMyBookings() {
 
   const handlePhoneClick = async (phone: string, bookingId: number) => {
     try {
-      // Copy to clipboard
       await navigator.clipboard.writeText(phone);
-
-      // Show copied feedback
       setCopiedPhone(bookingId);
       setTimeout(() => setCopiedPhone(null), 2000);
-
-      // Open phone dialer
       window.location.href = `tel:${phone}`;
     } catch (err) {
       console.error("Failed to copy phone number", err);
@@ -77,12 +72,9 @@ export default function GuestMyBookings() {
     window.location.href = `mailto:${email}`;
   };
 
-  const handleChatClick = (host: Booking["Car"]["host"]) => {
+  const handleChatClick = (host: Booking["Car"]["host"] | null | undefined) => {
     if (host) {
-      alert(
-        `Chat feature coming soon! Host: ${host.first_name} ${host.last_name}`
-      );
-      // navigate(`/chat/${host.id}`);
+      alert(`Chat feature coming soon!`);
     }
   };
 
@@ -108,6 +100,7 @@ export default function GuestMyBookings() {
 
         {bookings.map((booking) => {
           const car = booking.Car;
+          const isCarAvailable = Boolean(car);
           const image = car?.photos?.[0]?.photo_url || "/default-car.png";
           const host = car?.host;
 
@@ -129,16 +122,23 @@ export default function GuestMyBookings() {
             <div key={booking.id} className="booking-card">
               <img
                 src={image}
-                alt={`${car.make} ${car.model}`}
+                alt={
+                  isCarAvailable ? `${car!.make} ${car!.model}` : "Car removed"
+                }
                 className="booking-image"
               />
 
               <div className="booking-details">
                 <div>
                   <h3>
-                    {car.make} {car.model} ({car.year})
+                    {isCarAvailable
+                      ? `${car!.make} ${car!.model} (${car!.year})`
+                      : "Car no longer available"}
                   </h3>
-                  <p className="car-description">{car.description}</p>
+
+                  {isCarAvailable && (
+                    <p className="car-description">{car!.description}</p>
+                  )}
 
                   <div className="booking-dates">
                     <div>
@@ -163,7 +163,6 @@ export default function GuestMyBookings() {
                       {host ? `${host.first_name} ${host.last_name}` : "N/A"}
                     </p>
 
-                    {/* Contact Icons */}
                     {host && (
                       <div className="contact-icons">
                         <button
@@ -171,65 +170,23 @@ export default function GuestMyBookings() {
                           onClick={() =>
                             handlePhoneClick(host.phone, booking.id)
                           }
-                          title={`Call ${host.phone}`}
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                          </svg>
                           <span>
                             {copiedPhone === booking.id ? "Copied!" : "Call"}
                           </span>
                         </button>
+
                         <button
                           className="contact-icon-btn chat-btn"
                           onClick={() => handleChatClick(host)}
-                          title="Chat with host"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                          </svg>
                           <span>Chat</span>
                         </button>
 
                         <button
                           className="contact-icon-btn email-btn"
                           onClick={() => handleEmailClick(host.email)}
-                          title={`Email ${host.email}`}
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                            <polyline points="22,6 12,13 2,6" />
-                          </svg>
                           <span>Email</span>
                         </button>
                       </div>
@@ -238,66 +195,81 @@ export default function GuestMyBookings() {
                 </div>
 
                 <div className="price-section">
-                  {/* Calculation Breakdown */}
-                  {(() => {
-                    const hourlyRate =
-                      parseFloat(car.price_per_hour.replace(/[^\d.]/g, "")) ||
-                      0;
-                    const totalHours = Math.round(
-                      (endDate.getTime() - startDate.getTime()) /
-                        (1000 * 60 * 60)
-                    );
-                    const rentalAmount = hourlyRate * totalHours;
+                  {!isCarAvailable ? (
+                    <p className="status-row">
+                      This car has been removed from inventory.
+                    </p>
+                  ) : (
+                    (() => {
+                      const hourlyRate =
+                        parseFloat(
+                          car!.price_per_hour.replace(/[^\d.]/g, "")
+                        ) || 0;
 
-                    return (
-                      <>
-                        <div className="calculation-breakdown">
-                          <div className="calc-row">
-                            <span>₹{hourlyRate}/hr</span>
-                            <span>× {totalHours} hr</span>
-                          </div>
-                          <div className="calc-equals">
-                            <strong>= ₹{rentalAmount.toLocaleString()}</strong>
-                          </div>
-                        </div>
+                      const totalHours = Math.round(
+                        (endDate.getTime() - startDate.getTime()) /
+                          (1000 * 60 * 60)
+                      );
 
-                        <div className="total-breakdown">
-                          <div className="amount-row">
-                            <span>
-                              Insure: ₹{booking.insure_amount.toLocaleString()}
-                            </span>
-                          </div>
-                          <div className="amount-row">
-                            <span>
-                              Driver: ₹{booking.driver_amount.toLocaleString()}
-                            </span>
-                          </div>
-                          <hr />
-                          <div className="total-row">
-                            <strong>
-                              Total: ₹
-                              {(
-                                rentalAmount +
-                                booking.insure_amount +
-                                booking.driver_amount
-                              ).toLocaleString()}
-                            </strong>
-                          </div>
-                        </div>
+                      const rentalAmount = hourlyRate * totalHours;
 
-                        <p className="status-row">
-                          Status: <strong>{booking.status}</strong>
-                        </p>
+                      return (
+                        <>
+                          <div className="calculation-breakdown">
+                            <div className="calc-row">
+                              <span>₹{hourlyRate}/hr</span>
+                              <span>× {totalHours} hr</span>
+                            </div>
+                            <div className="calc-equals">
+                              <strong>
+                                = ₹{rentalAmount.toLocaleString()}
+                              </strong>
+                            </div>
+                          </div>
 
-                        <button
-                          className="view-details-btn"
-                          onClick={() => handleViewDetails(car.id)}
-                        >
-                          View Details
-                        </button>
-                      </>
-                    );
-                  })()}
+                          <div className="total-breakdown">
+                            <div className="amount-row">
+                              <span>
+                                Insure: ₹
+                                {booking.insure_amount.toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="amount-row">
+                              <span>
+                                Driver: ₹
+                                {booking.driver_amount.toLocaleString()}
+                              </span>
+                            </div>
+                            <hr />
+                            <div className="total-row">
+                              <strong>
+                                Total: ₹
+                                {(
+                                  rentalAmount +
+                                  booking.insure_amount +
+                                  booking.driver_amount
+                                ).toLocaleString()}
+                              </strong>
+                            </div>
+                          </div>
+
+                          <p className="status-row">
+                            Status: <strong>{booking.status}</strong>
+                          </p>
+
+                          <button
+                            className="view-details-btn"
+                            disabled={!isCarAvailable}
+                            onClick={() =>
+                              isCarAvailable && handleViewDetails(car!.id)
+                            }
+                          >
+                            View Details
+                          </button>
+                        </>
+                      );
+                    })()
+                  )}
                 </div>
               </div>
             </div>
