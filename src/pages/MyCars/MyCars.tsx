@@ -12,33 +12,30 @@ export default function MyCars() {
   const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchCars = async () => {
-      try {
-        const data = await getHostCars();
-        console.log("Fetched car data:", data);
+  const fetchCars = async () => {
+    try {
+      const data = await getHostCars();
 
-        if (!Array.isArray(data.cars)) {
-          console.error("Invalid response from backend:", data);
-          setCars([]);
-        } else {
-          const processedCars = data.cars.map((car: any) => ({
-            ...car,
-            photos: Array.isArray(car.photos) ? car.photos : [],
-            price_per_hour:
-              typeof car.price_per_hour === "string"
-                ? car.price_per_hour.replace(/\$/g, "")
-                : car.price_per_hour,
-          }));
+      if (Array.isArray(data.cars)) {
+        const processedCars = data.cars.map((car: any) => ({
+          ...car,
+          photos: Array.isArray(car.photos) ? car.photos : [],
+          price_per_hour:
+            typeof car.price_per_hour === "string"
+              ? car.price_per_hour.replace(/\$/g, "")
+              : car.price_per_hour,
+        }));
 
-          setCars(processedCars);
-        }
-      } catch (err) {
-        console.error("Error fetching cars:", err);
+        setCars(processedCars);
+      } else {
         setCars([]);
       }
-    };
-
+    } catch (err) {
+      console.error("Error fetching cars:", err);
+      setCars([]);
+    }
+  };
+  useEffect(() => {
     fetchCars();
   }, []);
 
@@ -60,27 +57,28 @@ export default function MyCars() {
 
     setIsDeleting(true);
     try {
-      // Call API
+      // Call delete API
       const response = await deleteCarById(carToDelete);
 
-      // Backend will respond with status:
-      // { status: "deleted" } => deleted successfully
-      // { status: "hidden" } => set to invisible due to past bookings
-      // { status: "active_booking" } => cannot delete due to active/future bookings
+      /*
+      Backend responses:
+      { status: "deleted" }        → car fully deleted
+      { status: "hidden" }         → car marked is_visible = false
+      { status: "active_booking" } → cannot delete
+    */
 
       if (response.status === "deleted") {
-        setCars(cars.filter((car) => car.id !== carToDelete));
         alert(`Car ${getCarName(carToDelete)} deleted successfully!`);
+
+        // ✅ REFRESH FROM BACKEND
+        await fetchCars();
       } else if (response.status === "hidden") {
-        // Optionally update local state if needed
-        setCars(
-          cars.map((car) =>
-            car.id === carToDelete ? { ...car, is_visible: false } : car
-          )
-        );
         alert(
           `Car ${getCarName(carToDelete)} has past bookings and is now hidden.`
         );
+
+        // ✅ REFRESH FROM BACKEND
+        await fetchCars();
       } else if (response.status === "active_booking") {
         alert(
           `Cannot delete ${getCarName(
@@ -91,7 +89,7 @@ export default function MyCars() {
         alert(`Unexpected response: ${JSON.stringify(response)}`);
       }
 
-      // Close modal and reset
+      // Close modal and reset state
       setShowDeleteModal(false);
       setCarToDelete(null);
     } catch (err: any) {
