@@ -235,22 +235,68 @@ export default function HostMyBookings() {
                     )}
                   </div>
                 </div>
-
                 <div className="price-section">
-                  <h4>₹{car.price_per_hour}/hr</h4>
-                  <p>
-                    Status: <strong>{booking.status}</strong>
-                  </p>
-                  <p>
-                    Insure: ₹{booking.insure_amount} <br />
-                    Driver: ₹{booking.driver_amount}
-                  </p>
-                  <button
-                    className="view-details-btn"
-                    onClick={() => handleViewCar(car.id)}
-                  >
-                    View Car
-                  </button>
+                  {/* ✅ NEW CALCULATION */}
+                  {(() => {
+                    const hourlyRate =
+                      parseFloat(car.price_per_hour.replace(/[^\d.]/g, "")) ||
+                      0;
+                    const totalHours = Math.round(
+                      (new Date(booking.end_datetime).getTime() -
+                        new Date(booking.start_datetime).getTime()) /
+                        (1000 * 60 * 60)
+                    );
+                    const rentalAmount = hourlyRate * totalHours;
+
+                    return (
+                      <>
+                        <div className="calculation-breakdown">
+                          <div className="calc-row">
+                            <span>₹{hourlyRate}/hr</span>
+                            <span>× {totalHours} hr</span>
+                          </div>
+                          <div className="calc-equals">
+                            <strong>= ₹{rentalAmount.toLocaleString()}</strong>
+                          </div>
+                        </div>
+
+                        <div className="total-breakdown">
+                          <div className="amount-row">
+                            <span>
+                              Insure: ₹{booking.insure_amount.toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="amount-row">
+                            <span>
+                              Driver: ₹{booking.driver_amount.toLocaleString()}
+                            </span>
+                          </div>
+                          <hr />
+                          <div className="total-row">
+                            <strong>
+                              Total: ₹
+                              {(
+                                rentalAmount +
+                                booking.insure_amount +
+                                booking.driver_amount
+                              ).toLocaleString()}
+                            </strong>
+                          </div>
+                        </div>
+
+                        <p className="status-row">
+                          Status: <strong>{booking.status}</strong>
+                        </p>
+
+                        <button
+                          className="view-details-btn"
+                          onClick={() => handleViewCar(car.id)}
+                        >
+                          View Car
+                        </button>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
