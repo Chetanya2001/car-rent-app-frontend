@@ -69,7 +69,6 @@ export default function GuestMyBookings() {
       window.location.href = `tel:${phone}`;
     } catch (err) {
       console.error("Failed to copy phone number", err);
-      // Fallback: still open dialer even if copy fails
       window.location.href = `tel:${phone}`;
     }
   };
