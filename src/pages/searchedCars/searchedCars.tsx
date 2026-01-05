@@ -399,27 +399,23 @@ export default function SearchedCars() {
                   className="location-option-btn current-location"
                   onClick={() => {
                     if (!navigator.geolocation) {
-                      alert("Geolocation is not supported on this device");
+                      alert(
+                        "Geolocation is not supported on this device. Please pick location on map."
+                      );
+                      setShowPickupOptions(false);
+                      setShowPickupMap(true);
                       return;
                     }
 
-                    navigator.geolocation.getCurrentPosition(
-                      async (pos) => {
-                        const { latitude, longitude, accuracy } = pos.coords;
+                    let locationTimeout: any;
 
-                        console.log("📍 Raw GPS:", {
-                          latitude,
-                          longitude,
-                          accuracy,
-                        });
+                    const successHandler = async (pos: any) => {
+                      const { latitude, longitude, accuracy } = pos.coords;
 
-                        // ⚠️ If accuracy is poor, warn user
-                        if (accuracy > 500) {
-                          alert(
-                            "Location accuracy is low. Please turn ON GPS or use 'Pick on Map' for precise location."
-                          );
-                        }
+                      console.log("📍 GPS:", { latitude, longitude, accuracy });
 
+                      // Mobile / good accuracy
+                      if (accuracy <= 100) {
                         try {
                           const res = await fetch(
                             `https://us1.locationiq.com/v1/reverse?key=${
@@ -427,13 +423,10 @@ export default function SearchedCars() {
                             }&lat=${latitude}&lon=${longitude}&format=json`
                           );
 
-                          if (!res.ok) {
+                          if (!res.ok)
                             throw new Error("Failed to fetch address");
-                          }
 
                           const data = await res.json();
-
-                          console.log("📍 LocationIQ Response:", data);
 
                           setPickupLocation({
                             address: data.display_name || "",
@@ -449,31 +442,60 @@ export default function SearchedCars() {
                             lng: longitude,
                           });
 
+                          clearTimeout(locationTimeout);
                           setShowPickupOptions(false);
                         } catch (err) {
-                          console.error("Reverse geocoding error:", err);
+                          console.error("Reverse geocode error:", err);
                           alert(
-                            "Unable to fetch address. Please try again or pick location on map."
+                            "Unable to fetch address. Please pick location on map."
                           );
+                          setShowPickupOptions(false);
+                          setShowPickupMap(true);
                         }
-                      },
-                      (err) => {
-                        console.error("Geolocation error:", err);
+                      } else {
+                        // Low accuracy (Laptop or poor GPS)
+                        alert(
+                          "Location accuracy is low. Please use 'Pick on Map' for precise location."
+                        );
+                        setShowPickupOptions(false);
+                        setShowPickupMap(true);
+                      }
+                    };
 
-                        if (err.code === 1) {
-                          alert("Location permission denied");
-                        } else if (err.code === 2) {
-                          alert("Location unavailable");
-                        } else {
-                          alert("Unable to fetch location");
-                        }
-                      },
+                    const errorHandler = (err: any) => {
+                      console.error("Geolocation error:", err);
+                      if (err.code === 1) {
+                        alert(
+                          "Location permission denied. Please pick on map."
+                        );
+                      } else if (err.code === 2) {
+                        alert("Location unavailable. Please pick on map.");
+                      } else {
+                        alert("Unable to fetch location. Please pick on map.");
+                      }
+                      setShowPickupOptions(false);
+                      setShowPickupMap(true);
+                    };
+
+                    // Try to get high accuracy position
+                    navigator.geolocation.getCurrentPosition(
+                      successHandler,
+                      errorHandler,
                       {
                         enableHighAccuracy: true,
                         timeout: 15000,
                         maximumAge: 0,
                       }
                     );
+
+                    // Fallback in case GPS never responds (15s)
+                    locationTimeout = setTimeout(() => {
+                      alert(
+                        "Unable to fetch accurate location. Please pick on map."
+                      );
+                      setShowPickupOptions(false);
+                      setShowPickupMap(true);
+                    }, 16000);
                   }}
                 >
                   <div className="option-icon">📍</div>
