@@ -78,3 +78,102 @@
   color: #555;
   margin-bottom: 20px;
 }
+
+/* Contact Icons Container */
+.contact-icons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Contact Icon Button Base Styles */
+.contact-icon-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.contact-icon-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.contact-icon-btn:active {
+  transform: translateY(0);
+}
+
+.contact-icon-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.contact-icon-btn:hover svg {
+  transform: scale(1.1);
+}
+
+/* Chat Button */
+.chat-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.chat-btn:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #65408a 100%);
+}
+
+/* Phone Button */
+.phone-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.phone-btn:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+/* Email Button */
+.email-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.email-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .contact-icons {
+    gap: 0.5rem;
+  }
+
+  .contact-icon-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .contact-icon-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-icons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .contact-icon-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
