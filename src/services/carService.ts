@@ -230,18 +230,6 @@ export const getAdminCars = async (): Promise<GetAdminCarsResponse> => {
     throw error;
   }
 };
-
-export const deleteCarById = async (car_id: number) => {
-  const token = localStorage.getItem("token");
-  const response = await axios.delete(`${API_URL}/delete-car/${car_id}`, {
-    headers: {
-      Authorization: token ? `Bearer ${token}` : "",
-      "Content-Type": "application/json",
-    },
-  });
-  return response.data;
-};
-
 export const editCar = async (
   car_id: number,
   updateData: {
@@ -287,4 +275,14 @@ export const editCar = async (
     );
     throw error;
   }
+};
+export const deleteCarById = async (car_id: number) => {
+  const token = localStorage.getItem("token");
+  const response = await axios.delete(`${API_URL}/delete-car/${car_id}`, {
+    headers: {
+      Authorization: token ? `Bearer ${token}` : "",
+      "Content-Type": "application/json",
+    },
+  });
+  return response.data;
 };

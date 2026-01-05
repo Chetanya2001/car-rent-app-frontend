@@ -1,29 +1,30 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getHostCars } from "../../services/carService";
+import { getHostCars, deleteCarById } from "../../services/carService";
 import type { Car } from "../../types/Cars";
 import Navbar from "../../components/Navbar/Navbar";
 import "./MyCars.css";
 
 export default function MyCars() {
   const [cars, setCars] = useState<Car[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [carToDelete, setCarToDelete] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCars = async () => {
       try {
         const data = await getHostCars();
-        console.log("Fetched car data:", data); // ✅ console log to check data structure
+        console.log("Fetched car data:", data);
 
         if (!Array.isArray(data.cars)) {
           console.error("Invalid response from backend:", data);
           setCars([]);
         } else {
-          // Clean and process each car object
           const processedCars = data.cars.map((car: any) => ({
             ...car,
             photos: Array.isArray(car.photos) ? car.photos : [],
-            // Remove any $ signs from price if backend sends as string
             price_per_hour:
               typeof car.price_per_hour === "string"
                 ? car.price_per_hour.replace(/\$/g, "")
@@ -47,6 +48,52 @@ export default function MyCars() {
 
   const handleDetails = (carId: number) => {
     navigate(`/car-details/${carId}`);
+  };
+
+  const handleDeleteClick = (carId: number) => {
+    setCarToDelete(carId);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (carToDelete === null) return;
+
+    setIsDeleting(true);
+    try {
+      // ✅ Now using the actual API call
+      await deleteCarById(carToDelete);
+
+      // Remove car from state after successful deletion
+      setCars(cars.filter((car) => car.id !== carToDelete));
+
+      // Close modal and reset state
+      setShowDeleteModal(false);
+      setCarToDelete(null);
+
+      console.log(`✅ Car ${carToDelete} deleted successfully`);
+
+      // Optional: Show success toast/notification here
+      alert(`Car deleted successfully!`); // Replace with better UI notification
+    } catch (err: any) {
+      console.error("❌ Error deleting car:", err);
+
+      // Handle specific error messages from backend
+      const errorMessage =
+        err.response?.data?.message || err.message || "Failed to delete car";
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setCarToDelete(null);
+  };
+
+  const getCarName = (carId: number) => {
+    const car = cars.find((c) => c.id === carId);
+    return car ? `${car.make} ${car.model}` : "this car";
   };
 
   return (
@@ -164,6 +211,12 @@ export default function MyCars() {
                     >
                       Update
                     </button>
+                    <button
+                      className="action-btn delete-btn"
+                      onClick={() => handleDeleteClick(car.id)}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               );
@@ -171,6 +224,48 @@ export default function MyCars() {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={handleDeleteCancel}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Confirm Delete</h3>
+              <button
+                className="modal-close"
+                onClick={handleDeleteCancel}
+                disabled={isDeleting}
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="warning-icon">⚠️</div>
+              <p>
+                Are you sure you want to delete{" "}
+                <strong>{getCarName(carToDelete!)}</strong>?
+              </p>
+              <p className="warning-text">This action cannot be undone.</p>
+            </div>
+            <div className="modal-footer">
+              <button
+                className="modal-btn cancel-btn"
+                onClick={handleDeleteCancel}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                className="modal-btn confirm-btn"
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
