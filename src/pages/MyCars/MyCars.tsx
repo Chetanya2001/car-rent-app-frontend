@@ -60,24 +60,43 @@ export default function MyCars() {
 
     setIsDeleting(true);
     try {
-      // ✅ Now using the actual API call
-      await deleteCarById(carToDelete);
+      // Call API
+      const response = await deleteCarById(carToDelete);
 
-      // Remove car from state after successful deletion
-      setCars(cars.filter((car) => car.id !== carToDelete));
+      // Backend will respond with status:
+      // { status: "deleted" } => deleted successfully
+      // { status: "hidden" } => set to invisible due to past bookings
+      // { status: "active_booking" } => cannot delete due to active/future bookings
 
-      // Close modal and reset state
+      if (response.status === "deleted") {
+        setCars(cars.filter((car) => car.id !== carToDelete));
+        alert(`Car ${getCarName(carToDelete)} deleted successfully!`);
+      } else if (response.status === "hidden") {
+        // Optionally update local state if needed
+        setCars(
+          cars.map((car) =>
+            car.id === carToDelete ? { ...car, is_visible: false } : car
+          )
+        );
+        alert(
+          `Car ${getCarName(carToDelete)} has past bookings and is now hidden.`
+        );
+      } else if (response.status === "active_booking") {
+        alert(
+          `Cannot delete ${getCarName(
+            carToDelete
+          )} because it has active or future bookings.`
+        );
+      } else {
+        alert(`Unexpected response: ${JSON.stringify(response)}`);
+      }
+
+      // Close modal and reset
       setShowDeleteModal(false);
       setCarToDelete(null);
-
-      console.log(`✅ Car ${carToDelete} deleted successfully`);
-
-      // Optional: Show success toast/notification here
-      alert(`Car deleted successfully!`); // Replace with better UI notification
     } catch (err: any) {
       console.error("❌ Error deleting car:", err);
 
-      // Handle specific error messages from backend
       const errorMessage =
         err.response?.data?.message || err.message || "Failed to delete car";
       alert(`Error: ${errorMessage}`);
