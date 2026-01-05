@@ -172,6 +172,7 @@
 .price-item .detail-value::before {
   content: "";
 }
+
 /* Availability box */
 .availability-box {
   padding: 0.75rem 1rem;
@@ -226,7 +227,7 @@
 /* Action Buttons */
 .car-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 0;
   border-top: 1px solid #e2e8f0;
 }
@@ -269,128 +270,24 @@
 
 .update-btn {
   color: #10b981;
+  border-right: 1px solid #e2e8f0;
 }
 
 .update-btn:hover {
   background: #ecfdf5;
 }
 
-.action-btn:active {
-  transform: scale(0.98);
-}
-
-/* Responsive - Tablets */
-@media (max-width: 1024px) {
-  .cars-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .page-header h2 {
-    font-size: 2rem;
-  }
-}
-
-/* Responsive - Mobile */
-@media (max-width: 768px) {
-  .my-cars-page {
-    padding: 1.5rem;
-  }
-
-  .page-header {
-    margin-bottom: 2rem;
-  }
-
-  .page-header h2 {
-    font-size: 1.75rem;
-  }
-
-  .subtitle {
-    font-size: 1rem;
-  }
-
-  .cars-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  .car-image-container {
-    height: 200px;
-  }
-
-  .car-title {
-    font-size: 1.35rem;
-  }
-
-  .car-details-grid {
-    padding: 0.75rem;
-  }
-}
-
-/* Responsive - Small Mobile */
-@media (max-width: 480px) {
-  .my-cars-page {
-    padding: 1rem;
-  }
-
-  .page-header h2 {
-    font-size: 1.5rem;
-  }
-
-  .subtitle {
-    font-size: 0.9rem;
-  }
-
-  .car-image-container {
-    height: 180px;
-  }
-
-  .car-info {
-    padding: 1rem;
-  }
-
-  .car-title {
-    font-size: 1.25rem;
-  }
-
-  .car-details-grid {
-    gap: 0.75rem;
-    padding: 0.75rem;
-  }
-
-  .detail-value {
-    font-size: 1rem;
-  }
-
-  .price-item .detail-value {
-    font-size: 1.15rem;
-  }
-
-  .action-btn {
-    padding: 0.875rem;
-    font-size: 0.95rem;
-  }
-
-  .availability-box {
-    padding: 0.625rem 0.875rem;
-  }
-
-  .availability-dates {
-    font-size: 0.85rem;
-  }
-}
-/* Delete Button Styling */
 .delete-btn {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  transition: all 0.3s ease;
+  color: #dc3545;
+  background: white;
 }
 
 .delete-btn:hover {
-  background-color: #c82333;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+  background: #fef2f2;
+}
+
+.action-btn:active {
+  transform: scale(0.98);
 }
 
 /* Modal Overlay */
@@ -556,19 +453,123 @@
   cursor: not-allowed;
 }
 
-/* Responsive Design */
+/* Responsive - Tablets */
+@media (max-width: 1024px) {
+  .cars-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .page-header h2 {
+    font-size: 2rem;
+  }
+}
+
+/* Responsive - Mobile */
 @media (max-width: 768px) {
+  .my-cars-page {
+    padding: 1.5rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-header h2 {
+    font-size: 1.75rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .cars-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .car-image-container {
+    height: 200px;
+  }
+
+  .car-title {
+    font-size: 1.35rem;
+  }
+
+  .car-details-grid {
+    padding: 0.75rem;
+  }
+
   .modal-content {
     max-width: 90%;
     margin: 20px;
   }
 
   .car-actions {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
   .action-btn {
     width: 100%;
+    border-right: none !important;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .action-btn:last-child {
+    border-bottom: none;
+  }
+}
+
+/* Responsive - Small Mobile */
+@media (max-width: 480px) {
+  .my-cars-page {
+    padding: 1rem;
+  }
+
+  .page-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .car-image-container {
+    height: 180px;
+  }
+
+  .car-info {
+    padding: 1rem;
+  }
+
+  .car-title {
+    font-size: 1.25rem;
+  }
+
+  .car-details-grid {
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .detail-value {
+    font-size: 1rem;
+  }
+
+  .price-item .detail-value {
+    font-size: 1.15rem;
+  }
+
+  .action-btn {
+    padding: 0.875rem;
+    font-size: 0.95rem;
+  }
+
+  .availability-box {
+    padding: 0.625rem 0.875rem;
+  }
+
+  .availability-dates {
+    font-size: 0.85rem;
   }
 }
 
