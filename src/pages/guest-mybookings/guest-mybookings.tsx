@@ -78,7 +78,6 @@ export default function GuestMyBookings() {
   };
 
   const handleChatClick = (host: Booking["Car"]["host"]) => {
-    // TODO: Implement chat functionality
     if (host) {
       alert(
         `Chat feature coming soon! Host: ${host.first_name} ${host.last_name}`
