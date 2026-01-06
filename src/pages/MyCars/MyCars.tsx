@@ -285,15 +285,13 @@ export default function MyCars() {
                         <span className="detail-label">Year</span>
                         <span className="detail-value">{car.year}</span>
                       </div>
-
                       <div className="detail-item price-item">
                         <span className="detail-label">Price</span>
                         <span className="detail-value price">
                           {car.price_per_hour
-                            ? `₹${String(car.price_per_hour).replace(
-                                /\$/g,
-                                ""
-                              )} / hr`
+                            ? `₹${Number(
+                                car.price_per_hour
+                              ).toLocaleString()} /hr`
                             : "Not set"}
                         </span>
                       </div>
