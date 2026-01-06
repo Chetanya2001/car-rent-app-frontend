@@ -30,6 +30,20 @@ function getDateAndTime(dateObj: Date) {
   };
 }
 
+const extractCityFromLocationIQ = (data: any): string => {
+  const address = data.address || {};
+
+  return (
+    address.city ||
+    address.town ||
+    address.village ||
+    address.state_district ||
+    address.county ||
+    address.state ||
+    ""
+  );
+};
+
 export default function SearchedCars() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -93,7 +107,7 @@ export default function SearchedCars() {
       ).toISOString();
 
       const data = await searchCars({
-        city: filters.city,
+        city: pickupLocation?.city || filters.city,
         pickup_datetime: pickupDateTime,
         dropoff_datetime: dropoffDateTime,
       });
@@ -191,16 +205,10 @@ export default function SearchedCars() {
       if (data.error) {
         throw new Error(data.error);
       }
-
-      const city =
-        data.address.city ||
-        data.address.town ||
-        data.address.village ||
-        data.address.county ||
-        data.address.state_district ||
-        data.address.state ||
-        "Unknown City";
-
+      const city = extractCityFromLocationIQ(data);
+      if (!city) {
+        throw new Error("Unable to detect city from location");
+      }
       setPickupLocation({
         address: data.display_name,
         city,
@@ -209,11 +217,10 @@ export default function SearchedCars() {
         lat,
         lng,
       });
-
-      // Auto-update city filter if needed
-      if (cities.includes(city)) {
-        setFilters((prev) => ({ ...prev, city }));
-      }
+      setFilters((prev) => ({
+        ...prev,
+        city, // ← this is what backend uses
+      }));
 
       setShowPickupOptions(false);
     } catch (err: any) {
