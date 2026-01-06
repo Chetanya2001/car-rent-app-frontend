@@ -393,19 +393,25 @@ export default function MyCars() {
         </div>
       )}
 
-      {/* Edit Modal */}
+      {/* Premium Edit Modal */}
       {showEditModal && carToEdit && (
         <div className="modal-overlay" onClick={handleEditCancel}>
           <div
-            className="edit-modal-content"
+            className="premium-edit-modal"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="modal-header">
-              <h3>
-                Edit Car Details - {carToEdit.make} {carToEdit.model}
-              </h3>
+            <div className="premium-modal-header">
+              <div className="modal-header-content">
+                <div className="modal-icon">✨</div>
+                <div>
+                  <h3 className="modal-title">Edit Car Details</h3>
+                  <p className="modal-subtitle">
+                    {carToEdit.make} {carToEdit.model} • {carToEdit.year}
+                  </p>
+                </div>
+              </div>
               <button
-                className="modal-close"
+                className="premium-close-btn"
                 onClick={handleEditCancel}
                 disabled={isSaving}
               >
@@ -413,117 +419,164 @@ export default function MyCars() {
               </button>
             </div>
 
-            <div className="modal-body edit-modal-body">
-              {/* Features Section */}
-              <div className="edit-section">
-                <h4 className="section-title">Features</h4>
-                <div className="features-grid-edit">
+            <div className="premium-modal-body">
+              {/* Features Section with Toggle Switches */}
+              <div className="premium-section">
+                <div className="section-header">
+                  <span className="section-icon">🎯</span>
+                  <h4 className="section-title">Features & Amenities</h4>
+                </div>
+                <div className="features-toggle-grid">
                   {FEATURES.map((feature) => (
-                    <label key={feature.key} className="feature-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={!!editingFeatures[feature.key]}
-                        onChange={(e) =>
-                          setEditingFeatures((prev) => ({
-                            ...prev,
-                            [feature.key]: e.target.checked,
-                          }))
-                        }
-                      />
-                      <span className="feature-label">
-                        {feature.icon} {feature.label}
-                      </span>
-                    </label>
+                    <div key={feature.key} className="toggle-item">
+                      <div className="toggle-label-wrapper">
+                        <span className="toggle-icon">{feature.icon}</span>
+                        <span className="toggle-label">{feature.label}</span>
+                      </div>
+                      <label className="toggle-switch">
+                        <input
+                          type="checkbox"
+                          checked={!!editingFeatures[feature.key]}
+                          onChange={(e) =>
+                            setEditingFeatures((prev) => ({
+                              ...prev,
+                              [feature.key]: e.target.checked,
+                            }))
+                          }
+                        />
+                        <span className="toggle-slider"></span>
+                      </label>
+                    </div>
                   ))}
                 </div>
               </div>
 
               {/* Pricing Section */}
-              <div className="edit-section">
-                <h4 className="section-title">Pricing</h4>
-                <div className="input-group">
-                  <label>Hourly Rate (₹)</label>
-                  <input
-                    type="number"
-                    value={editingPrice}
-                    onChange={(e) => setEditingPrice(e.target.value)}
-                    placeholder="Enter hourly rate"
-                    className="form-input"
-                  />
+              <div className="premium-section">
+                <div className="section-header">
+                  <span className="section-icon">💰</span>
+                  <h4 className="section-title">Pricing</h4>
+                </div>
+                <div className="premium-input-wrapper">
+                  <label className="premium-label">Hourly Rate</label>
+                  <div className="input-with-icon">
+                    <span className="input-icon">₹</span>
+                    <input
+                      type="number"
+                      value={editingPrice}
+                      onChange={(e) => setEditingPrice(e.target.value)}
+                      placeholder="Enter hourly rate"
+                      className="premium-input"
+                      step="0.01"
+                      min="0"
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Insurance Section */}
-              <div className="edit-section">
-                <h4 className="section-title">Insurance Details</h4>
-
-                <div className="input-group">
-                  <label>Insurance Company</label>
-                  <input
-                    type="text"
-                    value={editingInsuranceCompany}
-                    onChange={(e) => setEditingInsuranceCompany(e.target.value)}
-                    placeholder="Enter insurance company"
-                    className="form-input"
-                  />
+              <div className="premium-section">
+                <div className="section-header">
+                  <span className="section-icon">🛡️</span>
+                  <h4 className="section-title">Insurance Details</h4>
                 </div>
 
-                <div className="input-group">
-                  <label>IDV Value (₹)</label>
-                  <input
-                    type="number"
-                    value={editingIdvValue}
-                    onChange={(e) => setEditingIdvValue(e.target.value)}
-                    placeholder="Enter IDV value"
-                    className="form-input"
-                  />
-                </div>
+                <div className="insurance-grid">
+                  <div className="premium-input-wrapper">
+                    <label className="premium-label">Insurance Company</label>
+                    <input
+                      type="text"
+                      value={editingInsuranceCompany}
+                      onChange={(e) =>
+                        setEditingInsuranceCompany(e.target.value)
+                      }
+                      placeholder="e.g., ICICI Lombard"
+                      className="premium-input"
+                    />
+                  </div>
 
-                <div className="input-group">
-                  <label>Valid Till</label>
-                  <input
-                    type="date"
-                    value={editingValidTill}
-                    onChange={(e) => setEditingValidTill(e.target.value)}
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="input-group">
-                  <label>Insurance Document</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="form-input file-input"
-                  />
-                  {imagePreview && (
-                    <div className="image-preview-container">
-                      <img
-                        src={imagePreview}
-                        alt="Insurance preview"
-                        className="image-preview"
+                  <div className="premium-input-wrapper">
+                    <label className="premium-label">IDV Value</label>
+                    <div className="input-with-icon">
+                      <span className="input-icon">₹</span>
+                      <input
+                        type="number"
+                        value={editingIdvValue}
+                        onChange={(e) => setEditingIdvValue(e.target.value)}
+                        placeholder="Insured Declared Value"
+                        className="premium-input"
+                        step="0.01"
+                        min="0"
                       />
                     </div>
-                  )}
+                  </div>
+
+                  <div className="premium-input-wrapper">
+                    <label className="premium-label">Valid Till</label>
+                    <input
+                      type="date"
+                      value={editingValidTill}
+                      onChange={(e) => setEditingValidTill(e.target.value)}
+                      className="premium-input"
+                    />
+                  </div>
+
+                  <div className="premium-input-wrapper full-width">
+                    <label className="premium-label">Insurance Document</label>
+                    <div className="file-upload-area">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="file-input-hidden"
+                        id="insurance-upload"
+                      />
+                      <label
+                        htmlFor="insurance-upload"
+                        className="file-upload-label"
+                      >
+                        <span className="upload-icon">📎</span>
+                        <span className="upload-text">
+                          {selectedImage
+                            ? selectedImage.name
+                            : "Click to upload insurance document"}
+                        </span>
+                      </label>
+                    </div>
+                    {imagePreview && (
+                      <div className="premium-image-preview">
+                        <img src={imagePreview} alt="Insurance preview" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="modal-footer">
+            <div className="premium-modal-footer">
               <button
-                className="modal-btn cancel-btn"
+                className="premium-btn cancel"
                 onClick={handleEditCancel}
                 disabled={isSaving}
               >
                 Cancel
               </button>
               <button
-                className="modal-btn save-btn"
+                className="premium-btn save"
                 onClick={handleSaveEdit}
                 disabled={isSaving}
               >
-                {isSaving ? "Saving..." : "Save Changes"}
+                {isSaving ? (
+                  <>
+                    <span className="spinner"></span>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <span>💾</span>
+                    Save Changes
+                  </>
+                )}
               </button>
             </div>
           </div>

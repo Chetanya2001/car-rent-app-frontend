@@ -34,6 +34,9 @@ export const getCarDetails = async (
     throw error;
   }
 };
+const API_BASE = `${
+  import.meta.env.VITE_API_URL
+}/api/car-details/update-car-details`;
 export const updateCarDetails = async (payload: UpdateCarPayload) => {
   try {
     const token = localStorage.getItem("token");
@@ -83,16 +86,12 @@ export const updateCarDetails = async (payload: UpdateCarPayload) => {
       has_image: !!payload.insurance_image,
     });
 
-    const response = await axios.put(
-      `${API_URL}/api/car-details/update-car-details`,
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+    const response = await axios.put(API_BASE, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
     console.log("✅ Update successful:", response.data);
     return response.data;
