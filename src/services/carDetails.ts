@@ -85,6 +85,10 @@ export const updateCarDetails = async (payload: UpdateCarPayload) => {
       has_insurance: !!payload.insurance_company,
       has_image: !!payload.insurance_image,
     });
+    console.log("📤 FormData contents:");
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
 
     const response = await axios.put(API_BASE, formData, {
       headers: {

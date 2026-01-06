@@ -405,7 +405,6 @@ export default function MyCars() {
           >
             <div className="premium-modal-header">
               <div className="modal-header-content">
-                <div className="modal-icon">✨</div>
                 <div>
                   <h3 className="modal-title">Edit Car Details</h3>
                   <p className="modal-subtitle">
@@ -427,7 +426,7 @@ export default function MyCars() {
               <div className="premium-section">
                 <div className="section-header">
                   <span className="section-icon">🎯</span>
-                  <h4 className="section-title">Features & Amenities</h4>
+                  <h4 className="section-title">Features</h4>
                 </div>
                 <div className="features-toggle-grid">
                   {FEATURES.map((feature) => (
