@@ -7,6 +7,7 @@ import LocationPicker from "../../components/Map/LocationPicker";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import { searchCars } from "../../services/carService";
+import { useGeoLocation } from "../../hooks/useGeolocation";
 
 interface Car {
   id: number;
@@ -70,6 +71,7 @@ export default function SearchedCars() {
   const [pickupLocation, setPickupLocation] = useState<any>(null);
   const [showPickupOptions, setShowPickupOptions] = useState(false);
   const [showPickupMap, setShowPickupMap] = useState(false);
+  const geo = useGeoLocation(80);
 
   const cities = ["Delhi", "Gurgaon", "Noida", "Agra", "Ahmedabad", "Jaipur"];
 
@@ -397,105 +399,58 @@ export default function SearchedCars() {
                 {/* ================= CURRENT LOCATION ================= */}
                 <button
                   className="location-option-btn current-location"
-                  onClick={() => {
-                    if (!navigator.geolocation) {
+                  onClick={async () => {
+                    // 1️⃣ Still loading GPS
+                    if (geo.loading) {
+                      alert("Detecting accurate location, please wait...");
+                      return;
+                    }
+
+                    // 2️⃣ Failed or low-quality GPS
+                    if (geo.error || !geo.lat || !geo.lng) {
                       alert(
-                        "Geolocation is not supported on this device. Please pick location on map."
+                        "Unable to get accurate location. Please pick on map."
                       );
                       setShowPickupOptions(false);
                       setShowPickupMap(true);
                       return;
                     }
 
-                    let locationTimeout: any;
+                    try {
+                      // 3️⃣ Reverse geocode using accurate coordinates
+                      const res = await fetch(
+                        `https://us1.locationiq.com/v1/reverse?key=${
+                          import.meta.env.VITE_LOCATIONIQ_TOKEN
+                        }&lat=${geo.lat}&lon=${geo.lng}&format=json`
+                      );
 
-                    const successHandler = async (pos: any) => {
-                      const { latitude, longitude, accuracy } = pos.coords;
+                      if (!res.ok) throw new Error("Reverse geocode failed");
 
-                      console.log("📍 GPS:", { latitude, longitude, accuracy });
+                      const data = await res.json();
 
-                      // Mobile / good accuracy
-                      if (accuracy <= 100) {
-                        try {
-                          const res = await fetch(
-                            `https://us1.locationiq.com/v1/reverse?key=${
-                              import.meta.env.VITE_LOCATIONIQ_TOKEN
-                            }&lat=${latitude}&lon=${longitude}&format=json`
-                          );
+                      setPickupLocation({
+                        address: data.display_name || "",
+                        city:
+                          data.address?.city ||
+                          data.address?.town ||
+                          data.address?.village ||
+                          data.address?.suburb ||
+                          "",
+                        state: data.address?.state || "",
+                        country: data.address?.country || "",
+                        lat: geo.lat,
+                        lng: geo.lng,
+                      });
 
-                          if (!res.ok)
-                            throw new Error("Failed to fetch address");
-
-                          const data = await res.json();
-
-                          setPickupLocation({
-                            address: data.display_name || "",
-                            city:
-                              data.address?.city ||
-                              data.address?.town ||
-                              data.address?.village ||
-                              data.address?.suburb ||
-                              "",
-                            state: data.address?.state || "",
-                            country: data.address?.country || "",
-                            lat: latitude,
-                            lng: longitude,
-                          });
-
-                          clearTimeout(locationTimeout);
-                          setShowPickupOptions(false);
-                        } catch (err) {
-                          console.error("Reverse geocode error:", err);
-                          alert(
-                            "Unable to fetch address. Please pick location on map."
-                          );
-                          setShowPickupOptions(false);
-                          setShowPickupMap(true);
-                        }
-                      } else {
-                        // Low accuracy (Laptop or poor GPS)
-                        alert(
-                          "Location accuracy is low. Please use 'Pick on Map' for precise location."
-                        );
-                        setShowPickupOptions(false);
-                        setShowPickupMap(true);
-                      }
-                    };
-
-                    const errorHandler = (err: any) => {
-                      console.error("Geolocation error:", err);
-                      if (err.code === 1) {
-                        alert(
-                          "Location permission denied. Please pick on map."
-                        );
-                      } else if (err.code === 2) {
-                        alert("Location unavailable. Please pick on map.");
-                      } else {
-                        alert("Unable to fetch location. Please pick on map.");
-                      }
                       setShowPickupOptions(false);
-                      setShowPickupMap(true);
-                    };
-
-                    // Try to get high accuracy position
-                    navigator.geolocation.getCurrentPosition(
-                      successHandler,
-                      errorHandler,
-                      {
-                        enableHighAccuracy: true,
-                        timeout: 15000,
-                        maximumAge: 0,
-                      }
-                    );
-
-                    // Fallback in case GPS never responds (15s)
-                    locationTimeout = setTimeout(() => {
+                    } catch (err) {
+                      console.error(err);
                       alert(
-                        "Unable to fetch accurate location. Please pick on map."
+                        "Unable to fetch address. Please pick location on map."
                       );
                       setShowPickupOptions(false);
                       setShowPickupMap(true);
-                    }, 16000);
+                    }
                   }}
                 >
                   <div className="option-icon">📍</div>
