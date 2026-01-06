@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getHostCars, deleteCarById } from "../../services/carService";
 import { updateCarDetails } from "../../services/carDetails";
+import { updateCarFeatures } from "../../services/carFeatures";
 import type { Car } from "../../types/Cars";
 import Navbar from "../../components/Navbar/Navbar";
 import "./MyCars.css";
@@ -172,16 +173,19 @@ export default function MyCars() {
 
     setIsSaving(true);
     try {
-      const updatePayload: any = {
-        car_id: carToEdit.id,
-      };
+      const carId = carToEdit.id;
 
-      // Add features
+      // ✅ 1. Update FEATURES first (separate API call)
       const cleanFeatures: Record<string, boolean> = {};
       FEATURES.forEach((feature) => {
         cleanFeatures[feature.key] = !!editingFeatures[feature.key];
       });
-      updatePayload.features = cleanFeatures;
+      await updateCarFeatures(carId, cleanFeatures); // 🆕 Uses your new service
+
+      // ✅ 2. Update PRICE + INSURANCE (existing API)
+      const updatePayload: any = {
+        car_id: carId,
+      };
 
       // Add pricing
       if (editingPrice) {
@@ -204,13 +208,13 @@ export default function MyCars() {
 
       await updateCarDetails(updatePayload);
 
-      alert("Car details updated successfully!");
+      alert("✅ Car updated successfully!");
       setShowEditModal(false);
       setCarToEdit(null);
-      await fetchCars();
+      await fetchCars(); // Refresh list
     } catch (err: any) {
-      console.error("Error updating car:", err);
-      alert(err.response?.data?.message || "Failed to update car details");
+      console.error("❌ Update error:", err);
+      alert(err.response?.data?.message || "Failed to update car");
     } finally {
       setIsSaving(false);
     }

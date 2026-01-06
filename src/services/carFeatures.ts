@@ -19,3 +19,21 @@ export const addCarFeatures = async (carFeaturesData: CarFeatures) => {
 
   return response.data; // will contain { message, data } or the created CarFeatures object
 };
+
+export const updateCarFeatures = async (
+  car_id: number,
+  features: Partial<CarFeatures>
+) => {
+  const token = localStorage.getItem("token");
+
+  console.log("📤 Updating Car Features:", { car_id, features });
+
+  const response = await axios.put(`${API_URL}/${car_id}`, features, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  return response.data;
+};
