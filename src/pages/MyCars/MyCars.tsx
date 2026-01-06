@@ -46,7 +46,7 @@ export default function MyCars() {
   const [editingInsuranceCompany, setEditingInsuranceCompany] = useState("");
   const [editingIdvValue, setEditingIdvValue] = useState("");
   const [editingValidTill, setEditingValidTill] = useState("");
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedImage, setSelectedImage] = useState<any>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const fetchCars = async () => {
@@ -159,7 +159,7 @@ export default function MyCars() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setSelectedImage(file);
+      setSelectedImage(file); // file is File | undefined
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -167,7 +167,6 @@ export default function MyCars() {
       reader.readAsDataURL(file);
     }
   };
-
   const handleSaveEdit = async () => {
     if (!carToEdit) return;
 
