@@ -382,11 +382,11 @@ export default function SearchedCars() {
         <ModalWrapper onClose={() => setShowPickupOptions(false)}>
           <div
             className="location-modal-overlay"
-            onClick={() => setShowPickupOptions(false)}
+            onClick={() => setShowPickupOptions(false)} // Close on background click
           >
             <div
               className="location-modal"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()} // Prevent close when clicking inside
             >
               <div className="location-modal-header">
                 <h2>Select Pickup Location</h2>
@@ -394,68 +394,38 @@ export default function SearchedCars() {
               </div>
 
               <div className="location-modal-body">
-                {/* ================= CURRENT LOCATION ================= */}
                 <button
                   className="location-option-btn current-location"
-                  onClick={async () => {
-                    // If browser doesn't support geolocation, still do nothing
-                    if (!navigator.geolocation) return;
-
+                  onClick={() => {
                     navigator.geolocation.getCurrentPosition(
                       async (pos) => {
                         const lat = pos.coords.latitude;
                         const lng = pos.coords.longitude;
 
-                        try {
-                          const res = await fetch(
-                            `https://us1.locationiq.com/v1/reverse?key=${
-                              import.meta.env.VITE_LOCATIONIQ_TOKEN
-                            }&lat=${lat}&lon=${lng}&format=json&addressdetails=1&zoom=16`
-                          );
+                        const res = await fetch(
+                          `https://us1.locationiq.com/v1/reverse?key=${
+                            import.meta.env.VITE_LOCATIONIQ_TOKEN
+                          }&lat=${lat}&lon=${lng}&format=json`
+                        );
 
-                          const data = await res.json();
-                          const addr = data.address || {};
+                        const data = await res.json();
 
-                          setPickupLocation({
-                            address: data.display_name || "",
-                            city:
-                              addr.city ||
-                              addr.town ||
-                              addr.village ||
-                              addr.suburb ||
-                              "",
-                            state: addr.state || "",
-                            country: addr.country || "",
-                            lat,
-                            lng,
-                            confidence: "low", // ⬅️ important
-                          });
-                        } catch {
-                          // Even if reverse geocode fails, STILL SAVE LAT/LNG
-                          setPickupLocation({
-                            address: "Current location",
-                            city: "",
-                            state: "",
-                            country: "",
-                            lat,
-                            lng,
-                            confidence: "low",
-                          });
-                        }
+                        setPickupLocation({
+                          address: data.display_name, // FULL ADDRESS
+                          city:
+                            data.address.city ||
+                            data.address.town ||
+                            data.address.village ||
+                            "",
+                          state: data.address.state || "",
+                          country: data.address.country || "",
+                          lat,
+                          lng,
+                        });
 
                         setShowPickupOptions(false);
                       },
-                      () => {
-                        // ❌ NO MAP
-                        // ❌ NO ALERT
-                        // ❌ NO FALLBACK
-                        setShowPickupOptions(false);
-                      },
-                      {
-                        enableHighAccuracy: true, // 🚀 FAST
-                        timeout: 2000, // max 2 sec
-                        maximumAge: 600000, // cached allowed
-                      }
+                      () => alert("Location permission denied")
                     );
                   }}
                 >
@@ -466,7 +436,6 @@ export default function SearchedCars() {
                   </div>
                 </button>
 
-                {/* ================= PICK ON MAP ================= */}
                 <button
                   className="location-option-btn map-location"
                   onClick={() => {
