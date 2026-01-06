@@ -288,11 +288,7 @@ export default function MyCars() {
                       <div className="detail-item price-item">
                         <span className="detail-label">Price</span>
                         <span className="detail-value price">
-                          {car.price_per_hour
-                            ? `₹${Number(
-                                car.price_per_hour
-                              ).toLocaleString()} /hr`
-                            : "Not set"}
+                          ₹{car.price_per_hour}/hr
                         </span>
                       </div>
                     </div>
