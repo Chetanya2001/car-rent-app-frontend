@@ -421,23 +421,34 @@ export default function SearchedCars() {
                       const res = await fetch(
                         `https://us1.locationiq.com/v1/reverse?key=${
                           import.meta.env.VITE_LOCATIONIQ_TOKEN
-                        }&lat=${geo.lat}&lon=${geo.lng}&format=json`
+                        }&lat=${geo.lat}
+                         &lon=${geo.lng}
+                         &format=json
+                         &addressdetails=1
+                         &extratags=1
+                         &namedetails=1
+                         &zoom=18`
                       );
 
                       if (!res.ok) throw new Error("Reverse geocode failed");
 
                       const data = await res.json();
+                      const addr = data.address || {};
 
                       setPickupLocation({
-                        address: data.display_name || "",
-                        city:
-                          data.address?.city ||
-                          data.address?.town ||
-                          data.address?.village ||
-                          data.address?.suburb ||
-                          "",
-                        state: data.address?.state || "",
-                        country: data.address?.country || "",
+                        address: [
+                          addr.road,
+                          addr.neighbourhood || addr.suburb,
+                          addr.city || addr.town || addr.village,
+                          addr.postcode,
+                        ]
+                          .filter(Boolean)
+                          .join(", "),
+
+                        city: addr.city || addr.town || addr.village || "",
+
+                        state: addr.state || "",
+                        country: addr.country || "",
                         lat: geo.lat,
                         lng: geo.lng,
                       });
