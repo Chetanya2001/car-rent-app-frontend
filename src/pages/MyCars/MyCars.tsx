@@ -1,16 +1,53 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getHostCars, deleteCarById } from "../../services/carService";
+import { updateCarDetails } from "../../services/carDetails";
 import type { Car } from "../../types/Cars";
 import Navbar from "../../components/Navbar/Navbar";
 import "./MyCars.css";
 
+const FEATURES = [
+  { key: "airconditions", label: "Air Conditioning", icon: "❄️" },
+  { key: "child_seat", label: "Child Seat", icon: "👶" },
+  { key: "gps", label: "GPS Navigation", icon: "📍" },
+  { key: "luggage", label: "Luggage Space", icon: "🧳" },
+  { key: "music", label: "Music System", icon: "🎵" },
+  { key: "seat_belt", label: "Seat Belt", icon: "🔒" },
+  { key: "sleeping_bed", label: "Sleeping Bed", icon: "🛏️" },
+  { key: "water", label: "Water", icon: "💧" },
+  { key: "bluetooth", label: "Bluetooth", icon: "📱" },
+  { key: "onboard_computer", label: "Onboard Computer", icon: "💻" },
+  { key: "audio_input", label: "Audio Input", icon: "🎧" },
+  { key: "long_term_trips", label: "Long Term Trips", icon: "🚗" },
+  { key: "car_kit", label: "Car Kit", icon: "🧰" },
+  {
+    key: "remote_central_locking",
+    label: "Remote Central Locking",
+    icon: "🔑",
+  },
+  { key: "climate_control", label: "Climate Control", icon: "🌡️" },
+];
+
 export default function MyCars() {
   const [cars, setCars] = useState<Car[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [carToDelete, setCarToDelete] = useState<number | null>(null);
+  const [carToEdit, setCarToEdit] = useState<Car | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
+
+  // Edit form states
+  const [editingFeatures, setEditingFeatures] = useState<
+    Record<string, boolean>
+  >({});
+  const [editingPrice, setEditingPrice] = useState("");
+  const [editingInsuranceCompany, setEditingInsuranceCompany] = useState("");
+  const [editingIdvValue, setEditingIdvValue] = useState("");
+  const [editingValidTill, setEditingValidTill] = useState("");
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const fetchCars = async () => {
     try {
@@ -35,12 +72,30 @@ export default function MyCars() {
       setCars([]);
     }
   };
+
   useEffect(() => {
     fetchCars();
   }, []);
 
-  const handleUpdate = (carId: number) => {
-    navigate(`/update-car/${carId}`);
+  const handleUpdate = (car: Car) => {
+    setCarToEdit(car);
+
+    // Initialize features
+    const initialFeatures: Record<string, boolean> = {};
+    FEATURES.forEach((feature) => {
+      initialFeatures[feature.key] = !!(car as any).features?.[feature.key];
+    });
+    setEditingFeatures(initialFeatures);
+
+    // Initialize other fields
+    setEditingPrice(car.price_per_hour?.toString() || "");
+    setEditingInsuranceCompany((car as any).insurance?.company || "");
+    setEditingIdvValue((car as any).insurance?.idv_value?.toString() || "");
+    setEditingValidTill((car as any).insurance?.valid_till || "");
+    setSelectedImage(null);
+    setImagePreview(null);
+
+    setShowEditModal(true);
   };
 
   const handleDetails = (carId: number) => {
@@ -57,27 +112,15 @@ export default function MyCars() {
 
     setIsDeleting(true);
     try {
-      // Call delete API
       const response = await deleteCarById(carToDelete);
-
-      /*
-      Backend responses:
-      { status: "deleted" }        → car fully deleted
-      { status: "hidden" }         → car marked is_visible = false
-      { status: "active_booking" } → cannot delete
-    */
 
       if (response.status === "deleted") {
         alert(`Car ${getCarName(carToDelete)} deleted successfully!`);
-
-        // ✅ REFRESH FROM BACKEND
         await fetchCars();
       } else if (response.status === "hidden") {
         alert(
           `Car ${getCarName(carToDelete)} has past bookings and is now hidden.`
         );
-
-        // ✅ REFRESH FROM BACKEND
         await fetchCars();
       } else if (response.status === "active_booking") {
         alert(
@@ -89,12 +132,10 @@ export default function MyCars() {
         alert(`Unexpected response: ${JSON.stringify(response)}`);
       }
 
-      // Close modal and reset state
       setShowDeleteModal(false);
       setCarToDelete(null);
     } catch (err: any) {
       console.error("❌ Error deleting car:", err);
-
       const errorMessage =
         err.response?.data?.message || err.message || "Failed to delete car";
       alert(`Error: ${errorMessage}`);
@@ -106,6 +147,74 @@ export default function MyCars() {
   const handleDeleteCancel = () => {
     setShowDeleteModal(false);
     setCarToDelete(null);
+  };
+
+  const handleEditCancel = () => {
+    setShowEditModal(false);
+    setCarToEdit(null);
+    setSelectedImage(null);
+    setImagePreview(null);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!carToEdit) return;
+
+    setIsSaving(true);
+    try {
+      const updatePayload: any = {
+        car_id: carToEdit.id,
+      };
+
+      // Add features
+      const cleanFeatures: Record<string, boolean> = {};
+      FEATURES.forEach((feature) => {
+        cleanFeatures[feature.key] = !!editingFeatures[feature.key];
+      });
+      updatePayload.features = cleanFeatures;
+
+      // Add pricing
+      if (editingPrice) {
+        updatePayload.price_per_hour = parseFloat(editingPrice);
+      }
+
+      // Add insurance details
+      if (editingInsuranceCompany) {
+        updatePayload.insurance_company = editingInsuranceCompany;
+      }
+      if (editingIdvValue) {
+        updatePayload.insurance_idv_value = parseFloat(editingIdvValue);
+      }
+      if (editingValidTill) {
+        updatePayload.insurance_valid_till = editingValidTill;
+      }
+      if (selectedImage) {
+        updatePayload.insurance_image = selectedImage;
+      }
+
+      await updateCarDetails(updatePayload);
+
+      alert("Car details updated successfully!");
+      setShowEditModal(false);
+      setCarToEdit(null);
+      await fetchCars();
+    } catch (err: any) {
+      console.error("Error updating car:", err);
+      alert(err.response?.data?.message || "Failed to update car details");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const getCarName = (carId: number) => {
@@ -224,7 +333,7 @@ export default function MyCars() {
                     </button>
                     <button
                       className="action-btn update-btn"
-                      onClick={() => handleUpdate(car.id)}
+                      onClick={() => handleUpdate(car)}
                     >
                       Update
                     </button>
@@ -278,6 +387,143 @@ export default function MyCars() {
                 disabled={isDeleting}
               >
                 {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && carToEdit && (
+        <div className="modal-overlay" onClick={handleEditCancel}>
+          <div
+            className="edit-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <h3>
+                Edit Car Details - {carToEdit.make} {carToEdit.model}
+              </h3>
+              <button
+                className="modal-close"
+                onClick={handleEditCancel}
+                disabled={isSaving}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="modal-body edit-modal-body">
+              {/* Features Section */}
+              <div className="edit-section">
+                <h4 className="section-title">Features</h4>
+                <div className="features-grid-edit">
+                  {FEATURES.map((feature) => (
+                    <label key={feature.key} className="feature-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={!!editingFeatures[feature.key]}
+                        onChange={(e) =>
+                          setEditingFeatures((prev) => ({
+                            ...prev,
+                            [feature.key]: e.target.checked,
+                          }))
+                        }
+                      />
+                      <span className="feature-label">
+                        {feature.icon} {feature.label}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Pricing Section */}
+              <div className="edit-section">
+                <h4 className="section-title">Pricing</h4>
+                <div className="input-group">
+                  <label>Hourly Rate (₹)</label>
+                  <input
+                    type="number"
+                    value={editingPrice}
+                    onChange={(e) => setEditingPrice(e.target.value)}
+                    placeholder="Enter hourly rate"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              {/* Insurance Section */}
+              <div className="edit-section">
+                <h4 className="section-title">Insurance Details</h4>
+
+                <div className="input-group">
+                  <label>Insurance Company</label>
+                  <input
+                    type="text"
+                    value={editingInsuranceCompany}
+                    onChange={(e) => setEditingInsuranceCompany(e.target.value)}
+                    placeholder="Enter insurance company"
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label>IDV Value (₹)</label>
+                  <input
+                    type="number"
+                    value={editingIdvValue}
+                    onChange={(e) => setEditingIdvValue(e.target.value)}
+                    placeholder="Enter IDV value"
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label>Valid Till</label>
+                  <input
+                    type="date"
+                    value={editingValidTill}
+                    onChange={(e) => setEditingValidTill(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label>Insurance Document</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="form-input file-input"
+                  />
+                  {imagePreview && (
+                    <div className="image-preview-container">
+                      <img
+                        src={imagePreview}
+                        alt="Insurance preview"
+                        className="image-preview"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                className="modal-btn cancel-btn"
+                onClick={handleEditCancel}
+                disabled={isSaving}
+              >
+                Cancel
+              </button>
+              <button
+                className="modal-btn save-btn"
+                onClick={handleSaveEdit}
+                disabled={isSaving}
+              >
+                {isSaving ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>
