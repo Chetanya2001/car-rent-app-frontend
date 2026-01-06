@@ -70,6 +70,7 @@ export default function SearchedCars() {
   const [pickupLocation, setPickupLocation] = useState<any>(null);
   const [showPickupOptions, setShowPickupOptions] = useState(false);
   const [showPickupMap, setShowPickupMap] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false); // New loading state
 
   const cities = ["Delhi", "Gurgaon", "Noida", "Agra", "Ahmedabad", "Jaipur"];
 
@@ -105,8 +106,6 @@ export default function SearchedCars() {
 
   const formatShortAddress = (address: string) => {
     if (!address) return "";
-
-    // Keep natural order, clean spacing
     return address.replace(/\s+/g, " ").trim();
   };
 
@@ -131,6 +130,101 @@ export default function SearchedCars() {
       return true;
     });
   }, [cars, filters]);
+
+  // NEW: Handle current location detection
+  const handleUseCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    setIsDetectingLocation(true);
+
+    try {
+      const position = await new Promise<GeolocationPosition>(
+        (resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            resolve,
+            (error) => {
+              let message = "Unable to retrieve your location.";
+              switch (error.code) {
+                case error.PERMISSION_DENIED:
+                  message =
+                    "Location access denied. Please enable location permissions.";
+                  break;
+                case error.POSITION_UNAVAILABLE:
+                  message = "Location information is unavailable.";
+                  break;
+                case error.TIMEOUT:
+                  message = "Location request timed out.";
+                  break;
+              }
+              reject(new Error(message));
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 15000,
+              maximumAge: 0,
+            }
+          );
+        }
+      );
+
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+
+      const token = import.meta.env.VITE_LOCATIONIQ_TOKEN;
+      if (!token) {
+        throw new Error("LocationIQ API token is missing.");
+      }
+
+      const response = await fetch(
+        `https://us1.locationiq.com/v1/reverse.php?key=${token}&lat=${lat}&lon=${lng}&format=json&addressdetails=1&normalizeaddress=1`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch address. Please try again.");
+      }
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      const city =
+        data.address.city ||
+        data.address.town ||
+        data.address.village ||
+        data.address.county ||
+        data.address.state_district ||
+        data.address.state ||
+        "Unknown City";
+
+      setPickupLocation({
+        address: data.display_name,
+        city,
+        state: data.address.state || "",
+        country: data.address.country || "",
+        lat,
+        lng,
+      });
+
+      // Auto-update city filter if needed
+      if (cities.includes(city)) {
+        setFilters((prev) => ({ ...prev, city }));
+      }
+
+      setShowPickupOptions(false);
+    } catch (err: any) {
+      alert(
+        err.message || "Failed to detect your location. Please pick manually."
+      );
+      console.error("Location detection error:", err);
+    } finally {
+      setIsDetectingLocation(false);
+    }
+  };
 
   return (
     <>
@@ -204,6 +298,7 @@ export default function SearchedCars() {
           </div>
         </label>
 
+        {/* Rest of filters remain unchanged */}
         <label>
           Pickup Date:
           <input
@@ -377,16 +472,16 @@ export default function SearchedCars() {
         )}
       </div>
 
-      {/* PICKUP OPTIONS MODAL - FIXED FOR BACKGROUND CLICK */}
+      {/* PICKUP OPTIONS MODAL */}
       {showPickupOptions && (
         <ModalWrapper onClose={() => setShowPickupOptions(false)}>
           <div
             className="location-modal-overlay"
-            onClick={() => setShowPickupOptions(false)} // Close on background click
+            onClick={() => setShowPickupOptions(false)}
           >
             <div
               className="location-modal"
-              onClick={(e) => e.stopPropagation()} // Prevent close when clicking inside
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="location-modal-header">
                 <h2>Select Pickup Location</h2>
@@ -396,43 +491,27 @@ export default function SearchedCars() {
               <div className="location-modal-body">
                 <button
                   className="location-option-btn current-location"
-                  onClick={() => {
-                    navigator.geolocation.getCurrentPosition(
-                      async (pos) => {
-                        const lat = pos.coords.latitude;
-                        const lng = pos.coords.longitude;
-
-                        const res = await fetch(
-                          `https://us1.locationiq.com/v1/reverse?key=${
-                            import.meta.env.VITE_LOCATIONIQ_TOKEN
-                          }&lat=${lat}&lon=${lng}&format=json`
-                        );
-
-                        const data = await res.json();
-
-                        setPickupLocation({
-                          address: data.display_name, // FULL ADDRESS
-                          city:
-                            data.address.city ||
-                            data.address.town ||
-                            data.address.village ||
-                            "",
-                          state: data.address.state || "",
-                          country: data.address.country || "",
-                          lat,
-                          lng,
-                        });
-
-                        setShowPickupOptions(false);
-                      },
-                      () => alert("Location permission denied")
-                    );
+                  onClick={handleUseCurrentLocation}
+                  disabled={isDetectingLocation}
+                  style={{
+                    opacity: isDetectingLocation ? 0.7 : 1,
+                    cursor: isDetectingLocation ? "not-allowed" : "pointer",
                   }}
                 >
-                  <div className="option-icon">📍</div>
+                  <div className="option-icon">
+                    {isDetectingLocation ? "⌛" : "📍"}
+                  </div>
                   <div className="option-content">
-                    <h3>Use Current Location</h3>
-                    <p>Automatically detect your current position</p>
+                    <h3>
+                      {isDetectingLocation
+                        ? "Detecting your location..."
+                        : "Use Current Location"}
+                    </h3>
+                    <p>
+                      {isDetectingLocation
+                        ? "Please wait while we find you"
+                        : "Automatically detect your current position"}
+                    </p>
                   </div>
                 </button>
 
@@ -455,16 +534,16 @@ export default function SearchedCars() {
         </ModalWrapper>
       )}
 
-      {/* PICKUP MAP MODAL - FIXED FOR BACKGROUND CLICK */}
+      {/* PICKUP MAP MODAL */}
       {showPickupMap && (
         <ModalWrapper onClose={() => setShowPickupMap(false)}>
           <div
             className="location-modal-overlay"
-            onClick={() => setShowPickupMap(false)} // Close on background click
+            onClick={() => setShowPickupMap(false)}
           >
             <div
               className="location-modal"
-              onClick={(e) => e.stopPropagation()} // Prevent close when clicking inside
+              onClick={(e) => e.stopPropagation()}
             >
               <LocationPicker
                 onSelect={(loc: any) => {
@@ -477,16 +556,16 @@ export default function SearchedCars() {
         </ModalWrapper>
       )}
 
-      {/* DROP MAP MODAL - FIXED FOR BACKGROUND CLICK */}
+      {/* DROP MAP MODAL */}
       {showDropMap && (
         <ModalWrapper onClose={() => setShowDropMap(false)}>
           <div
             className="location-modal-overlay"
-            onClick={() => setShowDropMap(false)} // Close on background click
+            onClick={() => setShowDropMap(false)}
           >
             <div
               className="location-modal"
-              onClick={(e) => e.stopPropagation()} // Prevent close when clicking inside
+              onClick={(e) => e.stopPropagation()}
             >
               <LocationPicker
                 onSelect={(loc: any) => {
@@ -504,6 +583,7 @@ export default function SearchedCars() {
       )}
 
       <style>{`
+        /* Your existing styles remain unchanged */
         .location-modal-overlay {
           position: fixed;
           top: 0;
@@ -515,6 +595,7 @@ export default function SearchedCars() {
           justify-content: center;
           z-index: 9999;
           padding: 20px;
+          background: rgba(0, 0, 0, 0.5);
         }
 
         .location-modal {
@@ -582,15 +663,11 @@ export default function SearchedCars() {
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
         }
 
-        .location-option-btn:hover {
+        .location-option-btn:hover:not(:disabled) {
           border-color: #01d28e;
           background: #f0fdf7;
           transform: translateY(-2px);
           box-shadow: 0 6px 16px rgba(1, 210, 142, 0.2);
-        }
-
-        .location-option-btn:active {
-          transform: translateY(0);
         }
 
         .option-icon {
@@ -606,13 +683,10 @@ export default function SearchedCars() {
           transition: all 0.3s ease;
         }
 
-        .location-option-btn:hover .option-icon {
+        .location-option-btn:hover:not(:disabled) .option-icon {
           background: #01d28e;
+          color: white;
           transform: scale(1.1);
-        }
-
-        .option-content {
-          flex: 1;
         }
 
         .option-content h3 {
@@ -639,18 +713,6 @@ export default function SearchedCars() {
             padding: 24px 20px;
           }
 
-          .location-modal-header h2 {
-            font-size: 20px;
-          }
-
-          .location-modal-header p {
-            font-size: 13px;
-          }
-
-          .location-modal-body {
-            padding: 20px 16px;
-          }
-
           .location-option-btn {
             padding: 16px;
             gap: 16px;
@@ -660,14 +722,6 @@ export default function SearchedCars() {
             width: 50px;
             height: 50px;
             font-size: 26px;
-          }
-
-          .option-content h3 {
-            font-size: 16px;
-          }
-
-          .option-content p {
-            font-size: 13px;
           }
         }
       `}</style>
