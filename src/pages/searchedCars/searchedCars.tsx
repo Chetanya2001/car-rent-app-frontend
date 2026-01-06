@@ -7,7 +7,6 @@ import LocationPicker from "../../components/Map/LocationPicker";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import { searchCars } from "../../services/carService";
-import { useGeoLocation } from "../../hooks/useGeolocation";
 
 interface Car {
   id: number;
@@ -71,9 +70,6 @@ export default function SearchedCars() {
   const [pickupLocation, setPickupLocation] = useState<any>(null);
   const [showPickupOptions, setShowPickupOptions] = useState(false);
   const [showPickupMap, setShowPickupMap] = useState(false);
-  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
-
-  const geo = useGeoLocation(isMobile ? 80 : 300);
 
   const cities = ["Delhi", "Gurgaon", "Noida", "Agra", "Ahmedabad", "Jaipur"];
 
@@ -112,39 +108,6 @@ export default function SearchedCars() {
 
     // Keep natural order, clean spacing
     return address.replace(/\s+/g, " ").trim();
-  };
-  const reverseGeocode = async (lat: number, lng: number) => {
-    try {
-      const res = await fetch(
-        `https://us1.locationiq.com/v1/reverse?key=${
-          import.meta.env.VITE_LOCATIONIQ_TOKEN
-        }&lat=${lat}&lon=${lng}&format=json&addressdetails=1&zoom=18`
-      );
-
-      if (!res.ok) throw new Error("Reverse failed");
-
-      const data = await res.json();
-      const addr = data.address || {};
-
-      setPickupLocation({
-        address: [
-          addr.road,
-          addr.neighbourhood || addr.suburb,
-          addr.city || addr.town || addr.village,
-          addr.postcode,
-        ]
-          .filter(Boolean)
-          .join(", "),
-        city: addr.city || addr.town || addr.village || "",
-        state: addr.state || "",
-        country: addr.country || "",
-        lat,
-        lng,
-        confidence: "approximate",
-      });
-    } catch {
-      setShowPickupMap(true);
-    }
   };
 
   const filteredCars = useMemo(() => {
@@ -435,37 +398,63 @@ export default function SearchedCars() {
                 <button
                   className="location-option-btn current-location"
                   onClick={async () => {
-                    // 1️⃣ If hook already has something → USE IT IMMEDIATELY
-                    if (geo.lat && geo.lng) {
-                      await reverseGeocode(geo.lat, geo.lng);
-                      setShowPickupOptions(false);
-                      return;
-                    }
-
-                    // 2️⃣ Else: instantly try browser cached location (NO WAIT)
-                    if (!navigator.geolocation) {
-                      setShowPickupOptions(false);
-                      setShowPickupMap(true);
-                      return;
-                    }
+                    // If browser doesn't support geolocation, still do nothing
+                    if (!navigator.geolocation) return;
 
                     navigator.geolocation.getCurrentPosition(
                       async (pos) => {
-                        await reverseGeocode(
-                          pos.coords.latitude,
-                          pos.coords.longitude
-                        );
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
+
+                        try {
+                          const res = await fetch(
+                            `https://us1.locationiq.com/v1/reverse?key=${
+                              import.meta.env.VITE_LOCATIONIQ_TOKEN
+                            }&lat=${lat}&lon=${lng}&format=json&addressdetails=1&zoom=16`
+                          );
+
+                          const data = await res.json();
+                          const addr = data.address || {};
+
+                          setPickupLocation({
+                            address: data.display_name || "",
+                            city:
+                              addr.city ||
+                              addr.town ||
+                              addr.village ||
+                              addr.suburb ||
+                              "",
+                            state: addr.state || "",
+                            country: addr.country || "",
+                            lat,
+                            lng,
+                            confidence: "low", // ⬅️ important
+                          });
+                        } catch {
+                          // Even if reverse geocode fails, STILL SAVE LAT/LNG
+                          setPickupLocation({
+                            address: "Current location",
+                            city: "",
+                            state: "",
+                            country: "",
+                            lat,
+                            lng,
+                            confidence: "low",
+                          });
+                        }
+
                         setShowPickupOptions(false);
                       },
                       () => {
-                        // 3️⃣ Absolute fallback
+                        // ❌ NO MAP
+                        // ❌ NO ALERT
+                        // ❌ NO FALLBACK
                         setShowPickupOptions(false);
-                        setShowPickupMap(true);
                       },
                       {
-                        enableHighAccuracy: false, // 🚀 FAST
-                        timeout: 2500, // ⏱ MAX 2.5s
-                        maximumAge: 600000, // ✅ cached allowed
+                        enableHighAccuracy: true, // 🚀 FAST
+                        timeout: 2000, // max 2 sec
+                        maximumAge: 600000, // cached allowed
                       }
                     );
                   }}
