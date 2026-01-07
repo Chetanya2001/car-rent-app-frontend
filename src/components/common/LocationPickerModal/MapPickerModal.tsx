@@ -1,7 +1,7 @@
 // src/components/common/LocationPickerModal/MapPickerModal.tsx
 import React from "react";
 import LocationPicker from "../../Map/LocationPicker";
-import "../locationPickerModal.css";
+import "./LocationPickerModal.css";
 import { formatShortAddress } from "./utils";
 
 interface MapPickerModalProps {
