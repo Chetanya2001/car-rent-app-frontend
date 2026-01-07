@@ -2,8 +2,11 @@ import React, { useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./searchedCars.css";
 import Navbar from "../../components/Navbar/Navbar";
-import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
-import LocationPicker from "../../components/Map/LocationPicker";
+import {
+  LocationOptionsModal,
+  MapPickerModal,
+} from "../../components/common/LocationPickerModal";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import { searchCars } from "../../services/carService";
@@ -29,20 +32,6 @@ function getDateAndTime(dateObj: Date) {
     time: `${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}`,
   };
 }
-
-const extractCityFromLocationIQ = (data: any): string => {
-  const address = data.address || {};
-
-  return (
-    address.city ||
-    address.town ||
-    address.village ||
-    address.state_district ||
-    address.county ||
-    address.state ||
-    ""
-  );
-};
 
 export default function SearchedCars() {
   const location = useLocation();
@@ -80,11 +69,9 @@ export default function SearchedCars() {
   });
 
   const [dropCity, setDropCity] = useState("");
-  const [showDropMap, setShowDropMap] = useState(false);
   const [pickupLocation, setPickupLocation] = useState<any>(null);
-  const [showPickupOptions, setShowPickupOptions] = useState(false);
-  const [showPickupMap, setShowPickupMap] = useState(false);
-  const [isDetectingLocation, setIsDetectingLocation] = useState(false); // New loading state
+  const [pickupOptionsOpen, setPickupOptionsOpen] = useState(false);
+  const [pickupMapOpen, setPickupMapOpen] = useState(false);
 
   const cities = ["Delhi", "Gurgaon", "Noida", "Agra", "Ahmedabad", "Jaipur"];
 
@@ -145,94 +132,6 @@ export default function SearchedCars() {
     });
   }, [cars, filters]);
 
-  // NEW: Handle current location detection
-  const handleUseCurrentLocation = async () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
-      return;
-    }
-
-    setIsDetectingLocation(true);
-
-    try {
-      const position = await new Promise<GeolocationPosition>(
-        (resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(
-            resolve,
-            (error) => {
-              let message = "Unable to retrieve your location.";
-              switch (error.code) {
-                case error.PERMISSION_DENIED:
-                  message =
-                    "Location access denied. Please enable location permissions.";
-                  break;
-                case error.POSITION_UNAVAILABLE:
-                  message = "Location information is unavailable.";
-                  break;
-                case error.TIMEOUT:
-                  message = "Location request timed out.";
-                  break;
-              }
-              reject(new Error(message));
-            },
-            {
-              enableHighAccuracy: true,
-              timeout: 15000,
-              maximumAge: 0,
-            }
-          );
-        }
-      );
-
-      const lat = position.coords.latitude;
-      const lng = position.coords.longitude;
-
-      const token = import.meta.env.VITE_LOCATIONIQ_TOKEN;
-      if (!token) {
-        throw new Error("LocationIQ API token is missing.");
-      }
-
-      const response = await fetch(
-        `https://us1.locationiq.com/v1/reverse.php?key=${token}&lat=${lat}&lon=${lng}&format=json&addressdetails=1&normalizeaddress=1`
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch address. Please try again.");
-      }
-
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      const city = extractCityFromLocationIQ(data);
-      if (!city) {
-        throw new Error("Unable to detect city from location");
-      }
-      setPickupLocation({
-        address: data.display_name,
-        city,
-        state: data.address.state || "",
-        country: data.address.country || "",
-        lat,
-        lng,
-      });
-      setFilters((prev) => ({
-        ...prev,
-        city, // ← this is what backend uses
-      }));
-
-      setShowPickupOptions(false);
-    } catch (err: any) {
-      alert(
-        err.message || "Failed to detect your location. Please pick manually."
-      );
-      console.error("Location detection error:", err);
-    } finally {
-      setIsDetectingLocation(false);
-    }
-  };
-
   return (
     <>
       <Navbar />
@@ -249,7 +148,7 @@ export default function SearchedCars() {
               borderRadius: "8px",
               overflow: "hidden",
             }}
-            onClick={() => setShowPickupOptions(true)}
+            onClick={() => setPickupOptionsOpen(true)}
             onMouseEnter={(e) => {
               const input = e.currentTarget.querySelector("input");
               if (input) {
@@ -386,12 +285,6 @@ export default function SearchedCars() {
                 <option key={city}>{city}</option>
               ))}
             </select>
-
-            <FontAwesomeIcon
-              icon={faMapMarkerAlt}
-              style={{ marginLeft: "8px", cursor: "pointer" }}
-              onClick={() => setShowDropMap(true)}
-            />
           </div>
         )}
 
@@ -477,261 +370,35 @@ export default function SearchedCars() {
             ))}
           </div>
         )}
+        {/* ===== LOCATION MODALS ===== */}
+
+        <LocationOptionsModal
+          isOpen={pickupOptionsOpen}
+          onClose={() => setPickupOptionsOpen(false)}
+          title="Select Pickup Location"
+          onUseCurrent={(loc) => {
+            setPickupLocation(loc);
+            setFilters((prev) => ({ ...prev, city: loc.city }));
+          }}
+          onPickOnMap={() => {
+            setPickupOptionsOpen(false);
+            setPickupMapOpen(true);
+          }}
+        />
+
+        <MapPickerModal
+          isOpen={pickupMapOpen}
+          onClose={() => setPickupMapOpen(false)}
+          initialPosition={[
+            pickupLocation?.lat || 28.6139,
+            pickupLocation?.lng || 77.209,
+          ]}
+          onConfirm={(loc) => {
+            setPickupLocation(loc);
+            setFilters((prev) => ({ ...prev, city: loc.city }));
+          }}
+        />
       </div>
-
-      {/* PICKUP OPTIONS MODAL */}
-      {showPickupOptions && (
-        <ModalWrapper onClose={() => setShowPickupOptions(false)}>
-          <div
-            className="location-modal-overlay"
-            onClick={() => setShowPickupOptions(false)}
-          >
-            <div
-              className="location-modal"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="location-modal-header">
-                <h2>Select Pickup Location</h2>
-                <p>Choose how you'd like to set your pickup address</p>
-              </div>
-
-              <div className="location-modal-body">
-                <button
-                  className="location-option-btn current-location"
-                  onClick={handleUseCurrentLocation}
-                  disabled={isDetectingLocation}
-                  style={{
-                    opacity: isDetectingLocation ? 0.7 : 1,
-                    cursor: isDetectingLocation ? "not-allowed" : "pointer",
-                  }}
-                >
-                  <div className="option-icon">
-                    {isDetectingLocation ? "⌛" : "📍"}
-                  </div>
-                  <div className="option-content">
-                    <h3>
-                      {isDetectingLocation
-                        ? "Detecting your location..."
-                        : "Use Current Location"}
-                    </h3>
-                    <p>
-                      {isDetectingLocation
-                        ? "Please wait while we find you"
-                        : "Automatically detect your current position"}
-                    </p>
-                  </div>
-                </button>
-
-                <button
-                  className="location-option-btn map-location"
-                  onClick={() => {
-                    setShowPickupOptions(false);
-                    setShowPickupMap(true);
-                  }}
-                >
-                  <div className="option-icon">🗺️</div>
-                  <div className="option-content">
-                    <h3>Pick on Map</h3>
-                    <p>Choose a location by browsing the map</p>
-                  </div>
-                </button>
-              </div>
-            </div>
-          </div>
-        </ModalWrapper>
-      )}
-
-      {/* PICKUP MAP MODAL */}
-      {showPickupMap && (
-        <ModalWrapper onClose={() => setShowPickupMap(false)}>
-          <div
-            className="location-modal-overlay"
-            onClick={() => setShowPickupMap(false)}
-          >
-            <div
-              className="location-modal"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <LocationPicker
-                onSelect={(loc: any) => {
-                  setPickupLocation(loc);
-                  setShowPickupMap(false);
-                }}
-              />
-            </div>
-          </div>
-        </ModalWrapper>
-      )}
-
-      {/* DROP MAP MODAL */}
-      {showDropMap && (
-        <ModalWrapper onClose={() => setShowDropMap(false)}>
-          <div
-            className="location-modal-overlay"
-            onClick={() => setShowDropMap(false)}
-          >
-            <div
-              className="location-modal"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <LocationPicker
-                onSelect={(loc: any) => {
-                  setDropCity(
-                    loc.city && loc.state
-                      ? `${loc.city}, ${loc.state}`
-                      : loc.city || ""
-                  );
-                  setShowDropMap(false);
-                }}
-              />
-            </div>
-          </div>
-        </ModalWrapper>
-      )}
-
-      <style>{`
-        /* Your existing styles remain unchanged */
-        .location-modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 9999;
-          padding: 20px;
-          background: rgba(0, 0, 0, 0.5);
-        }
-
-        .location-modal {
-          background: white;
-          border-radius: 16px;
-          max-width: 500px;
-          width: 100%;
-          overflow: hidden;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-          animation: modalSlideIn 0.3s ease-out;
-        }
-
-        @keyframes modalSlideIn {
-          from {
-            opacity: 0;
-            transform: translateY(-30px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-
-        .location-modal-header {
-          background: linear-gradient(135deg, #01d28e 0%, #018f61 100%);
-          color: white;
-          padding: 32px 24px;
-          text-align: center;
-        }
-
-        .location-modal-header h2 {
-          margin: 0 0 8px 0;
-          font-size: 24px;
-          font-weight: 600;
-          letter-spacing: -0.5px;
-        }
-
-        .location-modal-header p {
-          margin: 0;
-          font-size: 14px;
-          opacity: 0.95;
-          font-weight: 400;
-        }
-
-        .location-modal-body {
-          padding: 28px 24px;
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-          background: #fafafa;
-        }
-
-        .location-option-btn {
-          display: flex;
-          align-items: center;
-          gap: 20px;
-          padding: 20px;
-          border: 2px solid #e5e7eb;
-          border-radius: 12px;
-          background: white;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          text-align: left;
-          width: 100%;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-        }
-
-        .location-option-btn:hover:not(:disabled) {
-          border-color: #01d28e;
-          background: #f0fdf7;
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(1, 210, 142, 0.2);
-        }
-
-        .option-icon {
-          font-size: 32px;
-          width: 60px;
-          height: 60px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #f0fdf7;
-          border-radius: 12px;
-          flex-shrink: 0;
-          transition: all 0.3s ease;
-        }
-
-        .location-option-btn:hover:not(:disabled) .option-icon {
-          background: #01d28e;
-          color: white;
-          transform: scale(1.1);
-        }
-
-        .option-content h3 {
-          margin: 0 0 4px 0;
-          font-size: 18px;
-          font-weight: 600;
-          color: #1f2937;
-        }
-
-        .option-content p {
-          margin: 0;
-          font-size: 14px;
-          color: #6b7280;
-          line-height: 1.4;
-        }
-
-        @media (max-width: 600px) {
-          .location-modal {
-            max-width: 100%;
-            margin: 0 10px;
-          }
-
-          .location-modal-header {
-            padding: 24px 20px;
-          }
-
-          .location-option-btn {
-            padding: 16px;
-            gap: 16px;
-          }
-
-          .option-icon {
-            width: 50px;
-            height: 50px;
-            font-size: 26px;
-          }
-        }
-      `}</style>
     </>
   );
 }
