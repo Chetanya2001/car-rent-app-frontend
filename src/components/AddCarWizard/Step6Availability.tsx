@@ -107,8 +107,8 @@ const mapServiceTypeToCarMode = (
 };
 
 const mapDropPolicyToBackend = (
-  policy: "flexible" | "no-service" | "fixed"
-): "not_available" | "flexible" | "fixed" => {
+  policy: "flexible" | "no-service"
+): "not_available" | "flexible" => {
   if (policy === "no-service") return "not_available";
   return policy;
 };
@@ -139,7 +139,6 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
   const [flexibleDropOffRate, setFlexibleDropOffRate] = useState<number>(
     defaultValues?.flexibleDropOffRate || 0
   );
-
 
   // Intercity specific states
   const [intercityPricePerKm, setIntercityPricePerKm] = useState<number>(
@@ -349,9 +348,7 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
             : "not_available",
 
         selfdrive_drop_amount:
-          selfDriveDropOffPolicy === "flexible"
-            ? flexibleDropOffRate
-            : null,
+          selfDriveDropOffPolicy === "flexible" ? flexibleDropOffRate : null,
 
         car_location: {
           address: carLocation.address,
