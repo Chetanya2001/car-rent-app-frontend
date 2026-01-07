@@ -22,7 +22,7 @@ interface CarFormData {
   availabilityFrom?: string;
   availabilityTill?: string;
   serviceType?: "self-drive" | "intercity" | "both";
-  selfDriveDropOffPolicy?: "flexible" | "no-service" | "fixed";
+  selfDriveDropOffPolicy?: "flexible" | "no-service";
   flexibleDropOffRate?: number;
   fixedDropOffPrice?: number;
   intercityPricePerKm?: number;
@@ -134,14 +134,12 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
 
   // Self-drive specific states
   const [selfDriveDropOffPolicy, setSelfDriveDropOffPolicy] = useState<
-    "flexible" | "no-service" | "fixed"
+    "flexible" | "no-service"
   >(defaultValues?.selfDriveDropOffPolicy || "flexible");
   const [flexibleDropOffRate, setFlexibleDropOffRate] = useState<number>(
     defaultValues?.flexibleDropOffRate || 0
   );
-  const [fixedDropOffPrice, setFixedDropOffPrice] = useState<number>(
-    defaultValues?.fixedDropOffPrice || 0
-  );
+
 
   // Intercity specific states
   const [intercityPricePerKm, setIntercityPricePerKm] = useState<number>(
@@ -323,11 +321,6 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
         alert("Please enter flexible drop-off rate.");
         return;
       }
-
-      if (selfDriveDropOffPolicy === "fixed" && !fixedDropOffPrice) {
-        alert("Please enter fixed drop-off price.");
-        return;
-      }
     }
 
     setSubmitting(true);
@@ -358,8 +351,6 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
         selfdrive_drop_amount:
           selfDriveDropOffPolicy === "flexible"
             ? flexibleDropOffRate
-            : selfDriveDropOffPolicy === "fixed"
-            ? fixedDropOffPrice
             : null,
 
         car_location: {
@@ -488,7 +479,7 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
             </label>
             <input
               type="number"
-              placeholder="Enter amount in INR"
+              placeholder="Enter amount in INR e.g., 500"
               value={expectedHourlyRent || ""}
               onChange={(e) => setExpectedHourlyRent(Number(e.target.value))}
               className="availability-input"
@@ -515,7 +506,7 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
                   <label className="availability-label">Rate per KM (₹)</label>
                   <input
                     type="number"
-                    placeholder="Enter rate per km"
+                    placeholder="Enter rate per km e.g., 10"
                     value={flexibleDropOffRate || ""}
                     onChange={(e) =>
                       setFlexibleDropOffRate(Number(e.target.value))
@@ -540,36 +531,6 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
                   </p>
                 </div>
               </label>
-
-              <label className="availability-radio-label">
-                <input
-                  type="radio"
-                  name="dropOffPolicy"
-                  checked={selfDriveDropOffPolicy === "fixed"}
-                  onChange={() => setSelfDriveDropOffPolicy("fixed")}
-                  className="availability-radio"
-                />
-                <div>
-                  <strong>Fixed Drop-Off Price</strong>
-                  <p className="availability-radio-description">
-                    One-time flat fee
-                  </p>
-                </div>
-              </label>
-              {selfDriveDropOffPolicy === "fixed" && (
-                <div className="availability-nested-input">
-                  <label className="availability-label">Fixed Price (₹)</label>
-                  <input
-                    type="number"
-                    placeholder="Enter fixed price"
-                    value={fixedDropOffPrice || ""}
-                    onChange={(e) =>
-                      setFixedDropOffPrice(Number(e.target.value))
-                    }
-                    className="availability-input"
-                  />
-                </div>
-              )}
             </div>
           </div>
         </div>

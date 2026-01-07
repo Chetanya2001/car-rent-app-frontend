@@ -128,7 +128,7 @@ export const uploadAvailability = async (availabilityData: {
   price_per_hour: number | null;
   price_per_km: number | null;
 
-  selfdrive_drop_policy: "not_available" | "flexible" | "fixed";
+  selfdrive_drop_policy: "not_available" | "flexible";
   selfdrive_drop_amount: number | null;
 
   car_location: {
