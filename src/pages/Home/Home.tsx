@@ -59,7 +59,6 @@ export default function Home() {
   } | null>(null);
 
   // Booking form state
-  const [city, setCity] = useState("");
   const [pickupDate, setPickupDate] = useState("");
   const [pickupTime, setPickupTime] = useState("");
   const [dropDate, setDropDate] = useState("");
@@ -145,23 +144,42 @@ export default function Home() {
 
   // Search cars safely
   const handleSearch = async () => {
-    if (!city || !pickupDate || !dropDate) {
-      alert("Please fill all fields");
+    if (!pickupLocation || !pickupLocation.lat || !pickupLocation.lng) {
+      alert("Please select pickup location");
+      return;
+    }
+
+    if (!pickupDate || !pickupTime || !dropDate || !dropTime) {
+      alert("Please fill date & time");
       return;
     }
 
     try {
+      const pickupDateTime = new Date(
+        `${pickupDate}T${pickupTime}`
+      ).toISOString();
+
+      const dropoffDateTime = new Date(`${dropDate}T${dropTime}`).toISOString();
+
       const data = await searchCars({
-        city,
-        pickup_datetime: pickupDate,
-        dropoff_datetime: dropDate,
+        pickup_location: {
+          address: pickupLocation.address,
+          city: pickupLocation.city,
+          state: pickupLocation.state,
+          country: pickupLocation.country,
+          latitude: pickupLocation.lat,
+          longitude: pickupLocation.lng,
+        },
+        pickup_datetime: pickupDateTime,
+        dropoff_datetime: dropoffDateTime,
+        trip_type: "selfdrive",
       });
 
       navigate("/searched-cars", {
         state: {
           cars: data.cars,
           bookingDetails: {
-            city,
+            pickupLocation,
             pickupDate,
             pickupTime,
             dropDate,
@@ -173,14 +191,9 @@ export default function Home() {
           },
         },
       });
-    } catch (err: any) {
-      if (err.response?.status === 403) {
-        alert("Session expired. Please login again.");
-        handleLogout();
-      } else {
-        console.error("Error searching cars:", err);
-        alert("Failed to fetch cars. Try again.");
-      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to fetch cars");
     }
   };
 
@@ -622,7 +635,6 @@ export default function Home() {
           <LocationPicker
             onSelect={(loc: any) => {
               setPickupLocation(loc);
-              setCity(loc.city || loc.state || "");
               setShowPickupMap(false);
             }}
           />
@@ -633,7 +645,6 @@ export default function Home() {
           <LocationPicker
             onSelect={(loc: any) => {
               setPickupLocation(loc);
-              setCity(loc.city || loc.state || "");
               setShowPickupMap(false);
             }}
           />

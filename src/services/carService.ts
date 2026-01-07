@@ -156,13 +156,17 @@ export const uploadAvailability = async (availabilityData: {
 
 export const searchCars = async (searchData: {
   pickup_location: {
-    city: string;
     address: string;
+    city?: string;
+    state?: string;
+    country?: string;
     latitude: number;
     longitude: number;
   };
   pickup_datetime: string;
   dropoff_datetime: string;
+  trip_type?: "selfdrive" | "intercity";
+  drop_city?: string;
 }) => {
   const token = localStorage.getItem("token");
 

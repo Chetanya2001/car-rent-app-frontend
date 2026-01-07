@@ -60,6 +60,21 @@ export default function IntercityCars() {
   const [luggage, setLuggage] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  const stationCoordinates: Record<string, { lat: number; lng: number }> = {
+    "Indira Gandhi International Airport (DEL)": {
+      lat: 28.5562,
+      lng: 77.1,
+    },
+    "New Delhi Railway Station (NDLS)": {
+      lat: 28.6438,
+      lng: 77.2197,
+    },
+    "Agra Cantt Railway Station (AGC)": {
+      lat: 27.1591,
+      lng: 78.003,
+    },
+  };
+
   const cityStations: Record<string, string[]> = {
     Delhi: [
       "Indira Gandhi International Airport (DEL)",
@@ -98,32 +113,43 @@ export default function IntercityCars() {
   const allCities = Object.keys(cityStations);
 
   const handleSearch = async () => {
-    if (!pickupLocation) {
-      alert("Please select a pickup location");
+    if (!pickupLocation || !dropCity) {
+      alert("Please select pickup & drop locations");
       return;
     }
-    if (!dropCity) {
-      alert("Please select a drop city");
+
+    const coords = stationCoordinates[pickupLocation];
+    if (!coords) {
+      alert("Pickup coordinates not available");
       return;
     }
 
     setLoading(true);
     try {
-      const pickup_datetime = new Date(`${pickupDate}T${pickupTime}`);
+      const pickup_datetime = new Date(
+        `${pickupDate}T${pickupTime}`
+      ).toISOString();
 
       const dropoff_datetime = new Date(pickup_datetime);
-      dropoff_datetime.setHours(dropoff_datetime.getHours() + 48); // or 24
+      dropoff_datetime.setHours(dropoff_datetime.getHours() + 48);
 
       const data = await searchCars({
-        city: pickupCity,
-        pickup_datetime: pickup_datetime.toISOString(),
+        pickup_location: {
+          address: pickupLocation,
+          city: pickupCity,
+          latitude: coords.lat,
+          longitude: coords.lng,
+        },
+        pickup_datetime,
         dropoff_datetime: dropoff_datetime.toISOString(),
+        trip_type: "intercity",
+        drop_city: dropCity,
       });
 
       setCars(data.cars || []);
-    } catch (error) {
-      console.error("Error searching cars:", error);
-      alert("Failed to search cars. Please try again.");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to search cars");
     } finally {
       setLoading(false);
     }
