@@ -30,7 +30,6 @@ interface CarFormData {
     lng: number;
     address: string;
     city?: string;
-    state?: string;
   };
 }
 
@@ -369,7 +368,6 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
               serviceType === "self-drive" ? "active" : ""
             }`}
           >
-            <span className="availability-toggle-icon">🚗</span>
             <span className="availability-toggle-text">Self-Drive</span>
           </button>
           <button
@@ -378,7 +376,6 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
               serviceType === "intercity" ? "active" : ""
             }`}
           >
-            <span className="availability-toggle-icon">🛣️</span>
             <span className="availability-toggle-text">Intercity</span>
           </button>
           <button
@@ -387,23 +384,12 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
               serviceType === "both" ? "active" : ""
             }`}
           >
-            <span className="availability-toggle-icon">⚡</span>
             <span className="availability-toggle-text">Both</span>
           </button>
         </div>
       </div>
 
       {/* Common Fields */}
-      <div className="availability-form-group">
-        <label className="availability-label">Expected Hourly Rent (₹)</label>
-        <input
-          type="number"
-          placeholder="Enter amount in INR"
-          value={expectedHourlyRent || ""}
-          onChange={(e) => setExpectedHourlyRent(Number(e.target.value))}
-          className="availability-input"
-        />
-      </div>
 
       <div className="availability-form-row">
         <div className="availability-form-group">
@@ -462,6 +448,16 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
           </h3>
 
           <div className="availability-form-group">
+            <label className="availability-label">
+              Expected Hourly Rent (₹)
+            </label>
+            <input
+              type="number"
+              placeholder="Enter amount in INR"
+              value={expectedHourlyRent || ""}
+              onChange={(e) => setExpectedHourlyRent(Number(e.target.value))}
+              className="availability-input"
+            />
             <label className="availability-label">Drop-Off Policy</label>
             <div className="availability-radio-group">
               <label className="availability-radio-label">
