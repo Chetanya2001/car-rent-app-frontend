@@ -93,8 +93,18 @@ export default function SearchedCars() {
         `${filters.dropDate}T${filters.dropTime}`
       ).toISOString();
 
+      if (!pickupLocation?.lat || !pickupLocation?.lng) {
+        alert("Pickup location not selected");
+        return;
+      }
+
       const data = await searchCars({
-        city: pickupLocation?.city || filters.city,
+        pickup_location: {
+          city: pickupLocation.city || filters.city,
+          address: pickupLocation.address,
+          latitude: pickupLocation.lat,
+          longitude: pickupLocation.lng,
+        },
         pickup_datetime: pickupDateTime,
         dropoff_datetime: dropoffDateTime,
       });

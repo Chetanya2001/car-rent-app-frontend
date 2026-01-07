@@ -155,7 +155,12 @@ export const uploadAvailability = async (availabilityData: {
 };
 
 export const searchCars = async (searchData: {
-  city: string;
+  pickup_location: {
+    city: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+  };
   pickup_datetime: string;
   dropoff_datetime: string;
 }) => {
@@ -169,8 +174,6 @@ export const searchCars = async (searchData: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
-
-  console.log("🔎 Search Cars Response:", response.data);
 
   return response.data;
 };
