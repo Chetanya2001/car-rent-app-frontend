@@ -129,11 +129,7 @@ export default function AddCarWizard({ onClose }: AddCarWizardProps) {
           )}
           {currentStep === 5 && (
             <Step6Availability
-              onNext={async (data) => {
-                // Step6 will call this only after availability API succeeds
-                await handleNext(data); // merge into formData if needed
-                handleSubmit(); // finalize wizard
-              }}
+              onSuccess={handleSubmit}
               onBack={handleBack}
               defaultValues={formData}
               carId={carId!}

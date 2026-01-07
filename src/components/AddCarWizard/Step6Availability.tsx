@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "./Step6Availability.css";
 import L from "leaflet";
+import { uploadAvailability } from "../../services/carService";
 // import { uploadAvailability } from "../../services/carService";
 
 // Fix for default marker icon
@@ -34,7 +35,7 @@ interface CarFormData {
 }
 
 interface AvailabilityProps {
-  onNext: (data: Partial<CarFormData>) => void;
+  onSuccess: () => void;
   onBack: () => void;
   defaultValues: CarFormData;
   carId: number;
@@ -98,9 +99,22 @@ const LocationPicker: React.FC<{
     </MapContainer>
   );
 };
+const mapServiceTypeToCarMode = (
+  serviceType: "self-drive" | "intercity" | "both"
+): "selfdrive" | "intercity" | "both" => {
+  if (serviceType === "self-drive") return "selfdrive";
+  return serviceType;
+};
+
+const mapDropPolicyToBackend = (
+  policy: "flexible" | "no-service" | "fixed"
+): "not_available" | "flexible" | "fixed" => {
+  if (policy === "no-service") return "not_available";
+  return policy;
+};
 
 const AvailabilityStep: React.FC<AvailabilityProps> = ({
-  onNext,
+  onSuccess,
   onBack,
   defaultValues,
   carId,
@@ -276,11 +290,10 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
     if (!address) return "";
     return address.replace(/\s+/g, " ").trim();
   };
-
   const handleNext = async () => {
-    // Validation
-    if (!expectedHourlyRent || !availabilityFrom || !availabilityTill) {
-      alert("Please fill all required fields.");
+    // 🔎 Basic validation
+    if (!availabilityFrom || !availabilityTill) {
+      alert("Please select availability dates.");
       return;
     }
 
@@ -289,15 +302,12 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
       return;
     }
 
-    if (serviceType === "self-drive" || serviceType === "both") {
-      if (selfDriveDropOffPolicy === "flexible" && !flexibleDropOffRate) {
-        alert("Please enter flexible drop-off rate per km.");
-        return;
-      }
-      if (selfDriveDropOffPolicy === "fixed" && !fixedDropOffPrice) {
-        alert("Please enter fixed drop-off price.");
-        return;
-      }
+    if (
+      (serviceType === "self-drive" || serviceType === "both") &&
+      !expectedHourlyRent
+    ) {
+      alert("Please enter hourly rent.");
+      return;
     }
 
     if (
@@ -308,39 +318,64 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
       return;
     }
 
+    if (serviceType !== "intercity") {
+      if (selfDriveDropOffPolicy === "flexible" && !flexibleDropOffRate) {
+        alert("Please enter flexible drop-off rate.");
+        return;
+      }
+
+      if (selfDriveDropOffPolicy === "fixed" && !fixedDropOffPrice) {
+        alert("Please enter fixed drop-off price.");
+        return;
+      }
+    }
+
     setSubmitting(true);
+
     try {
-      // You can integrate your uploadAvailability API call here
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      onNext({
-        expectedHourlyRent,
-        availabilityFrom,
-        availabilityTill,
-        serviceType,
-        selfDriveDropOffPolicy,
-        flexibleDropOffRate,
-        fixedDropOffPrice,
-        intercityPricePerKm,
-        carLocation,
-      });
-      console.log(carId);
-      // const result = await uploadAvailability({
-      //   car_id: carId,
-      //   price_per_hour: expectedHourlyRent,
-      //   available_from: availabilityFrom,
-      //   available_till: availabilityTill,
-      //   self_drive_dropoff_policy: selfDriveDropOffPolicy,
-      //   flexible_dropoff_rate:
-      //     selfDriveDropOffPolicy === "flexible" ? flexibleDropOffRate : 0,
-      //   fixed_dropoff_price:
-      //     selfDriveDropOffPolicy === "fixed" ? fixedDropOffPrice : 0,
-      //   intercity_price_per_km:
-      //     serviceType === "intercity" || serviceType === "both"
-      //       ? intercityPricePerKm
-      //       : 0,
-      // });
-    } catch (err: any) {
-      alert("Error saving availability");
+      const payload = {
+        car_id: carId,
+        car_mode: mapServiceTypeToCarMode(serviceType),
+
+        available_from: availabilityFrom,
+        available_till: availabilityTill,
+
+        price_per_hour:
+          serviceType === "self-drive" || serviceType === "both"
+            ? expectedHourlyRent
+            : null,
+
+        price_per_km:
+          serviceType === "intercity" || serviceType === "both"
+            ? intercityPricePerKm
+            : null,
+
+        selfdrive_drop_policy:
+          serviceType === "self-drive" || serviceType === "both"
+            ? mapDropPolicyToBackend(selfDriveDropOffPolicy)
+            : "not_available",
+
+        selfdrive_drop_amount:
+          selfDriveDropOffPolicy === "flexible"
+            ? flexibleDropOffRate
+            : selfDriveDropOffPolicy === "fixed"
+            ? fixedDropOffPrice
+            : null,
+
+        car_location: {
+          address: carLocation.address,
+          city: carLocation.city || "",
+          lat: carLocation.lat,
+          lng: carLocation.lng,
+        },
+      };
+
+      await uploadAvailability(payload);
+
+      onSuccess();
+    } catch (err) {
+      console.error(err);
+      alert("Error saving availability.");
     } finally {
       setSubmitting(false);
     }

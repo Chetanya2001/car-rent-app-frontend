@@ -121,9 +121,22 @@ export const uploadImages = async (carId: number, images: File[]) => {
 
 export const uploadAvailability = async (availabilityData: {
   car_id: number;
-  price_per_hour: number;
+  car_mode: "selfdrive" | "intercity" | "both";
   available_from: string;
   available_till: string;
+
+  price_per_hour: number | null;
+  price_per_km: number | null;
+
+  selfdrive_drop_policy: "not_available" | "flexible" | "fixed";
+  selfdrive_drop_amount: number | null;
+
+  car_location: {
+    address: string;
+    city: string;
+    lat: number;
+    lng: number;
+  };
 }) => {
   const token = localStorage.getItem("token");
 
