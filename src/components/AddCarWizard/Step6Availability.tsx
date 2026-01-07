@@ -352,7 +352,11 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
 
         selfdrive_drop_policy:
           serviceType === "self-drive" || serviceType === "both"
-            ? mapDropPolicyToBackend(selfDriveDropOffPolicy)
+            ? mapDropPolicyToBackend(
+                selfDriveDropOffPolicy === "fixed"
+                  ? "no-service"
+                  : selfDriveDropOffPolicy
+              )
             : "not_available",
 
         selfdrive_drop_amount:
@@ -484,7 +488,7 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
 
           <div className="availability-form-group">
             <label className="availability-label">
-              Expected Hourly Rent (₹)
+              Expected Hourly Rent (₹)/hr
             </label>
             <input
               type="number"
@@ -540,36 +544,6 @@ const AvailabilityStep: React.FC<AvailabilityProps> = ({
                   </p>
                 </div>
               </label>
-
-              <label className="availability-radio-label">
-                <input
-                  type="radio"
-                  name="dropOffPolicy"
-                  checked={selfDriveDropOffPolicy === "fixed"}
-                  onChange={() => setSelfDriveDropOffPolicy("fixed")}
-                  className="availability-radio"
-                />
-                <div>
-                  <strong>Fixed Drop-Off Price</strong>
-                  <p className="availability-radio-description">
-                    One-time flat fee
-                  </p>
-                </div>
-              </label>
-              {selfDriveDropOffPolicy === "fixed" && (
-                <div className="availability-nested-input">
-                  <label className="availability-label">Fixed Price (₹)</label>
-                  <input
-                    type="number"
-                    placeholder="Enter fixed price"
-                    value={fixedDropOffPrice || ""}
-                    onChange={(e) =>
-                      setFixedDropOffPrice(Number(e.target.value))
-                    }
-                    className="availability-input"
-                  />
-                </div>
-              )}
             </div>
           </div>
         </div>
