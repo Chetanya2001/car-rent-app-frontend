@@ -1,6 +1,6 @@
 // src/components/common/LocationPickerModal/LocationOptionsModal.tsx
 import React from "react";
-import "../locationPickerModal.css";
+import "./LocationPickerModal.css";
 import { useCurrentLocation } from "./useCurrentLocation";
 
 interface LocationOptionsModalProps {
