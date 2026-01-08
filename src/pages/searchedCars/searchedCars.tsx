@@ -384,13 +384,6 @@ export default function SearchedCars() {
                     )}
                   <PickupDropBadge capabilities={car.capabilities} />
 
-                  {car.capabilities.doorstep_drop &&
-                    car.capabilities.drop_amount && (
-                      <p className="drop-charge">
-                        Drop charge: ₹{car.capabilities.drop_amount}
-                      </p>
-                    )}
-
                   <p className="searched-car-price">
                     ₹{car.price_per_hour} / hour
                   </p>
