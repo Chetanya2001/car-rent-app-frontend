@@ -10,6 +10,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import { searchCars } from "../../services/carService";
+import CarDistanceBadge from "../../components/Cars/CarDistanceBadge";
 
 interface Car {
   id: number;
@@ -19,6 +20,12 @@ interface Car {
   price_per_hour: number;
   photos: string[];
   city?: string;
+  pickup_location?: {
+    latitude: number;
+    longitude: number;
+    address: string;
+    city: string;
+  };
   availableFrom: string;
   availableTo: string;
 }
@@ -350,6 +357,21 @@ export default function SearchedCars() {
                     {car.make} {car.model}
                   </h3>
                   <p>Year: {car.year}</p>
+                  {pickupLocation?.lat &&
+                    pickupLocation?.lng &&
+                    car.pickup_location?.latitude &&
+                    car.pickup_location?.longitude && (
+                      <CarDistanceBadge
+                        pickup={{
+                          lat: pickupLocation.lat,
+                          lng: pickupLocation.lng,
+                        }}
+                        carLocation={{
+                          lat: car.pickup_location?.latitude,
+                          lng: car.pickup_location?.longitude,
+                        }}
+                      />
+                    )}
                   <p className="searched-car-price">
                     ₹{car.price_per_hour} / hour
                   </p>
