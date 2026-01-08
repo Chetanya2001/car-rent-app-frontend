@@ -16,6 +16,7 @@ export interface Car {
   image?: string | null; // single thumbnail if provided
   photos?: string[]; // ✅ array of images
   reviews?: string[];
+  capabilities?: CarCapabilities;
   documents?: {
     car_id: number;
     rc_image_front: string | null;
@@ -31,6 +32,14 @@ export interface Car {
     trip_start_balance: string | null;
     trip_end_balance: string | null;
   };
+}
+export type DropPricingType = "Fixed" | "Percentage" | "None";
+
+export interface CarCapabilities {
+  self_pickup: boolean;
+  doorstep_drop: boolean;
+  drop_pricing_type: DropPricingType;
+  drop_amount: number | null;
 }
 
 export interface CarFormData {

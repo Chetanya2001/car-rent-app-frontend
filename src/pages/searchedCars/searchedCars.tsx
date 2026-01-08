@@ -11,7 +11,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import { searchCars } from "../../services/carService";
 import CarDistanceBadge from "../../components/Cars/CarDistanceBadge";
+import PickupDropBadge from "../../components/Cars/PickupDropBadge";
 
+export type DropPricingType = "fixed" | "distance_based" | null;
+
+export interface CarCapabilities {
+  self_pickup: boolean;
+  doorstep_drop: boolean;
+  drop_pricing_type: DropPricingType;
+  drop_amount: number | null;
+}
 interface Car {
   id: number;
   make: string;
@@ -20,6 +29,7 @@ interface Car {
   price_per_hour: number;
   photos: string[];
   city?: string;
+  capabilities: CarCapabilities;
   pickup_location?: {
     latitude: number;
     longitude: number;
@@ -372,6 +382,15 @@ export default function SearchedCars() {
                         }}
                       />
                     )}
+                  <PickupDropBadge capabilities={car.capabilities} />
+
+                  {car.capabilities.doorstep_drop &&
+                    car.capabilities.drop_amount && (
+                      <p className="drop-charge">
+                        Drop charge: ₹{car.capabilities.drop_amount}
+                      </p>
+                    )}
+
                   <p className="searched-car-price">
                     ₹{car.price_per_hour} / hour
                   </p>
