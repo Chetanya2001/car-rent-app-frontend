@@ -1,3 +1,4 @@
+import "./PickupDropBadge.css";
 interface Props {
   capabilities: {
     self_pickup: boolean;
