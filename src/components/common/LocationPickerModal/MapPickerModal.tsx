@@ -2,7 +2,6 @@
 import React from "react";
 import LocationPicker from "../../Map/LocationPicker";
 import "./LocationPickerModal.css";
-import { formatShortAddress } from "./utils";
 
 interface MapPickerModalProps {
   isOpen: boolean;
@@ -53,24 +52,6 @@ export const MapPickerModal: React.FC<MapPickerModalProps> = ({
           initialPosition={initialPosition}
           onSelect={handleLocationSelect}
         />
-
-        {/* Optional: Show live selected address */}
-        {selectedLocation && (
-          <div
-            style={{
-              padding: "0 24px 16px",
-              fontSize: "15px",
-              color: "#059669",
-              background: "#f0fdf7",
-              borderRadius: "8px",
-              margin: "0 24px 16px",
-              border: "1px solid #d1fae5",
-            }}
-          >
-            📍 <strong>Selected:</strong>{" "}
-            {formatShortAddress(selectedLocation.address)}
-          </div>
-        )}
 
         <button
           onClick={handleConfirm}
