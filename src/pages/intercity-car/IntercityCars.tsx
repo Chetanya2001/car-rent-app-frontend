@@ -85,6 +85,18 @@ export default function IntercityCars() {
       lat: 27.1591,
       lng: 78.003,
     },
+    "Greater Noida Railway Station (GNO)": {
+      lat: 28.5076,
+      lng: 77.5638,
+    },
+    "Sahibabad Railway Station (SBB)": {
+      lat: 28.6739,
+      lng: 77.3646,
+    },
+    "Noida Sector 51 Metro Station": {
+      lat: 28.5857,
+      lng: 77.3753,
+    },
   };
 
   const cityStations: Record<string, string[]> = {
