@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import "./intercityCars.css";
 import Navbar from "../../components/Navbar/Navbar";
 import { MapPickerModal } from "../../components/common/LocationPickerModal";
-import CarDistanceBadge from "../../components/Cars/CarDistanceBadge";
 import { searchIntercityCars } from "../../services/carService";
 import { getRoadDistance } from "../../components/Map/RoadDistanceService";
+import TripDistanceBadge from "../../components/Cars/TripDistanceBadge";
 
 interface Car {
   id: number;
@@ -20,10 +20,6 @@ interface Car {
   available_from?: string;
   available_till?: string;
   price_per_km: number;
-  pickup_location: {
-    latitude: number;
-    longitude: number;
-  };
   documents?: {
     car_id: number;
     insurance_company: string;
@@ -65,7 +61,8 @@ export default function IntercityCars() {
   const [dropCity, setDropCity] = useState("");
   const [dropLocation, setDropLocation] = useState<any>(null);
   const [dropMapOpen, setDropMapOpen] = useState(false);
-  const [distanceMap, setDistanceMap] = useState<Record<number, number>>({});
+  const [tripDistanceKm, setTripDistanceKm] = useState<number | null>(null);
+
   const [sameCityError, setSameCityError] = useState(false);
 
   const [pax, setPax] = useState(1);
@@ -190,29 +187,19 @@ export default function IntercityCars() {
       const carsList = data?.cars || [];
       setCars(carsList);
 
-      // Calculate road distance for EACH car
-      const distances: Record<number, number> = {};
-
-      for (const car of carsList) {
-        try {
-          const res = await getRoadDistance(
-            {
-              lat: car.pickup_location.latitude,
-              lng: car.pickup_location.longitude,
-            },
-            {
-              lat: dropLocation.lat,
-              lng: dropLocation.lng,
-            }
-          );
-
-          distances[car.id] = res.distanceKm;
-        } catch (err) {
-          console.error(`Distance failed for car ${car.id}`, err);
+      // Calculate trip distance ONCE (station → drop)
+      const res = await getRoadDistance(
+        {
+          lat: coords.lat,
+          lng: coords.lng,
+        },
+        {
+          lat: dropLocation.lat,
+          lng: dropLocation.lng,
         }
-      }
+      );
 
-      setDistanceMap(distances);
+      setTripDistanceKm(res.distanceKm);
     } catch (err) {
       console.error(err);
       alert("Failed to search intercity cars");
@@ -427,21 +414,21 @@ export default function IntercityCars() {
                   <p style={{ color: "#01d28e", fontSize: "0.9rem" }}>
                     Driver Included • Insurance Included
                   </p>
-                  {distanceMap[car.id] && (
+                  {tripDistanceKm && (
                     <>
-                      <CarDistanceBadge
+                      <TripDistanceBadge
                         pickup={{
-                          lat: car.pickup_location.latitude,
-                          lng: car.pickup_location.longitude,
+                          lat: stationCoordinates[pickupLocation].lat,
+                          lng: stationCoordinates[pickupLocation].lng,
                         }}
-                        carLocation={{
+                        drop={{
                           lat: dropLocation.lat,
                           lng: dropLocation.lng,
                         }}
                       />
 
                       <p className="searched-car-price">
-                        ₹{Math.round(distanceMap[car.id] * car.price_per_km)}
+                        ₹{Math.round(tripDistanceKm * car.price_per_km)}
                       </p>
                     </>
                   )}
