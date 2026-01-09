@@ -120,6 +120,11 @@ export default function IntercityCars() {
       "Amritsar Junction (ASR)",
       "Sri Guru Ram Dass Jee International Airport (ATQ)",
     ],
+    Noida: [
+      "Greater Noida Railway Station (GNO)",
+      "Sahibabad Railway Station (SBB)",
+      "Noida Sector 51 Metro Station",
+    ],
   };
 
   const allCities = Object.keys(cityStations);
