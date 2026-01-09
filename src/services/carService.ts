@@ -306,3 +306,27 @@ export const deleteCarById = async (car_id: number) => {
   });
   return response.data;
 };
+
+export const searchIntercityCars = async (data: {
+  pickup_location: {
+    address: string;
+    city: string;
+    latitude: number;
+    longitude: number;
+  };
+  drop_location: {
+    address: string;
+    city: string;
+    latitude: number;
+    longitude: number;
+  };
+  pickup_datetime: string;
+  pax: number;
+  luggage: number;
+}) => {
+  const response = await axios.post(`${API_URL}/search-intercity`, data, {
+    headers: { "Content-Type": "application/json" },
+  });
+
+  return response.data;
+};

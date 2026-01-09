@@ -2,7 +2,10 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "./intercityCars.css";
 import Navbar from "../../components/Navbar/Navbar";
-import { searchCars } from "../../services/carService";
+import { MapPickerModal } from "../../components/common/LocationPickerModal";
+import CarDistanceBadge from "../../components/Cars/CarDistanceBadge";
+import { searchIntercityCars } from "../../services/carService";
+import { getRoadDistance } from "../../components/Map/RoadDistanceService";
 
 interface Car {
   id: number;
@@ -16,6 +19,11 @@ interface Car {
   availableTo?: string;
   available_from?: string;
   available_till?: string;
+  price_per_km: number;
+  pickup_location: {
+    latitude: number;
+    longitude: number;
+  };
   documents?: {
     car_id: number;
     insurance_company: string;
@@ -55,6 +63,10 @@ export default function IntercityCars() {
   const [pickupDate, setPickupDate] = useState(date);
   const [pickupTime, setPickupTime] = useState(time);
   const [dropCity, setDropCity] = useState("");
+  const [dropLocation, setDropLocation] = useState<any>(null);
+  const [dropMapOpen, setDropMapOpen] = useState(false);
+  const [distanceMap, setDistanceMap] = useState<Record<number, number>>({});
+  const [sameCityError, setSameCityError] = useState(false);
 
   const [pax, setPax] = useState(1);
   const [luggage, setLuggage] = useState(0);
@@ -113,8 +125,15 @@ export default function IntercityCars() {
   const allCities = Object.keys(cityStations);
 
   const handleSearch = async () => {
-    if (!pickupLocation || !dropCity) {
-      alert("Please select pickup & drop locations");
+    // Basic validations
+    if (!pickupLocation || !dropLocation) {
+      alert("Please select pickup station and drop address");
+      return;
+    }
+
+    // Same city check (hard stop)
+    if (pickupCity === dropLocation.city) {
+      alert("Pickup city and drop city cannot be the same for intercity trips");
       return;
     }
 
@@ -125,31 +144,61 @@ export default function IntercityCars() {
     }
 
     setLoading(true);
+
     try {
+      // Pickup datetime
       const pickup_datetime = new Date(
         `${pickupDate}T${pickupTime}`
       ).toISOString();
 
-      const dropoff_datetime = new Date(pickup_datetime);
-      dropoff_datetime.setHours(dropoff_datetime.getHours() + 48);
-
-      const data = await searchCars({
+      // Call INTERCITY search API
+      const data = await searchIntercityCars({
         pickup_location: {
           address: pickupLocation,
           city: pickupCity,
           latitude: coords.lat,
           longitude: coords.lng,
         },
+        drop_location: {
+          address: dropLocation.address,
+          city: dropLocation.city,
+          latitude: dropLocation.lat,
+          longitude: dropLocation.lng,
+        },
         pickup_datetime,
-        dropoff_datetime: dropoff_datetime.toISOString(),
-        trip_type: "intercity",
-        drop_city: dropCity,
+        pax,
+        luggage,
       });
 
-      setCars(data.cars || []);
+      const carsList = data?.cars || [];
+      setCars(carsList);
+
+      // Calculate road distance for EACH car
+      const distances: Record<number, number> = {};
+
+      for (const car of carsList) {
+        try {
+          const res = await getRoadDistance(
+            {
+              lat: car.pickup_location.latitude,
+              lng: car.pickup_location.longitude,
+            },
+            {
+              lat: dropLocation.lat,
+              lng: dropLocation.lng,
+            }
+          );
+
+          distances[car.id] = res.distanceKm;
+        } catch (err) {
+          console.error(`Distance failed for car ${car.id}`, err);
+        }
+      }
+
+      setDistanceMap(distances);
     } catch (err) {
       console.error(err);
-      alert("Failed to search cars");
+      alert("Failed to search intercity cars");
     } finally {
       setLoading(false);
     }
@@ -185,8 +234,6 @@ export default function IntercityCars() {
       return true;
     });
   }, [cars, pickupCity, pickupDate, pickupTime]);
-
-  const availableDropCities = allCities.filter((city) => city !== pickupCity);
 
   return (
     <>
@@ -249,22 +296,22 @@ export default function IntercityCars() {
         </label>
 
         <label>
-          Drop City:
-          <select
-            value={dropCity}
-            onChange={(e) => setDropCity(e.target.value)}
-            required
-          >
-            <option value="" disabled>
-              Select Drop City
-            </option>
-            {availableDropCities.map((city) => (
-              <option key={city} value={city}>
-                {city}
-              </option>
-            ))}
-          </select>
+          Drop Address:
+          <div className="location-input" onClick={() => setDropMapOpen(true)}>
+            <input
+              type="text"
+              readOnly
+              placeholder="Select drop location on map"
+              value={dropLocation?.address || ""}
+            />
+          </div>
         </label>
+
+        {sameCityError && (
+          <p style={{ color: "red", fontSize: "0.9rem" }}>
+            Pickup city and drop city cannot be the same for intercity trips
+          </p>
+        )}
 
         {/* PAX (+ -) */}
         <label>
@@ -317,7 +364,7 @@ export default function IntercityCars() {
         <button
           className="searched-search-btn"
           onClick={handleSearch}
-          disabled={loading}
+          disabled={loading || sameCityError || !dropLocation}
         >
           {loading ? "Searching..." : "Search"}
         </button>
@@ -365,6 +412,24 @@ export default function IntercityCars() {
                   <p style={{ color: "#01d28e", fontSize: "0.9rem" }}>
                     Driver Included • Insurance Included
                   </p>
+                  {distanceMap[car.id] && (
+                    <>
+                      <CarDistanceBadge
+                        pickup={{
+                          lat: car.pickup_location.latitude,
+                          lng: car.pickup_location.longitude,
+                        }}
+                        carLocation={{
+                          lat: dropLocation.lat,
+                          lng: dropLocation.lng,
+                        }}
+                      />
+
+                      <p className="searched-car-price">
+                        ₹{Math.round(distanceMap[car.id] * car.price_per_km)}
+                      </p>
+                    </>
+                  )}
                 </div>
 
                 <div className="searched-car-actions">
@@ -407,6 +472,24 @@ export default function IntercityCars() {
           </div>
         )}
       </div>
+      <MapPickerModal
+        isOpen={dropMapOpen}
+        onClose={() => setDropMapOpen(false)}
+        initialPosition={[
+          dropLocation?.lat || 28.6139,
+          dropLocation?.lng || 77.209,
+        ]}
+        onConfirm={(loc) => {
+          if (loc.city === pickupCity) {
+            setSameCityError(true);
+            setDropLocation(null);
+            return;
+          }
+
+          setSameCityError(false);
+          setDropLocation(loc);
+        }}
+      />
     </>
   );
 }
