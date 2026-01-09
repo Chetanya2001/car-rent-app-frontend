@@ -423,9 +423,7 @@ export default function IntercityCars() {
                     {car.make} {car.model}
                   </h3>
                   <p>Year: {car.year}</p>
-                  <p className="searched-car-price">
-                    ₹{car.price_per_hour} / hour
-                  </p>
+                  <p className="searched-car-price">₹{car.price_per_km} / km</p>
                   <p style={{ color: "#01d28e", fontSize: "0.9rem" }}>
                     Driver Included • Insurance Included
                   </p>
