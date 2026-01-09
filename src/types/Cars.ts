@@ -17,6 +17,7 @@ export interface Car {
   photos?: string[]; // ✅ array of images
   reviews?: string[];
   capabilities?: CarCapabilities;
+  price_per_km: number;
   documents?: {
     car_id: number;
     rc_image_front: string | null;

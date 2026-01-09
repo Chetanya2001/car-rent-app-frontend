@@ -49,6 +49,7 @@ export default function MyCars() {
   const [editingValidTill, setEditingValidTill] = useState("");
   const [selectedImage, setSelectedImage] = useState<any>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [pricingType, setPricingType] = useState<"hour" | "km">("hour");
 
   const fetchCars = async () => {
     try {
@@ -58,10 +59,8 @@ export default function MyCars() {
         const processedCars = data.cars.map((car: any) => ({
           ...car,
           photos: Array.isArray(car.photos) ? car.photos : [],
-          price_per_hour:
-            typeof car.price_per_hour === "string"
-              ? car.price_per_hour.replace(/\$/g, "")
-              : car.price_per_hour,
+          price_per_hour: car.price_per_hour,
+          price_per_km: car.price_per_km,
         }));
 
         setCars(processedCars);
@@ -89,7 +88,14 @@ export default function MyCars() {
     setEditingFeatures(initialFeatures);
 
     // Initialize other fields
-    setEditingPrice(car.price_per_hour?.toString() || "");
+    setPricingType(car.price_per_km !== null ? "km" : "hour");
+
+    setEditingPrice(
+      car.price_per_km !== null
+        ? car.price_per_km.toString()
+        : car.price_per_hour?.toString() || ""
+    );
+
     setEditingInsuranceCompany((car as any).insurance?.company || "");
     setEditingIdvValue((car as any).insurance?.idv_value?.toString() || "");
     setEditingValidTill((car as any).insurance?.valid_till || "");
@@ -189,7 +195,13 @@ export default function MyCars() {
 
       // Add pricing
       if (editingPrice) {
-        updatePayload.price_per_hour = parseFloat(editingPrice);
+        if (pricingType === "hour") {
+          updatePayload.price_per_hour = parseFloat(editingPrice);
+          updatePayload.price_per_km = null;
+        } else {
+          updatePayload.price_per_km = parseFloat(editingPrice);
+          updatePayload.price_per_hour = null;
+        }
       }
 
       // Add insurance details
@@ -279,6 +291,14 @@ export default function MyCars() {
                     <h3 className="car-title">
                       {car.make} {car.model}
                     </h3>
+                    <div className="trip-type-badges">
+                      {car.price_per_hour !== null && (
+                        <span className="badge selfdrive">Self-Drive</span>
+                      )}
+                      {car.price_per_km !== null && (
+                        <span className="badge intercity">Intercity</span>
+                      )}
+                    </div>
 
                     <div className="car-details-grid">
                       <div className="detail-item">
@@ -287,9 +307,18 @@ export default function MyCars() {
                       </div>
                       <div className="detail-item price-item">
                         <span className="detail-label">Price</span>
-                        <span className="detail-value price">
-                          ₹{car.price_per_hour}/hr
-                        </span>
+
+                        {car.price_per_hour !== null && (
+                          <span className="detail-value price">
+                            ₹{car.price_per_hour}/hr
+                          </span>
+                        )}
+
+                        {car.price_per_km !== null && (
+                          <span className="detail-value price">
+                            ₹{car.price_per_km}/km
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -453,17 +482,38 @@ export default function MyCars() {
                   <span className="section-icon">💰</span>
                   <h4 className="section-title">Pricing</h4>
                 </div>
+
+                <div className="pricing-type-toggle">
+                  <label>
+                    <input
+                      type="radio"
+                      checked={pricingType === "hour"}
+                      onChange={() => setPricingType("hour")}
+                    />
+                    Per Hour
+                  </label>
+
+                  <label>
+                    <input
+                      type="radio"
+                      checked={pricingType === "km"}
+                      onChange={() => setPricingType("km")}
+                    />
+                    Per KM
+                  </label>
+                </div>
+
                 <div className="premium-input-wrapper">
-                  <label className="premium-label">Hourly Rate</label>
+                  <label className="premium-label">
+                    {pricingType === "hour" ? "Hourly Rate" : "Per KM Rate"}
+                  </label>
                   <div className="input-with-icon">
                     <span className="input-icon">₹</span>
                     <input
                       type="number"
                       value={editingPrice}
                       onChange={(e) => setEditingPrice(e.target.value)}
-                      placeholder="Enter hourly rate"
                       className="premium-input"
-                      step="0.01"
                       min="0"
                     />
                   </div>
