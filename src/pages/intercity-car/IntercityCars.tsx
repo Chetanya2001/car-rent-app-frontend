@@ -11,7 +11,7 @@ interface Car {
   id: number;
   make: string;
   model: string;
-  year: number;
+  year?: number;
   price_per_hour: number;
   photos: string[];
   city?: string;
@@ -409,7 +409,6 @@ export default function IntercityCars() {
                   <h3>
                     {car.make} {car.model}
                   </h3>
-                  <p>Year: {car.year}</p>
                   <p className="searched-car-price">₹{car.price_per_km} / km</p>
                   <p style={{ color: "#01d28e", fontSize: "0.9rem" }}>
                     Driver Included • Insurance Included
@@ -428,8 +427,10 @@ export default function IntercityCars() {
                       />
 
                       <p className="searched-car-price">
-                        ₹{Math.round(tripDistanceKm * car.price_per_km)}
+                        Total Trip Amount : ₹
+                        {Math.round(tripDistanceKm * car.price_per_km)}
                       </p>
+                      <p className="searched-car-price">Tolls/Taxes extra</p>
                     </>
                   )}
                 </div>
