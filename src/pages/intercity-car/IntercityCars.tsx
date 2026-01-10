@@ -253,6 +253,9 @@ export default function IntercityCars() {
               setPickupCity(e.target.value);
               setPickupLocation("");
               setDropCity("");
+              setDropLocation(null);
+              setTripDistanceKm(null);
+              setCars([]);
             }}
           >
             {allCities.map((city) => (
@@ -413,26 +416,29 @@ export default function IntercityCars() {
                   <p style={{ color: "#01d28e", fontSize: "0.9rem" }}>
                     Driver Included • Insurance Included
                   </p>
-                  {tripDistanceKm && (
-                    <>
-                      <TripDistanceBadge
-                        pickup={{
-                          lat: stationCoordinates[pickupLocation].lat,
-                          lng: stationCoordinates[pickupLocation].lng,
-                        }}
-                        drop={{
-                          lat: dropLocation.lat,
-                          lng: dropLocation.lng,
-                        }}
-                      />
+                  {tripDistanceKm &&
+                    pickupLocation &&
+                    stationCoordinates[pickupLocation] &&
+                    dropLocation && (
+                      <>
+                        <TripDistanceBadge
+                          pickup={{
+                            lat: stationCoordinates[pickupLocation].lat,
+                            lng: stationCoordinates[pickupLocation].lng,
+                          }}
+                          drop={{
+                            lat: dropLocation.lat,
+                            lng: dropLocation.lng,
+                          }}
+                        />
+                        <p className="searched-car-price">
+                          Total Trip Amount : ₹
+                          {Math.round(tripDistanceKm * car.price_per_km)}
+                        </p>
 
-                      <p className="searched-car-price">
-                        Total Trip Amount : ₹
-                        {Math.round(tripDistanceKm * car.price_per_km)}
-                      </p>
-                      <p className="searched-car-price">Tolls/Taxes extra</p>
-                    </>
-                  )}
+                        <p className="searched-car-price">Tolls/Taxes extra</p>
+                      </>
+                    )}
                 </div>
 
                 <div className="searched-car-actions">
