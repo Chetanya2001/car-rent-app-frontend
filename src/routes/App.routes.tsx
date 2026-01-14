@@ -22,7 +22,7 @@ import Dashboard from "../pages/admin/dashboard/dashboard";
 import GuestMyBookings from "../pages/guest-mybookings/guest-mybookings";
 import HostMyBookings from "../pages/host-mybookings/host-mybookings";
 import IntercityCars from "../pages/intercity-car/IntercityCars";
-import BookAcarRouter from "../pages/BookACar/BookAcarRouter";
+import SelfDriveCarDetails from "../pages/BookACar/selfDriveCarDetails";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -37,7 +37,7 @@ const AppRoutes = () => (
       <Route path="/my-documents" element={<MyDocumentsPage />} />
       <Route path="/support" element={<Support />} />
       <Route path="/community" element={<Community />} />
-      <Route path="/bookAcar" element={<BookAcarRouter />} />
+      <Route path="/selfdrive/car" element={<SelfDriveCarDetails />} />
       <Route path="/guest-mybookings" element={<GuestMyBookings />} />
       <Route path="/host-mybookings" element={<HostMyBookings />} />
       <Route path="/intercity-cars" element={<IntercityCars />} />

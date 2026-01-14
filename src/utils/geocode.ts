@@ -2,8 +2,8 @@
 
 // This function converts an address string to lat/lng coordinates using LocationIQ forward geocoding
 export interface GeocodeResult {
-  lat: number;
-  lng: number;
+  lat: number | null;
+  lng: number | null;
   display_name: string;
   city?: string;
   state?: string;

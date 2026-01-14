@@ -398,11 +398,11 @@ export default function SearchedCars() {
                   <button
                     className="searched-btn-book"
                     onClick={() =>
-                      navigate("/bookAcar", {
+                      navigate("/selfdrive/car", {
                         state: {
                           carId: car.id,
-                          pricePerHour: car.price_per_hour,
                           bookingDetails: { ...filters, dropCity },
+                          pickupLocation,
                         },
                       })
                     }

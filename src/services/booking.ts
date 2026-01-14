@@ -2,6 +2,9 @@
 import axios from "axios";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/api/bookings`;
+const API_URL_SelfDrive = `${
+  import.meta.env.VITE_API_URL
+}/api/self-drive-bookings`;
 
 // The booking input type matches your API needs
 
@@ -10,11 +13,11 @@ export interface BookCarRequest {
   start_datetime: string;
   end_datetime: string;
   pickup_address: string;
-  pickup_lat: number;
-  pickup_long: number;
+  pickup_lat: number | null;
+  pickup_long: number | null;
   drop_address: string;
-  drop_lat: number;
-  drop_long: number;
+  drop_lat: number | null;
+  drop_long: number | null;
   insure_amount?: number;
   driver_amount?: number;
 }
@@ -28,8 +31,8 @@ export interface UpdateBookingRequest {
   start_datetime?: string;
   end_datetime?: string;
   pickup_address?: string;
-  pickup_lat?: number;
-  pickup_long?: number;
+  pickup_lat?: number | null;
+  pickup_long?: number | null;
   drop_address?: string;
   drop_lat?: number;
   drop_long?: number;
@@ -49,7 +52,7 @@ export const bookCar = async (
 ): Promise<BookCarResponse> => {
   try {
     const res = await axios.post<BookCarResponse>(
-      `${API_URL}/book-car`,
+      `${API_URL_SelfDrive}/book`,
       bookingData,
       {
         headers: {
