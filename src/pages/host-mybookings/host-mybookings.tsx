@@ -6,13 +6,8 @@ import "./host-mybookings.css";
 
 type HostBooking = {
   id: number;
-  start_datetime: string;
-  end_datetime: string;
-  pickup_address: string;
-  drop_address: string;
-  insure_amount: number;
-  driver_amount: number;
   status: string;
+  total_amount: number;
   Car: {
     id: number;
     make: string;
@@ -22,6 +17,13 @@ type HostBooking = {
     description: string;
     photos?: { photo_url: string }[];
   };
+  SelfDriveBooking: {
+    start_datetime: string;
+    end_datetime: string;
+    pickup_address: string;
+    drop_address: string;
+    insure_amount: number;
+  } | null;
   guest: {
     id: number;
     first_name: string;
@@ -104,25 +106,50 @@ export default function HostMyBookings() {
 
         {bookings.map((booking) => {
           const car = booking.Car;
-          const image = car?.photos?.[0]?.photo_url || "/default-car.png";
           const guest = booking.guest;
+          const sd = booking.SelfDriveBooking;
 
-          const startDate = new Date(booking.start_datetime);
-          const endDate = new Date(booking.end_datetime);
+          // 👉 Only show SELF_DRIVE bookings here
+          if (!sd) return null;
+
+          const image = car?.photos?.[0]?.photo_url || "/default-car.png";
+
+          // ✅ Dates MUST come from SelfDriveBooking
+          const startDate = new Date(sd.start_datetime);
+          const endDate = new Date(sd.end_datetime);
 
           const pickupDate = startDate.toLocaleDateString();
           const pickupTime = startDate.toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
           });
+
           const dropoffDate = endDate.toLocaleDateString();
           const dropoffTime = endDate.toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
           });
 
+          // ✅ Price calculation (same as before)
+          const hourlyRate =
+            parseFloat(car.price_per_hour?.toString().replace(/[^\d.]/g, "")) ||
+            0;
+
+          const totalHours = Math.max(
+            1,
+            Math.round(
+              (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)
+            )
+          );
+
+          const rentalAmount = hourlyRate * totalHours;
+          const insureAmount = sd.insure_amount || 0;
+          const driverAmount = 0; // self-drive
+          const totalAmount = rentalAmount + insureAmount + driverAmount;
+
           return (
             <div key={booking.id} className="booking-card">
+              {/* ================= CAR IMAGE ================= */}
               <img
                 src={image}
                 alt={`${car.make} ${car.model}`}
@@ -130,40 +157,45 @@ export default function HostMyBookings() {
               />
 
               <div className="booking-details">
+                {/* ================= LEFT ================= */}
                 <div>
                   <h3>
                     {car.make} {car.model} ({car.year})
                   </h3>
                   <p className="car-description">{car.description}</p>
 
+                  {/* ================= DATES ================= */}
                   <div className="booking-dates">
                     <div>
                       <p className="label">Pickup</p>
                       <p>
-                        {booking.pickup_address}
+                        {sd.pickup_address}
                         <br />
                         {pickupDate}, {pickupTime}
                       </p>
                     </div>
+
                     <div>
                       <p className="label">Drop-off</p>
                       <p>
-                        {booking.drop_address}
+                        {sd.drop_address}
                         <br />
                         {dropoffDate}, {dropoffTime}
                       </p>
                     </div>
                   </div>
 
+                  {/* ================= GUEST INFO ================= */}
                   <div className="guest-info">
-                    <p className="label">Guest:</p>
+                    <p className="label">Guest</p>
                     <p>
                       {guest ? `${guest.first_name} ${guest.last_name}` : "N/A"}
                     </p>
 
-                    {/* Contact Icons */}
+                    {/* ===== CALL / CHAT / EMAIL ===== */}
                     {guest && (
                       <div className="contact-icons">
+                        {/* 📞 CALL */}
                         <button
                           className="contact-icon-btn phone-btn"
                           onClick={() =>
@@ -171,131 +203,66 @@ export default function HostMyBookings() {
                           }
                           title={`Call ${guest.phone}`}
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                          </svg>
-                          <span>
-                            {copiedPhone === booking.id ? "Copied!" : "Call"}
-                          </span>
+                          📞 <span>Call</span>
                         </button>
+                        {copiedPhone && (
+                          <span className="copied-feedback">Phone copied!</span>
+                        )}
+
+                        {/* 💬 CHAT */}
                         <button
                           className="contact-icon-btn chat-btn"
                           onClick={() => handleChatClick(guest)}
-                          title="Chat with guest"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                          </svg>
-                          <span>Chat</span>
+                          💬 <span>Chat</span>
                         </button>
 
+                        {/* ✉️ EMAIL */}
                         <button
                           className="contact-icon-btn email-btn"
                           onClick={() => handleEmailClick(guest.email)}
-                          title={`Email ${guest.email}`}
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                            <polyline points="22,6 12,13 2,6" />
-                          </svg>
-                          <span>Email</span>
+                          ✉️ <span>Email</span>
                         </button>
                       </div>
                     )}
                   </div>
                 </div>
+
+                {/* ================= RIGHT / PRICE ================= */}
                 <div className="price-section">
-                  {/* ✅ NEW CALCULATION */}
-                  {(() => {
-                    const hourlyRate =
-                      parseFloat(car.price_per_hour.replace(/[^\d.]/g, "")) ||
-                      0;
-                    const totalHours = Math.round(
-                      (new Date(booking.end_datetime).getTime() -
-                        new Date(booking.start_datetime).getTime()) /
-                        (1000 * 60 * 60)
-                    );
-                    const rentalAmount = hourlyRate * totalHours;
+                  <div className="calculation-breakdown">
+                    <div className="calc-row">
+                      <span>₹{hourlyRate}/hr</span>
+                      <span>× {totalHours} hr</span>
+                    </div>
+                    <div className="calc-equals">
+                      <strong>= ₹{rentalAmount.toLocaleString()}</strong>
+                    </div>
+                  </div>
 
-                    return (
-                      <>
-                        <div className="calculation-breakdown">
-                          <div className="calc-row">
-                            <span>₹{hourlyRate}/hr</span>
-                            <span>× {totalHours} hr</span>
-                          </div>
-                          <div className="calc-equals">
-                            <strong>= ₹{rentalAmount.toLocaleString()}</strong>
-                          </div>
-                        </div>
+                  <div className="total-breakdown">
+                    <div className="amount-row">
+                      <span>Insurance: ₹{insureAmount.toLocaleString()}</span>
+                    </div>
 
-                        <div className="total-breakdown">
-                          <div className="amount-row">
-                            <span>
-                              Insure: ₹{booking.insure_amount.toLocaleString()}
-                            </span>
-                          </div>
-                          <div className="amount-row">
-                            <span>
-                              Driver: ₹{booking.driver_amount.toLocaleString()}
-                            </span>
-                          </div>
-                          <hr />
-                          <div className="total-row">
-                            <strong>
-                              Total: ₹
-                              {(
-                                rentalAmount +
-                                booking.insure_amount +
-                                booking.driver_amount
-                              ).toLocaleString()}
-                            </strong>
-                          </div>
-                        </div>
+                    <hr />
 
-                        <p className="status-row">
-                          Status: <strong>{booking.status}</strong>
-                        </p>
+                    <div className="total-row">
+                      <strong>Total: ₹{totalAmount.toLocaleString()}</strong>
+                    </div>
+                  </div>
 
-                        <button
-                          className="view-details-btn"
-                          onClick={() => handleViewCar(car.id)}
-                        >
-                          View Car
-                        </button>
-                      </>
-                    );
-                  })()}
+                  <p className="status-row">
+                    Status: <strong>{booking.status}</strong>
+                  </p>
+
+                  <button
+                    className="view-details-btn"
+                    onClick={() => handleViewCar(car.id)}
+                  >
+                    View Car
+                  </button>
                 </div>
               </div>
             </div>
