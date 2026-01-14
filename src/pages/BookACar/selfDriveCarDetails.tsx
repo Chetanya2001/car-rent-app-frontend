@@ -9,7 +9,11 @@ import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
 import LocationPicker from "../../components/Map/LocationPicker";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faChevronRight, faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faChevronRight,
+  faMapMarkerAlt,
+} from "@fortawesome/free-solid-svg-icons";
 
 import { getCarDetails } from "../../services/carDetails";
 import { getCarLocation } from "../../services/carService";
@@ -114,6 +118,7 @@ const SelfDriveCarDetails: React.FC = () => {
       total: subtotal + gst,
     };
   }, [car, hours, insureTrip, driverRequired, differentDrop]);
+
   const nextImage = () => {
     if (car?.photos?.length) {
       setCurrentImageIndex((prev) => (prev + 1) % car.photos.length);
@@ -185,7 +190,9 @@ const SelfDriveCarDetails: React.FC = () => {
     return (
       <>
         <Navbar />
-        <div className="book-car-container">Loading...</div>
+        <div className="book-car-container">
+          <div className="loading-spinner">Loading...</div>
+        </div>
         <Footer />
       </>
     );
@@ -198,7 +205,7 @@ const SelfDriveCarDetails: React.FC = () => {
       <Navbar />
 
       <div className="book-car-container">
-        {/* LEFT - Car details + tabs */}
+        {/* LEFT SECTION - Car details + tabs */}
         <div className="car-details-section">
           <button className="back-button" onClick={() => navigate(-1)}>
             ←
@@ -208,19 +215,18 @@ const SelfDriveCarDetails: React.FC = () => {
             {car.make} {car.model}
           </h1>
 
+          {/* FIXED: Carousel with correct class names */}
           {car.photos?.length > 0 && (
-            <div className="carousel-wrapper">
-              <button className="carousel-btn prev" onClick={prevImage}>
-                <FontAwesomeIcon icon={faChevronLeft} />
-              </button>
-
+            <div className="carousel">
               <img
                 src={car.photos[currentImageIndex].photo_url}
                 alt={car.model}
-                className="main-car-image"
+                className="carousel-image"
               />
-
-              <button className="carousel-btn next" onClick={nextImage}>
+              <button className="prev" onClick={prevImage}>
+                <FontAwesomeIcon icon={faChevronLeft} />
+              </button>
+              <button className="next" onClick={nextImage}>
                 <FontAwesomeIcon icon={faChevronRight} />
               </button>
             </div>
@@ -229,8 +235,9 @@ const SelfDriveCarDetails: React.FC = () => {
           <CarTabs car={car} />
         </div>
 
-        {/* RIGHT - Booking controls + ChargesCard */}
+        {/* RIGHT SECTION - Booking controls + ChargesCard */}
         <div className="booking-section">
+          {/* Zip Your Trip Panel */}
           <div className="zip-trip-panel">
             <h3>Zip Your Trip</h3>
 
@@ -269,38 +276,46 @@ const SelfDriveCarDetails: React.FC = () => {
               </div>
             </div>
 
+            {/* FIXED: Toggle switches with correct structure */}
             <div className="options-list">
-              <label className="option-row">
+              <div className="option-row">
                 <span>Insure Trip</span>
-                <input
-                  type="checkbox"
-                  checked={insureTrip}
-                  onChange={() => setInsureTrip(!insureTrip)}
-                />
-                <span className="checkmark"></span>
-              </label>
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    checked={insureTrip}
+                    onChange={() => setInsureTrip(!insureTrip)}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
 
-              <label className="option-row">
+              <div className="option-row">
                 <span>Driver Required</span>
-                <input
-                  type="checkbox"
-                  checked={driverRequired}
-                  onChange={() => setDriverRequired(!driverRequired)}
-                />
-                <span className="checkmark"></span>
-              </label>
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    checked={driverRequired}
+                    onChange={() => setDriverRequired(!driverRequired)}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
 
-              <label className="option-row">
+              <div className="option-row">
                 <span>Different Drop Location</span>
-                <input
-                  type="checkbox"
-                  checked={differentDrop}
-                  onChange={() => setDifferentDrop(!differentDrop)}
-                />
-                <span className="checkmark"></span>
-              </label>
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    checked={differentDrop}
+                    onChange={() => setDifferentDrop(!differentDrop)}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
             </div>
 
+            {/* Drop city selector */}
             {differentDrop && (
               <div className="drop-city-field">
                 <select
@@ -313,12 +328,16 @@ const SelfDriveCarDetails: React.FC = () => {
                   <option>Gurgaon</option>
                   <option>Agra</option>
                 </select>
-                <FontAwesomeIcon icon={faMapMarkerAlt} className="map-icon" />
+                <FontAwesomeIcon
+                  icon={faMapMarkerAlt}
+                  className="map-icon"
+                  onClick={() => setShowDropMap(true)}
+                />
               </div>
             )}
           </div>
 
-          {/* Keep your original ChargesCard component unchanged */}
+          {/* Charges Card - Confirm Your Booking */}
           <ChargesCard
             carCharges={pricing.base}
             insuranceCharges={pricing.insurance}
@@ -332,6 +351,8 @@ const SelfDriveCarDetails: React.FC = () => {
       </div>
 
       <Footer />
+
+      {/* Map Modal */}
       {showDropMap && (
         <ModalWrapper onClose={() => setShowDropMap(false)}>
           <LocationPicker
