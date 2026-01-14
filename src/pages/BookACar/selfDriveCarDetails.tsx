@@ -38,6 +38,7 @@ const SelfDriveCarDetails: React.FC = () => {
   const [car, setCar] = useState<CarDetailsType | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchedCarLocation, setFetchedCarLocation] = useState("");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const now = new Date();
   now.setHours(now.getHours() + 2);
@@ -113,6 +114,19 @@ const SelfDriveCarDetails: React.FC = () => {
       total: subtotal + gst,
     };
   }, [car, hours, insureTrip, driverRequired, differentDrop]);
+  const nextImage = () => {
+    if (car?.photos?.length) {
+      setCurrentImageIndex((prev) => (prev + 1) % car.photos.length);
+    }
+  };
+
+  const prevImage = () => {
+    if (car?.photos?.length) {
+      setCurrentImageIndex(
+        (prev) => (prev - 1 + car.photos.length) % car.photos.length
+      );
+    }
+  };
 
   /* -------------------- BOOKING -------------------- */
   const handleBookNow = async () => {
@@ -193,6 +207,24 @@ const SelfDriveCarDetails: React.FC = () => {
           <h1>
             {car.make} {car.model}
           </h1>
+          {/* CAROUSEL */}
+          {car.photos?.length > 0 && (
+            <div className="carousel">
+              <button className="prev" onClick={prevImage}>
+                &#10094;
+              </button>
+
+              <img
+                src={car.photos[currentImageIndex].photo_url}
+                alt={`${car.make} ${car.model}`}
+                className="carousel-image"
+              />
+
+              <button className="next" onClick={nextImage}>
+                &#10095;
+              </button>
+            </div>
+          )}
 
           <CarTabs car={car} />
 
@@ -224,30 +256,41 @@ const SelfDriveCarDetails: React.FC = () => {
             </div>
 
             <div className="trip-options">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={insureTrip}
-                  onChange={() => setInsureTrip(!insureTrip)}
-                />{" "}
-                Insure Trip
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={driverRequired}
-                  onChange={() => setDriverRequired(!driverRequired)}
-                />{" "}
-                Driver
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={differentDrop}
-                  onChange={() => setDifferentDrop(!differentDrop)}
-                />{" "}
-                Different Drop
-              </label>
+              <div className="toggle-wrapper">
+                <p className="switch-label">Insure Trip</p>
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    checked={insureTrip}
+                    onChange={() => setInsureTrip(!insureTrip)}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
+
+              <div className="toggle-wrapper">
+                <p className="switch-label">Driver Required</p>
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    checked={driverRequired}
+                    onChange={() => setDriverRequired(!driverRequired)}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
+
+              <div className="toggle-wrapper">
+                <p className="switch-label">Different Drop Location</p>
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    checked={differentDrop}
+                    onChange={() => setDifferentDrop(!differentDrop)}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
             </div>
 
             {differentDrop && (
