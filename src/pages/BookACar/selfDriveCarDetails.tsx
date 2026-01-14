@@ -227,7 +227,10 @@ const SelfDriveCarDetails: React.FC = () => {
           )}
 
           <CarTabs car={car} />
+        </div>
 
+        {/* RIGHT */}
+        <div className="right-section">
           {/* TRIP */}
           <div className="trip-section">
             <h3>Zip Your Trip</h3>
@@ -312,10 +315,7 @@ const SelfDriveCarDetails: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
-
-        {/* RIGHT */}
-        <div className="right-section">
+          {/* CHARGES */}
           <ChargesCard
             carCharges={pricing.base}
             insuranceCharges={pricing.insurance}
