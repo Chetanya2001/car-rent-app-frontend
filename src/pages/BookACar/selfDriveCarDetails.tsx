@@ -9,7 +9,7 @@ import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
 import LocationPicker from "../../components/Map/LocationPicker";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
+import { faChevronLeft, faChevronRight, faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 
 import { getCarDetails } from "../../services/carDetails";
 import { getCarLocation } from "../../services/carService";
@@ -198,30 +198,30 @@ const SelfDriveCarDetails: React.FC = () => {
       <Navbar />
 
       <div className="book-car-container">
-        {/* LEFT */}
+        {/* LEFT - Car details + tabs */}
         <div className="car-details-section">
           <button className="back-button" onClick={() => navigate(-1)}>
             ←
           </button>
 
-          <h1>
+          <h1 className="car-title">
             {car.make} {car.model}
           </h1>
-          {/* CAROUSEL */}
+
           {car.photos?.length > 0 && (
-            <div className="carousel">
-              <button className="prev" onClick={prevImage}>
-                &#10094;
+            <div className="carousel-wrapper">
+              <button className="carousel-btn prev" onClick={prevImage}>
+                <FontAwesomeIcon icon={faChevronLeft} />
               </button>
 
               <img
                 src={car.photos[currentImageIndex].photo_url}
-                alt={`${car.make} ${car.model}`}
-                className="carousel-image"
+                alt={car.model}
+                className="main-car-image"
               />
 
-              <button className="next" onClick={nextImage}>
-                &#10095;
+              <button className="carousel-btn next" onClick={nextImage}>
+                <FontAwesomeIcon icon={faChevronRight} />
               </button>
             </div>
           )}
@@ -229,75 +229,80 @@ const SelfDriveCarDetails: React.FC = () => {
           <CarTabs car={car} />
         </div>
 
-        {/* RIGHT */}
-        <div className="right-section">
-          {/* TRIP */}
-          <div className="trip-section">
+        {/* RIGHT - Booking controls + ChargesCard */}
+        <div className="booking-section">
+          <div className="zip-trip-panel">
             <h3>Zip Your Trip</h3>
 
-            <div className="trip-inputs">
-              <input
-                type="date"
-                value={pickupDate}
-                onChange={(e) => setPickupDate(e.target.value)}
-              />
-              <input
-                type="time"
-                value={pickupTime}
-                onChange={(e) => setPickupTime(e.target.value)}
-              />
-              <input
-                type="date"
-                value={dropDate}
-                onChange={(e) => setDropDate(e.target.value)}
-              />
-              <input
-                type="time"
-                value={dropTime}
-                onChange={(e) => setDropTime(e.target.value)}
-              />
+            <div className="date-time-grid">
+              <div className="input-block">
+                <label>PICKUP DATE</label>
+                <input
+                  type="date"
+                  value={pickupDate}
+                  onChange={(e) => setPickupDate(e.target.value)}
+                />
+              </div>
+              <div className="input-block">
+                <label>PICKUP TIME</label>
+                <input
+                  type="time"
+                  value={pickupTime}
+                  onChange={(e) => setPickupTime(e.target.value)}
+                />
+              </div>
+              <div className="input-block">
+                <label>DROP DATE</label>
+                <input
+                  type="date"
+                  value={dropDate}
+                  onChange={(e) => setDropDate(e.target.value)}
+                />
+              </div>
+              <div className="input-block">
+                <label>DROP TIME</label>
+                <input
+                  type="time"
+                  value={dropTime}
+                  onChange={(e) => setDropTime(e.target.value)}
+                />
+              </div>
             </div>
 
-            <div className="trip-options">
-              <div className="toggle-wrapper">
-                <p className="switch-label">Insure Trip</p>
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    checked={insureTrip}
-                    onChange={() => setInsureTrip(!insureTrip)}
-                  />
-                  <span className="slider"></span>
-                </label>
-              </div>
+            <div className="options-list">
+              <label className="option-row">
+                <span>Insure Trip</span>
+                <input
+                  type="checkbox"
+                  checked={insureTrip}
+                  onChange={() => setInsureTrip(!insureTrip)}
+                />
+                <span className="checkmark"></span>
+              </label>
 
-              <div className="toggle-wrapper">
-                <p className="switch-label">Driver Required</p>
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    checked={driverRequired}
-                    onChange={() => setDriverRequired(!driverRequired)}
-                  />
-                  <span className="slider"></span>
-                </label>
-              </div>
+              <label className="option-row">
+                <span>Driver Required</span>
+                <input
+                  type="checkbox"
+                  checked={driverRequired}
+                  onChange={() => setDriverRequired(!driverRequired)}
+                />
+                <span className="checkmark"></span>
+              </label>
 
-              <div className="toggle-wrapper">
-                <p className="switch-label">Different Drop Location</p>
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    checked={differentDrop}
-                    onChange={() => setDifferentDrop(!differentDrop)}
-                  />
-                  <span className="slider"></span>
-                </label>
-              </div>
+              <label className="option-row">
+                <span>Different Drop Location</span>
+                <input
+                  type="checkbox"
+                  checked={differentDrop}
+                  onChange={() => setDifferentDrop(!differentDrop)}
+                />
+                <span className="checkmark"></span>
+              </label>
             </div>
 
             {differentDrop && (
-              <div>
+              <div className="drop-city-field">
                 <select
                   value={dropCity}
                   onChange={(e) => setDropCity(e.target.value)}
@@ -308,14 +313,12 @@ const SelfDriveCarDetails: React.FC = () => {
                   <option>Gurgaon</option>
                   <option>Agra</option>
                 </select>
-                <FontAwesomeIcon
-                  icon={faMapMarkerAlt}
-                  onClick={() => setShowDropMap(true)}
-                />
+                <FontAwesomeIcon icon={faMapMarkerAlt} className="map-icon" />
               </div>
             )}
           </div>
-          {/* CHARGES */}
+
+          {/* Keep your original ChargesCard component unchanged */}
           <ChargesCard
             carCharges={pricing.base}
             insuranceCharges={pricing.insurance}
@@ -329,7 +332,6 @@ const SelfDriveCarDetails: React.FC = () => {
       </div>
 
       <Footer />
-
       {showDropMap && (
         <ModalWrapper onClose={() => setShowDropMap(false)}>
           <LocationPicker

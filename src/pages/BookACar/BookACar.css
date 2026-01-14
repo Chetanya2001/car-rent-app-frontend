@@ -1,73 +1,77 @@
+/* ==========================================================================
+   Book A Car Page - Main Layout & General
+   ========================================================================== */
+
 .book-car-container {
   display: flex;
-  justify-content: space-between;
-  gap: 40px;
-  padding: 40px 80px;
-  background-color: #f9f9f9;
-  flex-wrap: nowrap; /* prevent wrapping to maintain side by side */
+  flex-direction: row;
+  gap: 32px;
   max-width: 1280px;
-
   margin: 0 auto;
+  padding: 32px 24px;
+  background: #f8fafc;
+  min-height: calc(100vh - 140px); /* rough navbar + footer space */
   box-sizing: border-box;
-  align-items: flex-start; /* keep children at top, no stretch */
-  height: auto; /* avoid forcing height */
-  min-height: 0; /* to prevent flex-grow vertical */
 }
 
 .car-details-section {
-  flex: 0 0 60%; /* fixed flex basis with no grow/shrink */
+  flex: 0 0 60%;
   max-width: 60%;
-  overflow-y: auto; /* allow scroll if content too tall */
-  max-height: 80vh; /* limit vertical height to viewport */
 }
 
-.right-section {
-  flex: 0 0 30%;
-  min-width: 300px;
-  max-width: 30%;
-  display: flex;
-  justify-content: flex-end;
+.booking-section {
+  flex: 0 0 40%;
+  max-width: 40%;
   position: sticky;
-  top: 20px;
-  align-self: flex-start; /* align top */
+  top: 24px;
+  align-self: flex-start;
 }
 
-.breadcrumb {
-  color: #666;
-  font-size: 14px;
-  margin-bottom: 8px;
-  word-break: break-word;
+/* ==========================================================================
+   Left side - Car image, title, tabs
+   ========================================================================== */
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #2563eb;
+  color: white;
+  font-size: 1.4rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-bottom: 16px;
+}
+
+.back-button:hover {
+  background-color: #1d4ed8;
 }
 
 .car-title {
-  font-size: 32px;
+  font-size: 2.125rem; /* 34px */
   font-weight: 700;
-  margin-bottom: 8px;
-  word-wrap: break-word;
-}
-
-.car-subtitle {
-  color: #555;
-  margin-bottom: 24px;
-  font-size: 15px;
+  color: #111827;
+  margin: 0 0 24px 0;
+  line-height: 1.2;
 }
 
 .carousel {
   position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 30px;
-  width: 100%;
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  margin-bottom: 32px;
 }
 
 .carousel-image {
   width: 100%;
-  max-width: 700px;
   height: auto;
-  border-radius: 12px;
   display: block;
+  object-fit: cover;
 }
 
 .prev,
@@ -75,133 +79,108 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: #fff;
-  border: none;
-  cursor: pointer;
-  font-size: 24px;
-  padding: 8px 12px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.92);
+  border: none;
+  font-size: 1.5rem;
+  color: #374151;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  transition: all 0.18s ease;
   z-index: 10;
 }
 
 .prev {
-  left: 10px;
+  left: 16px;
 }
-
 .next {
-  right: 10px;
+  right: 16px;
 }
 
-.about-section-1 {
-  margin-bottom: 2rem;
+.prev:hover,
+.next:hover {
+  background: white;
+  transform: translateY(-50%) scale(1.08);
 }
 
-.about-section-1 h3,
-.trip-section h3 {
-  margin-top: 8px; /* reduce top margin */
-  margin-bottom: 8px; /* reduce bottom margin */
-  line-height: 1.3; /* tighter line height */
+/* ==========================================================================
+   Right side - Zip Your Trip panel
+   ========================================================================== */
+
+.zip-trip-panel,
+.booking-section > div:first-child {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+  margin-bottom: 24px;
 }
 
-.about-section-1 p,
-.trip-section p {
-  margin-top: 4px; /* reduce top margin */
-  margin-bottom: 8px; /* reduce bottom margin */
-  line-height: 1.4; /* adjust line height for readability */
-}
-
-.trip-section {
-  background: #ffffff;
-  color: #222;
-  border: 1px solid #e5e7eb;
-  padding: 28px;
-  border-radius: 8px;
-}
-.trip-section h3 {
+.zip-trip-panel h3 {
+  margin: 0;
+  padding: 20px 24px;
+  font-size: 1.375rem;
+  font-weight: 600;
   color: #111827;
+  background: #f1f5f9;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.trip-inputs label,
-.switch-label {
-  color: #374151;
-}
-.trip-inputs input,
-.trip-inputs select {
-  border: 1px solid #d1d5db;
-  height: 42px;
+/* Date & Time inputs */
+
+.date-time-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 20px 24px;
 }
 
-.trip-inputs > div {
+.input-block {
   display: flex;
   flex-direction: column;
 }
 
-.trip-inputs label {
-  display: block;
-  font-weight: 600;
-  color: #fff;
+.input-block label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563;
   margin-bottom: 6px;
-  font-size: 14px;
 }
 
-.trip-inputs input,
-.trip-inputs select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
+.input-block input[type="date"],
+.input-block input[type="time"],
+.drop-city-field select {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
   border-radius: 6px;
-  font-size: 14px;
-  box-sizing: border-box;
+  font-size: 1rem;
+  background: white;
 }
 
-.trip-options {
+/* Toggles - modern iOS-like style */
+
+.options-list {
+  padding: 0 24px 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: 16px;
 }
 
-.toggle-wrapper {
+.option-row {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 8px 0;
-}
-
-.switch-label {
-  font-size: 15px;
-  font-weight: 500;
-  color: #374151;
-  margin: 0;
-}
-.back-button {
-  background-color: #007bff; /* blue background */
-  border: none;
-  color: white;
-  cursor: pointer;
-  font-size: 1.25rem;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%; /* circle shape */
-  display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0;
-  margin-bottom: 0.75rem;
-  transition: background-color 0.2s ease;
+  font-size: 1.05rem;
+  color: #374151;
+  font-weight: 500;
 }
 
-.back-button:hover {
-  background-color: #0056b3; /* darker blue on hover */
-}
-
-/* Toggle Switch */
 .switch {
   position: relative;
-  width: 46px;
-  height: 24px;
-  flex-shrink: 0;
+  width: 52px;
+  height: 28px;
 }
 
 .switch input {
@@ -212,149 +191,170 @@
 
 .slider {
   position: absolute;
-  inset: 0;
-  background-color: #ccc;
-  border-radius: 34px;
-  transition: 0.3s;
   cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: 0.4s;
+  border-radius: 34px;
 }
 
 .slider:before {
-  content: "";
   position: absolute;
-  height: 18px;
-  width: 18px;
+  content: "";
+  height: 22px;
+  width: 22px;
   left: 3px;
   bottom: 3px;
-  background-color: #fff;
+  background-color: white;
+  transition: 0.4s;
   border-radius: 50%;
-  transition: 0.3s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.switch input:checked + .slider {
-  background-color: #01d28e;
+input:checked + .slider {
+  background-color: #10b981;
 }
 
-.switch input:checked + .slider:before {
-  transform: translateX(22px);
+input:checked + .slider:before {
+  transform: translateX(24px);
 }
 
-/* Tablet and smaller laptops */
-@media (max-width: 1200px) {
+/* Different drop location */
+
+.drop-city-field {
+  padding: 0 24px 24px;
+  position: relative;
+}
+
+.drop-city-field select {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.map-icon {
+  position: absolute;
+  right: 36px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ef4444;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+/* Large desktops / laptops */
+@media (min-width: 1200px) {
   .book-car-container {
-    padding: 30px 40px;
-    gap: 30px;
+    padding: 40px 5%;
+    gap: 48px;
+  }
+}
+
+/* Laptops & smaller desktops */
+@media (max-width: 1199px) {
+  .book-car-container {
+    padding: 32px 5%;
+    gap: 32px;
   }
 
   .car-title {
-    font-size: 28px;
+    font-size: 1.9rem;
   }
 }
 
-/* Tablet */
-@media (max-width: 900px) {
+/* Tablets & medium screens */
+@media (max-width: 992px) {
   .book-car-container {
     flex-direction: column;
-    padding: 20px 30px;
-    gap: 30px;
+    gap: 32px;
+    padding: 24px 5%;
   }
 
-  .car-details-section {
-    min-width: 100%;
+  .car-details-section,
+  .booking-section {
+    flex: none;
+    max-width: 100%;
   }
 
-  .right-section {
-    justify-content: center;
-    min-width: 100%;
+  .booking-section {
     position: static;
   }
 
-  .car-title {
-    font-size: 26px;
-  }
-
-  .trip-inputs {
-    grid-template-columns: repeat(2, 1fr);
+  .date-time-grid {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
-/* Mobile landscape */
-@media (max-width: 640px) {
+/* Mobile landscape / small tablets */
+@media (max-width: 768px) {
   .book-car-container {
     padding: 20px 16px;
-    gap: 24px;
   }
 
   .car-title {
-    font-size: 24px;
+    font-size: 1.75rem;
   }
 
-  .car-subtitle {
-    font-size: 14px;
+  .carousel {
+    margin-bottom: 24px;
   }
 
-  .carousel-image {
-    border-radius: 8px;
-  }
-
-  .prev,
-  .next {
-    font-size: 20px;
-    padding: 6px 10px;
-  }
-
-  .prev {
-    left: 5px;
-  }
-
-  .next {
-    right: 5px;
-  }
-
-  .trip-section {
-    padding: 20px;
-  }
-
-  .trip-inputs {
+  .date-time-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 20px;
   }
 
-  .about-section h3,
-  .trip-section h3 {
-    font-size: 18px;
+  .zip-trip-panel h3 {
+    font-size: 1.25rem;
+    padding: 18px 20px;
   }
 }
 
-/* Small mobile */
-@media (max-width: 400px) {
+/* Phones - portrait */
+@media (max-width: 480px) {
   .book-car-container {
     padding: 16px 12px;
   }
 
-  .car-details-section {
-    min-width: 280px;
-  }
-
-  .right-section {
-    min-width: 280px;
-  }
-
   .car-title {
-    font-size: 22px;
-  }
-
-  .breadcrumb {
-    font-size: 13px;
+    font-size: 1.6rem;
   }
 
   .prev,
   .next {
-    font-size: 18px;
-    padding: 4px 8px;
+    width: 42px;
+    height: 42px;
+    font-size: 1.3rem;
   }
 
-  .trip-section {
-    padding: 16px;
+  .prev {
+    left: 10px;
+  }
+  .next {
+    right: 10px;
+  }
+
+  .option-row {
+    font-size: 1rem;
+  }
+
+  .switch {
+    width: 48px;
+    height: 26px;
+  }
+
+  .slider:before {
+    height: 20px;
+    width: 20px;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(22px);
   }
 }
