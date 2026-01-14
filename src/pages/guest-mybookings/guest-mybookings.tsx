@@ -4,15 +4,21 @@ import Navbar from "../../components/Navbar/Navbar";
 import { getGuestBookings } from "../../services/booking";
 import "./guest-mybooking.css";
 
-type Booking = {
-  id: number;
+type SelfDriveBooking = {
   start_datetime: string;
   end_datetime: string;
   pickup_address: string;
   drop_address: string;
   insure_amount: number;
-  driver_amount: number;
+};
+
+type Booking = {
+  id: number;
+  booking_type: "SELF_DRIVE" | "INTERCITY";
   status: string;
+  total_amount: number;
+  createdAt: string;
+
   Car: {
     id: number;
     make: string;
@@ -29,6 +35,9 @@ type Booking = {
       phone: string;
     };
   };
+
+  SelfDriveBooking: SelfDriveBooking | null;
+  IntercityBooking: any | null;
 };
 
 export default function GuestMyBookings() {
@@ -103,9 +112,12 @@ export default function GuestMyBookings() {
           const isCarAvailable = Boolean(car);
           const image = car?.photos?.[0]?.photo_url || "/default-car.png";
           const host = car?.host;
+          const sdb = booking.SelfDriveBooking;
 
-          const startDate = new Date(booking.start_datetime);
-          const endDate = new Date(booking.end_datetime);
+          if (!sdb) return null;
+
+          const startDate = new Date(sdb.start_datetime);
+          const endDate = new Date(sdb.end_datetime);
 
           const pickupDate = startDate.toLocaleDateString();
           const pickupTime = startDate.toLocaleTimeString([], {
@@ -117,6 +129,17 @@ export default function GuestMyBookings() {
             hour: "2-digit",
             minute: "2-digit",
           });
+          const totalHours = Math.max(
+            1,
+            Math.round(
+              (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)
+            )
+          );
+
+          const hourlyRate =
+            parseFloat(car.price_per_hour.replace(/[^\d.]/g, "")) || 0;
+
+          const rentalAmount = hourlyRate * totalHours;
 
           return (
             <div key={booking.id} className="booking-card">
@@ -144,14 +167,16 @@ export default function GuestMyBookings() {
                     <div>
                       <p className="label">Pickup</p>
                       <p>
-                        {booking.pickup_address} <br />
+                        {sdb.pickup_address}
+                        <br />
                         {pickupDate}, {pickupTime}
                       </p>
                     </div>
                     <div>
                       <p className="label">Drop-off</p>
                       <p>
-                        {booking.drop_address} <br />
+                        {sdb.drop_address}
+                        <br />
                         {dropoffDate}, {dropoffTime}
                       </p>
                     </div>
@@ -195,81 +220,40 @@ export default function GuestMyBookings() {
                 </div>
 
                 <div className="price-section">
-                  {!isCarAvailable ? (
-                    <p className="status-row">
-                      This car has been removed from inventory.
-                    </p>
-                  ) : (
-                    (() => {
-                      const hourlyRate =
-                        parseFloat(
-                          car!.price_per_hour.replace(/[^\d.]/g, "")
-                        ) || 0;
+                  <div className="calculation-breakdown">
+                    <div className="calc-row">
+                      <span>₹{hourlyRate}/hr</span>
+                      <span>× {totalHours} hr</span>
+                    </div>
+                    <div className="calc-equals">
+                      <strong>= ₹{rentalAmount.toLocaleString()}</strong>
+                    </div>
+                  </div>
 
-                      const totalHours = Math.round(
-                        (endDate.getTime() - startDate.getTime()) /
-                          (1000 * 60 * 60)
-                      );
+                  <div className="total-breakdown">
+                    <div className="amount-row">
+                      <span>Insure: ₹{sdb.insure_amount.toLocaleString()}</span>
+                    </div>
 
-                      const rentalAmount = hourlyRate * totalHours;
+                    <hr />
 
-                      return (
-                        <>
-                          <div className="calculation-breakdown">
-                            <div className="calc-row">
-                              <span>₹{hourlyRate}/hr</span>
-                              <span>× {totalHours} hr</span>
-                            </div>
-                            <div className="calc-equals">
-                              <strong>
-                                = ₹{rentalAmount.toLocaleString()}
-                              </strong>
-                            </div>
-                          </div>
+                    <div className="total-row">
+                      <strong>
+                        Total: ₹{booking.total_amount.toLocaleString()}
+                      </strong>
+                    </div>
+                  </div>
 
-                          <div className="total-breakdown">
-                            <div className="amount-row">
-                              <span>
-                                Insure: ₹
-                                {booking.insure_amount.toLocaleString()}
-                              </span>
-                            </div>
-                            <div className="amount-row">
-                              <span>
-                                Driver: ₹
-                                {booking.driver_amount.toLocaleString()}
-                              </span>
-                            </div>
-                            <hr />
-                            <div className="total-row">
-                              <strong>
-                                Total: ₹
-                                {(
-                                  rentalAmount +
-                                  booking.insure_amount +
-                                  booking.driver_amount
-                                ).toLocaleString()}
-                              </strong>
-                            </div>
-                          </div>
+                  <p className="status-row">
+                    Status: <strong>{booking.status}</strong>
+                  </p>
 
-                          <p className="status-row">
-                            Status: <strong>{booking.status}</strong>
-                          </p>
-
-                          <button
-                            className="view-details-btn"
-                            disabled={!isCarAvailable}
-                            onClick={() =>
-                              isCarAvailable && handleViewDetails(car!.id)
-                            }
-                          >
-                            View Details
-                          </button>
-                        </>
-                      );
-                    })()
-                  )}
+                  <button
+                    className="view-details-btn"
+                    onClick={() => handleViewDetails(car.id)}
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
             </div>
