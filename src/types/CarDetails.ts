@@ -26,6 +26,7 @@ export interface CarPhoto {
 export interface CarDetailsType {
   documents: any;
   price_per_hour: number;
+  price_per_km?: number;
   id: number;
   make: string;
   model: string;

@@ -445,35 +445,21 @@ export default function IntercityCars() {
                   <button
                     className="searched-btn-book"
                     onClick={() =>
-                      navigate("/bookAcar", {
+                      navigate("/intercity-car-details", {
                         state: {
                           carId: car.id,
-                          tripType: "intercity",
                           pickupCity,
                           pickupLocation,
-                          dropCity,
-                          pickupDate,
-                          pickupTime,
-                          pax,
-                          luggage,
+                          dropLocation,
+                          tripDistanceKm,
+                          pricePerKm: car.price_per_km,
                           insureTrip: true,
-                          driverRequired: false,
+                          dropCity,
                         },
                       })
                     }
                   >
                     Book now
-                  </button>
-
-                  <button
-                    className="searched-btn-details"
-                    onClick={() =>
-                      navigate(`/car-details/${car.id}`, {
-                        state: { tripType: "intercity" },
-                      })
-                    }
-                  >
-                    Details
                   </button>
                 </div>
               </div>
