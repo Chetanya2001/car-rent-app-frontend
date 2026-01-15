@@ -445,7 +445,7 @@ export default function IntercityCars() {
                   <button
                     className="searched-btn-book"
                     onClick={() =>
-                      navigate("/intercity-car-details", {
+                      navigate("/intercity/car", {
                         state: {
                           carId: car.id,
                           pickupCity,
