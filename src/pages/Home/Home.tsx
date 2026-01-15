@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import "./Home.css";
 import logo from "../../assets/logo.png";
-import pickupIcon from "../../assets/smart-transportation.png";
-import bestdealIcon from "../../assets/communication.png";
-import carrentIcon from "../../assets/car-rent.png";
+
 import aboutImage from "../../assets/bg_3.jpg";
 import defaultAvatar from "../../assets/user.png";
 import Testimonials from "../../components/Testimonials/Testimonial";
