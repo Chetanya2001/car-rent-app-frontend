@@ -25,7 +25,6 @@ const IntercityCarDetails: React.FC = () => {
 
   const {
     carId,
-    pickupCity,
     pickupLocation,
     dropLocation,
     tripDistanceKm,
@@ -168,8 +167,8 @@ const IntercityCarDetails: React.FC = () => {
         {/* RIGHT SECTION - Intercity Charges Card */}
         <div className="booking-section">
           <IntercityChargesCard
-            pickupStation={pickupLocation || ""}
-            pickupCity={pickupCity || ""}
+            pickupStation={pickupLocation}
+            pickupCity={pickupLocation.city}
             dropAddress={dropLocation?.address || ""}
             dropCity={dropCity || dropLocation?.city || ""}
             tripKm={tripDistanceKm || 0}

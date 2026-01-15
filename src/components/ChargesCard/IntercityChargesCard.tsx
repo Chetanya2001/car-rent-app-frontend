@@ -2,7 +2,13 @@ import React, { useState, useMemo, useEffect } from "react";
 import "./ChargesCard.css";
 
 interface IntercityChargesCardProps {
-  pickupStation: string;
+  pickupStation: {
+    address: string;
+    lat: number;
+    lng: number;
+    city: string;
+  };
+
   pickupCity: string;
   dropAddress: string;
   dropCity: string;
@@ -25,7 +31,6 @@ const GST_RATE = 0.18;
 
 const IntercityChargesCard: React.FC<IntercityChargesCardProps> = ({
   pickupStation,
-  pickupCity,
   dropAddress,
   dropCity,
   tripKm,
@@ -72,7 +77,8 @@ const IntercityChargesCard: React.FC<IntercityChargesCardProps> = ({
         <div className="detail-item">
           <span className="icon">📍</span>
           <span>
-            <strong>Pickup Station:</strong> {pickupStation}, {pickupCity}
+            <strong>Pickup Station:</strong> {pickupStation.address},{" "}
+            {pickupStation.city}
           </span>
         </div>
 
