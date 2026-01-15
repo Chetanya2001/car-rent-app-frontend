@@ -16,7 +16,6 @@ import ModalWrapper from "../../components/ModalWrapper/ModalWrapper";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faMapMarkerAlt,
   faCar,
   // faCalendarAlt,
   // faLifeRing,
@@ -25,9 +24,7 @@ import {
   // faFile,
 } from "@fortawesome/free-solid-svg-icons";
 
-import { searchCars } from "../../services/carService";
 import { fetchUserProfile } from "../../services/auth";
-import LocationPicker from "../../components/Map/LocationPicker";
 
 type TokenPayload = { role: "host" | "guest" | "admin" };
 
@@ -46,27 +43,7 @@ export default function Home() {
   const [role, setRole] = useState<"host" | "guest" | "admin" | null>(null);
   const [, setShowMenu] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
-  const [showPickupMap, setShowPickupMap] = useState(false);
-  const [showDropMap, setShowDropMap] = useState(false);
-  const [dropCity, setDropCity] = useState("");
-  const [pickupLocation, setPickupLocation] = useState<{
-    address: string;
-    city?: string;
-    state?: string;
-    country?: string;
-    lat?: number;
-    lng?: number;
-  } | null>(null);
-
   // Booking form state
-  const [pickupDate, setPickupDate] = useState("");
-  const [pickupTime, setPickupTime] = useState("");
-  const [dropDate, setDropDate] = useState("");
-  const [dropTime, setDropTime] = useState("");
-  const [insureTrip, setInsureTrip] = useState(false);
-  const [driverRequired, setDriverRequired] = useState(false);
-  const [differentDrop, setDifferentDrop] = useState(false);
-  const [showPickupOptions, setShowPickupOptions] = useState(false);
 
   // Handle logout
   const handleLogout = () => {
@@ -115,12 +92,6 @@ export default function Home() {
       }
     }
   }, []);
-  const formatDisplayAddress = (address: string) => {
-    if (!address) return "";
-
-    // Keep natural order, just trim extra spaces
-    return address.replace(/\s+/g, " ").trim();
-  };
 
   // Check URL for showLogin param
   useEffect(() => {
@@ -130,103 +101,6 @@ export default function Home() {
       navigate("/", { replace: true });
     }
   }, [location, navigate]);
-
-  // Set default pickup/drop time
-  useEffect(() => {
-    const now = new Date();
-    now.setHours(now.getHours() + 2);
-    const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(
-      now.getMinutes()
-    ).padStart(2, "0")}`;
-    setPickupTime(currentTime);
-    setDropTime(currentTime);
-  }, []);
-
-  // Search cars safely
-  const handleSearch = async () => {
-    if (!pickupLocation || !pickupLocation.lat || !pickupLocation.lng) {
-      alert("Please select pickup location");
-      return;
-    }
-
-    if (!pickupDate || !pickupTime || !dropDate || !dropTime) {
-      alert("Please fill date & time");
-      return;
-    }
-
-    try {
-      const pickupDateTime = new Date(
-        `${pickupDate}T${pickupTime}`
-      ).toISOString();
-
-      const dropoffDateTime = new Date(`${dropDate}T${dropTime}`).toISOString();
-
-      const data = await searchCars({
-        pickup_location: {
-          address: pickupLocation.address,
-          city: pickupLocation.city,
-          state: pickupLocation.state,
-          country: pickupLocation.country,
-          latitude: pickupLocation.lat,
-          longitude: pickupLocation.lng,
-        },
-        pickup_datetime: pickupDateTime,
-        dropoff_datetime: dropoffDateTime,
-        trip_type: "selfdrive",
-      });
-
-      navigate("/searched-cars", {
-        state: {
-          cars: data.cars,
-          bookingDetails: {
-            pickupLocation,
-            pickupDate,
-            pickupTime,
-            dropDate,
-            dropTime,
-            insureTrip,
-            driverRequired,
-            differentDrop,
-            dropCity,
-          },
-        },
-      });
-    } catch (err) {
-      console.error(err);
-      alert("Failed to fetch cars");
-    }
-  };
-
-  // // Menu items
-  // const hostMenu = ["Add a Car", "My Cars", "My Bookings", "Logout"];
-  // const guestMenu = ["Book a Car", "My Bookings", "My Documents", "Logout"];
-  // const adminMenu = [
-  //   "Cars",
-  //   "Bookings",
-  //   "Guests",
-  //   "Hosts",
-  //   "Payments",
-  //   "Support",
-  //   "Logout",
-  // ];
-  // const menuItems =
-  //   role === "host"
-  //     ? hostMenu
-  //     : role === "guest"
-  //     ? guestMenu
-  //     : role === "admin"
-  //     ? adminMenu
-  //     : [];
-
-  // const iconMap: Record<string, any> = {
-  //   "Add a Car": faPlus,
-  //   "My Cars": faCar,
-  //   "My Bookings": faCalendarAlt,
-  //   "Book a Car": faCar,
-  //   "My Documents": faFile,
-  //   Logout: faDoorOpen,
-  //   Support: faLifeRing,
-  // };
 
   return (
     <div className="home-container">
@@ -380,146 +254,6 @@ export default function Home() {
 
       {/* Booking */}
       <div className="booking-section">
-        <div className="booking-box">
-          <h2>Zip your Trip</h2>
-          <label>Pick-up Location</label>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <input
-              type="text"
-              placeholder="Click to select pickup location"
-              value={
-                pickupLocation
-                  ? formatDisplayAddress(pickupLocation.address)
-                  : ""
-              }
-              readOnly={!pickupLocation}
-              onClick={() => {
-                if (!pickupLocation) {
-                  setShowPickupOptions(true); // open the new options modal
-                }
-              }}
-              onChange={(e) => {
-                if (pickupLocation) {
-                  setPickupLocation({
-                    ...pickupLocation,
-                    address: e.target.value,
-                  });
-                }
-              }}
-              title={pickupLocation?.address} // hover shows full address
-              style={{
-                flexGrow: 1,
-                cursor: pickupLocation ? "text" : "pointer",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            />
-
-            {!pickupLocation && (
-              <FontAwesomeIcon
-                icon={faMapMarkerAlt}
-                style={{ marginLeft: "8px", cursor: "pointer" }}
-                onClick={() => setShowPickupMap(true)}
-              />
-            )}
-          </div>
-
-          <div className="date-time">
-            <div>
-              <label>Pick-up Date</label>
-              <input
-                type="date"
-                value={pickupDate}
-                onChange={(e) => setPickupDate(e.target.value)}
-              />
-              <input
-                type="time"
-                value={pickupTime}
-                onChange={(e) => setPickupTime(e.target.value)}
-              />
-            </div>
-            <div>
-              <label>Drop-off Date</label>
-              <input
-                type="date"
-                value={dropDate}
-                onChange={(e) => setDropDate(e.target.value)}
-              />
-              <input
-                type="time"
-                value={dropTime}
-                onChange={(e) => setDropTime(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="toggle-wrapper">
-            <span className="switch-label">Insure Trip</span>
-            <label className="switch">
-              <input
-                type="checkbox"
-                checked={insureTrip}
-                onChange={() => setInsureTrip(!insureTrip)}
-              />
-              <span className="slider round"></span>
-            </label>
-          </div>
-
-          <div className="toggle-wrapper">
-            <span className="switch-label">Driver Required</span>
-            <label className="switch">
-              <input
-                type="checkbox"
-                checked={driverRequired}
-                onChange={() => setDriverRequired(!driverRequired)}
-              />
-              <span className="slider round"></span>
-            </label>
-          </div>
-
-          <div className="toggle-wrapper">
-            <span className="switch-label">Different Drop-off Location</span>
-            <label className="switch">
-              <input
-                type="checkbox"
-                checked={differentDrop}
-                onChange={() => setDifferentDrop(!differentDrop)}
-              />
-              <span className="slider round"></span>
-            </label>
-          </div>
-          {differentDrop && (
-            <>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <select
-                  value={dropCity}
-                  onChange={(e) => setDropCity(e.target.value)}
-                  style={{ flexGrow: 1, padding: "6px", fontSize: "1rem" }}
-                >
-                  <option value="" disabled>
-                    Select Drop-off City
-                  </option>
-                  <option value="Noida">Noida</option>
-                  <option value="Gurgaon">Gurgaon</option>
-                  <option value="Delhi">Delhi</option>
-                  <option value="Agra">Agra</option>
-                  <option value="Meerut">Meerut</option>
-                </select>
-                <FontAwesomeIcon
-                  icon={faMapMarkerAlt}
-                  style={{ marginLeft: "8px", cursor: "pointer" }}
-                  onClick={() => setShowDropMap(true)}
-                />
-              </div>
-            </>
-          )}
-
-          <button className="search-btn" onClick={handleSearch}>
-            Search
-          </button>
-        </div>
-
         <div className="info-box">
           <h2>Better Way to Rent Your Perfect Cars</h2>
           <div className="info-steps">
@@ -629,93 +363,6 @@ export default function Home() {
 
       {/* Footer */}
       <Footer />
-      {/* Pickup Map Modal */}
-      {showPickupMap && (
-        <ModalWrapper onClose={() => setShowPickupMap(false)}>
-          <LocationPicker
-            onSelect={(loc: any) => {
-              setPickupLocation(loc);
-              setShowPickupMap(false);
-            }}
-          />
-        </ModalWrapper>
-      )}
-      {showDropMap && (
-        <ModalWrapper onClose={() => setShowDropMap(false)}>
-          <LocationPicker
-            onSelect={(loc: any) => {
-              setPickupLocation(loc);
-              setShowPickupMap(false);
-            }}
-          />
-        </ModalWrapper>
-      )}
-      {/* PICKUP OPTIONS MODAL */}
-      {showPickupOptions && (
-        <ModalWrapper onClose={() => setShowPickupOptions(false)}>
-          <div className="location-modal-overlay">
-            <div className="location-modal">
-              <div className="location-modal-header">
-                <h2>Select Pickup Location</h2>
-                <p>Choose how you'd like to set your pickup address</p>
-              </div>
-
-              <div className="location-modal-body">
-                <button
-                  className="location-option-btn current-location"
-                  onClick={() => {
-                    navigator.geolocation.getCurrentPosition(
-                      async (pos) => {
-                        const lat = pos.coords.latitude;
-                        const lng = pos.coords.longitude;
-
-                        const res = await fetch(
-                          `https://us1.locationiq.com/v1/reverse?key=${
-                            import.meta.env.VITE_LOCATIONIQ_TOKEN
-                          }&lat=${lat}&lon=${lng}&format=json`
-                        );
-                        const data = await res.json();
-
-                        setPickupLocation({
-                          address: data.display_name,
-                          city: data.address.city || data.address.town || "",
-                          state: data.address.state || "",
-                          country: data.address.country || "",
-                          lat,
-                          lng,
-                        });
-
-                        setShowPickupOptions(false);
-                      },
-                      () => alert("Location permission denied")
-                    );
-                  }}
-                >
-                  <div className="option-icon">📍</div>
-                  <div className="option-content">
-                    <h3>Use Current Location</h3>
-                    <p>Automatically detect your current position</p>
-                  </div>
-                </button>
-
-                <button
-                  className="location-option-btn map-location"
-                  onClick={() => {
-                    setShowPickupOptions(false);
-                    setShowPickupMap(true);
-                  }}
-                >
-                  <div className="option-icon">🗺️</div>
-                  <div className="option-content">
-                    <h3>Pick on Map</h3>
-                    <p>Choose a location by browsing the map</p>
-                  </div>
-                </button>
-              </div>
-            </div>
-          </div>
-        </ModalWrapper>
-      )}
 
       <style>{`
         .location-modal-overlay {
