@@ -444,22 +444,31 @@ export default function IntercityCars() {
                 <div className="searched-car-actions">
                   <button
                     className="searched-btn-book"
-                    onClick={() =>
+                    onClick={() => {
+                      const pickupCoords = stationCoordinates[pickupLocation];
+
                       navigate("/intercity/car", {
                         state: {
                           carId: car.id,
-                          pickupCity,
-                          pickupLocation,
-                          dropLocation,
+
+                          pickupLocation: {
+                            address: pickupLocation,
+                            lat: pickupCoords.lat,
+                            lng: pickupCoords.lng,
+                            city: pickupCity,
+                          },
+
+                          dropLocation, // already object from MapPickerModal
+
                           tripDistanceKm,
                           pricePerKm: car.price_per_km,
                           insureTrip: true,
-                          pax, // ✅ ADD
-                          luggage, // ✅ ADD
                           dropCity,
+                          pax,
+                          luggage,
                         },
-                      })
-                    }
+                      });
+                    }}
                   >
                     Book now
                   </button>
