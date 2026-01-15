@@ -5,6 +5,9 @@ const API_URL = `${import.meta.env.VITE_API_URL}/api/bookings`;
 const API_URL_SelfDrive = `${
   import.meta.env.VITE_API_URL
 }/api/self-drive-bookings`;
+const API_URL_Intercity = `${
+  import.meta.env.VITE_API_URL
+}/api/intercity-bookings`;
 
 // The booking input type matches your API needs
 
@@ -25,6 +28,25 @@ export interface BookCarRequest {
 export interface BookCarResponse {
   message: string;
   booking: any;
+}
+export interface BookIntercityRequest {
+  car_id: number;
+
+  pickup_address: string;
+  pickup_lat: number;
+  pickup_long: number;
+
+  drop_address: string;
+  drop_lat: number;
+  drop_long: number;
+
+  pax: number;
+  luggage: number;
+
+  distance_km: number;
+  driver_amount: number;
+
+  total_amount: number;
 }
 
 export interface UpdateBookingRequest {
@@ -70,6 +92,32 @@ export const bookCar = async (
     throw err.response?.data || new Error("Booking failed");
   }
 };
+export const bookCarIntercity = async (
+  bookingData: BookIntercityRequest,
+  token: string
+): Promise<BookCarResponse> => {
+  try {
+    const res = await axios.post<BookCarResponse>(
+      `${API_URL_Intercity}/book`,
+      bookingData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return res.data;
+  } catch (err: any) {
+    console.error(
+      "❌ Error booking intercity car:",
+      err.response?.status,
+      err.response?.data || err.message
+    );
+    throw err.response?.data || new Error("Intercity booking failed");
+  }
+};
+
 export const getAllBookingsAdmin = async (token: string): Promise<any[]> => {
   try {
     const res = await axios.get<any[]>(`${API_URL}/admin/bookings`, {

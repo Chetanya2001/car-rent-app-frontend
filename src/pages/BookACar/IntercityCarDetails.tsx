@@ -10,11 +10,9 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { getCarDetails } from "../../services/carDetails";
-import { bookCar } from "../../services/booking";
+import { bookCarIntercity } from "../../services/booking";
 import type { CarDetailsType } from "../../types/CarDetails";
 import "./BookACar.css";
-
-const GST_RATE = 0.18;
 
 const IntercityCarDetails: React.FC = () => {
   const { state } = useLocation();
@@ -34,11 +32,24 @@ const IntercityCarDetails: React.FC = () => {
     insureTrip = true,
     dropCity,
     pricePerKm,
+    pax,
+    luggage,
   } = state;
 
   const [car, setCar] = useState<CarDetailsType | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [pricing, setPricing] = useState<{
+    baseFare: number;
+    driverFee: number;
+    gst: number;
+    total: number;
+  }>({
+    baseFare: 0,
+    driverFee: 0,
+    gst: 0,
+    total: 0,
+  });
 
   useEffect(() => {
     const load = async () => {
@@ -72,38 +83,36 @@ const IntercityCarDetails: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("Please login to continue");
+        alert("Please login");
         return;
       }
 
-      // Calculate pricing
-      const baseFare = Math.round(tripDistanceKm * (pricePerKm || 0));
-      const insurance = insureTrip ? Math.round(tripDistanceKm * 1.5) : 0;
-      const subTotal = baseFare + insurance;
-      const gst = Math.round(subTotal * GST_RATE);
-      const total = subTotal + gst;
+      await bookCarIntercity(
+        {
+          car_id: carId,
 
-      const payload = {
-        car_id: Number(carId),
-        start_datetime: new Date().toISOString(),
-        end_datetime: new Date().toISOString(),
-        pickup_address: `${pickupLocation}, ${pickupCity}`,
-        pickup_lat: 0,
-        pickup_long: 0,
-        drop_address: `${dropLocation?.address || ""}, ${dropCity || ""}`,
-        drop_lat: dropLocation?.lat || 0,
-        drop_long: dropLocation?.lng || 0,
-        insure_amount: insurance,
-        driver_amount: 0,
-        total_amount: total,
-      };
+          pickup_address: pickupLocation.address,
+          pickup_lat: pickupLocation.lat,
+          pickup_long: pickupLocation.lng,
 
-      const res = await bookCar(payload, token);
+          drop_address: dropLocation.address,
+          drop_lat: dropLocation.lat,
+          drop_long: dropLocation.lng,
 
-      alert("Intercity booking confirmed! Pay at pickup.");
-      navigate("/guest-mybookings", { state: { booking: res.booking } });
+          pax,
+          luggage,
+
+          distance_km: tripDistanceKm,
+          driver_amount: pricing.driverFee,
+
+          total_amount: pricing.total,
+        },
+        token
+      );
+
+      navigate("/guest-mybookings");
+      alert(" Intercity Booking successful!");
     } catch (e: any) {
-      console.error(e);
       alert(e.message || "Booking failed");
     }
   };
@@ -164,8 +173,11 @@ const IntercityCarDetails: React.FC = () => {
             dropAddress={dropLocation?.address || ""}
             dropCity={dropCity || dropLocation?.city || ""}
             tripKm={tripDistanceKm || 0}
-            pricePerKm={car.price_per_km || 0}
+            pricePerKm={pricePerKm || 0}
             insureTrip={insureTrip}
+            pax={pax} // ✅ ADD
+            luggage={luggage}
+            onPriceChange={setPricing}
             onPay={handleBookNow}
           />
         </div>

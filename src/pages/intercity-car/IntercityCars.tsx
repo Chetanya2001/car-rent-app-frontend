@@ -454,6 +454,8 @@ export default function IntercityCars() {
                           tripDistanceKm,
                           pricePerKm: car.price_per_km,
                           insureTrip: true,
+                          pax, // ✅ ADD
+                          luggage, // ✅ ADD
                           dropCity,
                         },
                       })

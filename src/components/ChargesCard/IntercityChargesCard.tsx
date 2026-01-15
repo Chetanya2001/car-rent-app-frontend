@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import "./ChargesCard.css";
 
 interface IntercityChargesCardProps {
@@ -10,6 +10,14 @@ interface IntercityChargesCardProps {
   pricePerKm: number;
   insureTrip: boolean;
   insurancePerKm?: number;
+  pax: number;
+  luggage: number;
+  onPriceChange: (pricing: {
+    baseFare: number;
+    driverFee: number;
+    gst: number;
+    total: number;
+  }) => void;
   onPay: () => void;
 }
 
@@ -23,7 +31,10 @@ const IntercityChargesCard: React.FC<IntercityChargesCardProps> = ({
   tripKm,
   pricePerKm,
   insureTrip,
+  pax,
+  luggage,
   insurancePerKm = 1.5,
+  onPriceChange,
   onPay,
 }) => {
   const [isAgreed, setIsAgreed] = useState(false);
@@ -42,6 +53,15 @@ const IntercityChargesCard: React.FC<IntercityChargesCardProps> = ({
       total: subTotal + gst, // GST INCLUDED
     };
   }, [tripKm, pricePerKm, insureTrip, insurancePerKm]);
+
+  useEffect(() => {
+    const baseFare = Math.round(tripKm * pricePerKm);
+    const driverFee = Math.round(tripKm * 3);
+    const gst = Math.round((baseFare + driverFee) * GST_RATE);
+    const total = baseFare + driverFee + gst;
+
+    onPriceChange({ baseFare, driverFee, gst, total });
+  }, [tripKm, pricePerKm]);
 
   return (
     <div className="booking-container">
@@ -67,6 +87,19 @@ const IntercityChargesCard: React.FC<IntercityChargesCardProps> = ({
           <span className="icon">🛣️</span>
           <span>
             <strong>Trip Distance:</strong> {tripKm} km
+          </span>
+        </div>
+        <div className="detail-item">
+          <span className="icon">👥</span>
+          <span>
+            <strong>Passengers:</strong> {pax}
+          </span>
+        </div>
+
+        <div className="detail-item">
+          <span className="icon">🧳</span>
+          <span>
+            <strong>Luggage:</strong> {luggage}
           </span>
         </div>
 
