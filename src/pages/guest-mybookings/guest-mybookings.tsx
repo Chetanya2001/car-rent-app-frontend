@@ -12,6 +12,15 @@ type SelfDriveBooking = {
   insure_amount: number;
 };
 
+type IntercityBooking = {
+  pickup_address: string;
+  drop_address: string;
+  distance_km: string;
+  driver_amount: number;
+  pax: number;
+  luggage: number;
+};
+
 type Booking = {
   id: number;
   booking_type: "SELF_DRIVE" | "INTERCITY";
@@ -24,7 +33,8 @@ type Booking = {
     make: string;
     model: string;
     year: number;
-    price_per_hour: string;
+    price_per_hour: string | null;
+    price_per_km: string | null;
     description: string;
     photos?: { photo_url: string }[];
     host?: {
@@ -37,7 +47,7 @@ type Booking = {
   };
 
   SelfDriveBooking: SelfDriveBooking | null;
-  IntercityBooking: any | null;
+  IntercityBooking: IntercityBooking | null;
 };
 
 export default function GuestMyBookings() {
@@ -112,34 +122,60 @@ export default function GuestMyBookings() {
           const isCarAvailable = Boolean(car);
           const image = car?.photos?.[0]?.photo_url || "/default-car.png";
           const host = car?.host;
+
+          const isSelfDrive = booking.booking_type === "SELF_DRIVE";
+          const isIntercity = booking.booking_type === "INTERCITY";
+
           const sdb = booking.SelfDriveBooking;
+          const icb = booking.IntercityBooking;
 
-          if (!sdb) return null;
+          // Self-drive calculations
+          let pickupDate = "";
+          let pickupTime = "";
+          let dropoffDate = "";
+          let dropoffTime = "";
+          let totalHours = 0;
+          let hourlyRate = 0;
+          let rentalAmount = 0;
 
-          const startDate = new Date(sdb.start_datetime);
-          const endDate = new Date(sdb.end_datetime);
+          if (isSelfDrive && sdb) {
+            const startDate = new Date(sdb.start_datetime);
+            const endDate = new Date(sdb.end_datetime);
 
-          const pickupDate = startDate.toLocaleDateString();
-          const pickupTime = startDate.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-          const dropoffDate = endDate.toLocaleDateString();
-          const dropoffTime = endDate.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-          const totalHours = Math.max(
-            1,
-            Math.round(
-              (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)
-            )
-          );
+            pickupDate = startDate.toLocaleDateString();
+            pickupTime = startDate.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+            dropoffDate = endDate.toLocaleDateString();
+            dropoffTime = endDate.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+            totalHours = Math.max(
+              1,
+              Math.round(
+                (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)
+              )
+            );
 
-          const hourlyRate =
-            parseFloat(car.price_per_hour.replace(/[^\d.]/g, "")) || 0;
+            hourlyRate =
+              parseFloat(car.price_per_hour?.replace(/[^\d.]/g, "") || "0") ||
+              0;
 
-          const rentalAmount = hourlyRate * totalHours;
+            rentalAmount = hourlyRate * totalHours;
+          }
+
+          // Intercity calculations
+          let pricePerKm = 0;
+          let distanceKm = 0;
+          let baseFare = 0;
+
+          if (isIntercity && icb) {
+            pricePerKm = parseFloat(car.price_per_km || "0");
+            distanceKm = parseFloat(icb.distance_km);
+            baseFare = Math.round(pricePerKm * distanceKm);
+          }
 
           return (
             <div key={booking.id} className="booking-card">
@@ -163,24 +199,51 @@ export default function GuestMyBookings() {
                     <p className="car-description">{car!.description}</p>
                   )}
 
-                  <div className="booking-dates">
-                    <div>
-                      <p className="label">Pickup</p>
-                      <p>
-                        {sdb.pickup_address}
-                        <br />
-                        {pickupDate}, {pickupTime}
-                      </p>
+                  {/* SELF DRIVE BOOKING */}
+                  {isSelfDrive && sdb && (
+                    <div className="booking-dates">
+                      <div>
+                        <p className="label">Pickup</p>
+                        <p>
+                          {sdb.pickup_address}
+                          <br />
+                          {pickupDate}, {pickupTime}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="label">Drop-off</p>
+                        <p>
+                          {sdb.drop_address}
+                          <br />
+                          {dropoffDate}, {dropoffTime}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="label">Drop-off</p>
-                      <p>
-                        {sdb.drop_address}
-                        <br />
-                        {dropoffDate}, {dropoffTime}
-                      </p>
+                  )}
+
+                  {/* INTERCITY BOOKING */}
+                  {isIntercity && icb && (
+                    <div className="booking-dates">
+                      <div>
+                        <p className="label">Pickup Station</p>
+                        <p>{icb.pickup_address}</p>
+                      </div>
+                      <div>
+                        <p className="label">Drop Location</p>
+                        <p>{icb.drop_address}</p>
+                      </div>
+                      <div>
+                        <p className="label">Distance</p>
+                        <p>{distanceKm} km</p>
+                      </div>
+                      <div>
+                        <p className="label">Passengers</p>
+                        <p>
+                          PAX: {icb.pax} | Luggage: {icb.luggage}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="host-info">
                     <p className="label">Host:</p>
@@ -220,29 +283,67 @@ export default function GuestMyBookings() {
                 </div>
 
                 <div className="price-section">
-                  <div className="calculation-breakdown">
-                    <div className="calc-row">
-                      <span>₹{hourlyRate}/hr</span>
-                      <span>× {totalHours} hr</span>
-                    </div>
-                    <div className="calc-equals">
-                      <strong>= ₹{rentalAmount.toLocaleString()}</strong>
-                    </div>
-                  </div>
+                  {/* SELF DRIVE PRICING */}
+                  {isSelfDrive && sdb && (
+                    <>
+                      <div className="calculation-breakdown">
+                        <div className="calc-row">
+                          <span>₹{hourlyRate}/hr</span>
+                          <span>× {totalHours} hr</span>
+                        </div>
+                        <div className="calc-equals">
+                          <strong>= ₹{rentalAmount.toLocaleString()}</strong>
+                        </div>
+                      </div>
 
-                  <div className="total-breakdown">
-                    <div className="amount-row">
-                      <span>Insure: ₹{sdb.insure_amount.toLocaleString()}</span>
-                    </div>
+                      <div className="total-breakdown">
+                        <div className="amount-row">
+                          <span>
+                            Insure: ₹{sdb.insure_amount.toLocaleString()}
+                          </span>
+                        </div>
 
-                    <hr />
+                        <hr />
 
-                    <div className="total-row">
-                      <strong>
-                        Total: ₹{booking.total_amount.toLocaleString()}
-                      </strong>
-                    </div>
-                  </div>
+                        <div className="total-row">
+                          <strong>
+                            Total: ₹{booking.total_amount.toLocaleString()}
+                          </strong>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* INTERCITY PRICING */}
+                  {isIntercity && icb && (
+                    <>
+                      <div className="calculation-breakdown">
+                        <div className="calc-row">
+                          <span>₹{pricePerKm}/km</span>
+                          <span>× {distanceKm} km</span>
+                        </div>
+                        <div className="calc-equals">
+                          <strong>= ₹{baseFare.toLocaleString()}</strong>
+                        </div>
+                      </div>
+
+                      <div className="total-breakdown">
+                        <div className="amount-row">
+                          <span>
+                            Driver: ₹{icb.driver_amount.toLocaleString()}
+                          </span>
+                        </div>
+
+                        <hr />
+
+                        <div className="total-row">
+                          <strong>
+                            Total: ₹{booking.total_amount.toLocaleString()}
+                          </strong>
+                        </div>
+                      </div>
+                    </>
+                  )}
 
                   <p className="status-row">
                     Status: <strong>{booking.status}</strong>
