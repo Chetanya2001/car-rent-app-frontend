@@ -253,7 +253,7 @@ export default function Home() {
       </div>
 
       {/* Booking */}
-      <div className="booking-section">
+      {/* <div className="booking-section">
         <div className="info-box">
           <h2>Better Way to Rent Your Perfect Cars</h2>
           <div className="info-steps">
@@ -276,7 +276,7 @@ export default function Home() {
           </div>
           <button className="reserve-btn">Reserve Your Perfect Car</button>
         </div>
-      </div>
+      </div> */}
 
       {/* About */}
       <section className="about-section" id="about">
