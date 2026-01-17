@@ -51,12 +51,14 @@ export const updateCarDetails = async (payload: UpdateCarPayload) => {
     }
 
     // Append price_per_hour if provided (can be null to clear it)
-    if (payload.price_per_hour !== undefined) {
+    if (
+      payload.price_per_hour !== undefined &&
+      payload.price_per_hour !== null
+    ) {
       formData.append("price_per_hour", String(payload.price_per_hour));
     }
 
-    // Append price_per_km if provided (can be null to clear it)
-    if (payload.price_per_km !== undefined) {
+    if (payload.price_per_km !== undefined && payload.price_per_km !== null) {
       formData.append("price_per_km", String(payload.price_per_km));
     }
 

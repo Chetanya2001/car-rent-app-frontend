@@ -88,7 +88,6 @@ export default function MyCars() {
     setEditingFeatures(initialFeatures);
 
     // Initialize pricing type based on which price exists
-    // Priority: if price_per_km exists, use km; otherwise use hour
     const hasKmPrice =
       car.price_per_km !== null && car.price_per_km !== undefined;
     const hasHourPrice =
@@ -97,15 +96,12 @@ export default function MyCars() {
     setPricingType(hasKmPrice ? "km" : "hour");
 
     // Set the appropriate price value
-    // Set the appropriate price value
     let price = "";
-
     if (hasKmPrice && car.price_per_km != null) {
       price = car.price_per_km.toString();
     } else if (hasHourPrice && car.price_per_hour != null) {
       price = car.price_per_hour.toString();
     }
-
     setEditingPrice(price);
 
     setEditingInsuranceCompany((car as any).insurance?.company || "");
@@ -207,13 +203,14 @@ export default function MyCars() {
       };
 
       // Add pricing based on selected type
-      if (editingPrice) {
+      // ONLY send the price field that's being used, don't send null for the other
+      if (editingPrice && editingPrice.trim()) {
         if (pricingType === "hour") {
           updatePayload.price_per_hour = parseFloat(editingPrice);
-          updatePayload.price_per_km = null; // Clear the other price
+          // Don't send price_per_km at all (backend should handle clearing if needed)
         } else {
           updatePayload.price_per_km = parseFloat(editingPrice);
-          updatePayload.price_per_hour = null; // Clear the other price
+          // Don't send price_per_hour at all (backend should handle clearing if needed)
         }
       }
 
