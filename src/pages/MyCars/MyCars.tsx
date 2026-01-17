@@ -87,14 +87,26 @@ export default function MyCars() {
     });
     setEditingFeatures(initialFeatures);
 
-    // Initialize other fields
-    setPricingType(car.price_per_km !== null ? "km" : "hour");
+    // Initialize pricing type based on which price exists
+    // Priority: if price_per_km exists, use km; otherwise use hour
+    const hasKmPrice =
+      car.price_per_km !== null && car.price_per_km !== undefined;
+    const hasHourPrice =
+      car.price_per_hour !== null && car.price_per_hour !== undefined;
 
-    setEditingPrice(
-      car.price_per_km !== null
-        ? car.price_per_km.toString()
-        : car.price_per_hour?.toString() || ""
-    );
+    setPricingType(hasKmPrice ? "km" : "hour");
+
+    // Set the appropriate price value
+    // Set the appropriate price value
+    let price = "";
+
+    if (hasKmPrice && car.price_per_km != null) {
+      price = car.price_per_km.toString();
+    } else if (hasHourPrice && car.price_per_hour != null) {
+      price = car.price_per_hour.toString();
+    }
+
+    setEditingPrice(price);
 
     setEditingInsuranceCompany((car as any).insurance?.company || "");
     setEditingIdvValue((car as any).insurance?.idv_value?.toString() || "");
@@ -126,14 +138,14 @@ export default function MyCars() {
         await fetchCars();
       } else if (response.status === "hidden") {
         alert(
-          `Car ${getCarName(carToDelete)} has past bookings and is now hidden.`
+          `Car ${getCarName(carToDelete)} has past bookings and is now hidden.`,
         );
         await fetchCars();
       } else if (response.status === "active_booking") {
         alert(
           `Cannot delete ${getCarName(
-            carToDelete
-          )} because it has active or future bookings.`
+            carToDelete,
+          )} because it has active or future bookings.`,
         );
       } else {
         alert(`Unexpected response: ${JSON.stringify(response)}`);
@@ -166,7 +178,7 @@ export default function MyCars() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setSelectedImage(file); // file is File | undefined
+      setSelectedImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -174,6 +186,7 @@ export default function MyCars() {
       reader.readAsDataURL(file);
     }
   };
+
   const handleSaveEdit = async () => {
     if (!carToEdit) return;
 
@@ -186,21 +199,21 @@ export default function MyCars() {
       FEATURES.forEach((feature) => {
         cleanFeatures[feature.key] = !!editingFeatures[feature.key];
       });
-      await updateCarFeatures(carId, cleanFeatures); // 🆕 Uses your new service
+      await updateCarFeatures(carId, cleanFeatures);
 
       // ✅ 2. Update PRICE + INSURANCE (existing API)
       const updatePayload: any = {
         car_id: carId,
       };
 
-      // Add pricing
+      // Add pricing based on selected type
       if (editingPrice) {
         if (pricingType === "hour") {
           updatePayload.price_per_hour = parseFloat(editingPrice);
-          updatePayload.price_per_km = null;
+          updatePayload.price_per_km = null; // Clear the other price
         } else {
           updatePayload.price_per_km = parseFloat(editingPrice);
-          updatePayload.price_per_hour = null;
+          updatePayload.price_per_hour = null; // Clear the other price
         }
       }
 
@@ -217,6 +230,8 @@ export default function MyCars() {
       if (selectedImage) {
         updatePayload.insurance_image = selectedImage;
       }
+
+      console.log("💾 Saving with payload:", updatePayload);
 
       await updateCarDetails(updatePayload);
 
@@ -490,7 +505,7 @@ export default function MyCars() {
                       checked={pricingType === "hour"}
                       onChange={() => setPricingType("hour")}
                     />
-                    Per Hour
+                    Per Hour (Self-Drive)
                   </label>
 
                   <label>
@@ -499,7 +514,7 @@ export default function MyCars() {
                       checked={pricingType === "km"}
                       onChange={() => setPricingType("km")}
                     />
-                    Per KM
+                    Per KM (Intercity)
                   </label>
                 </div>
 
@@ -515,6 +530,7 @@ export default function MyCars() {
                       onChange={(e) => setEditingPrice(e.target.value)}
                       className="premium-input"
                       min="0"
+                      step="0.01"
                     />
                   </div>
                 </div>

@@ -33,13 +33,15 @@ export interface EditCarData {
   year: number;
   features: EditCarFeatures;
   price_per_hour: string;
+  price_per_km: string;
   insurance: EditCarInsurance;
 }
 
 export interface UpdateCarPayload {
   car_id: number;
   features?: Record<string, boolean>;
-  price_per_hour?: number;
+  price_per_hour?: number | null;
+  price_per_km?: number | null;
   insurance_company?: string;
   insurance_idv_value?: number;
   insurance_valid_till?: string;

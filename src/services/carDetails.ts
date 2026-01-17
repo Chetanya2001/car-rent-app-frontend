@@ -7,7 +7,7 @@ const API_URL = `${import.meta.env.VITE_API_URL}/api/car-details/getCarDetails`;
 
 // 📌 Get Car Details by ID (car_id in body)
 export const getCarDetails = async (
-  car_id: number
+  car_id: number,
 ): Promise<CarDetailsType> => {
   try {
     const token = localStorage.getItem("token");
@@ -20,7 +20,7 @@ export const getCarDetails = async (
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-      }
+      },
     );
 
     console.log("📥 Car Details Response:", response.data);
@@ -29,7 +29,7 @@ export const getCarDetails = async (
   } catch (error: any) {
     console.error(
       "❌ Error fetching car details:",
-      error.response?.data || error.message
+      error.response?.data || error.message,
     );
     throw error;
   }
@@ -50,9 +50,14 @@ export const updateCarDetails = async (payload: UpdateCarPayload) => {
       formData.append("features", JSON.stringify(payload.features));
     }
 
-    // Append price if provided
+    // Append price_per_hour if provided (can be null to clear it)
     if (payload.price_per_hour !== undefined) {
       formData.append("price_per_hour", String(payload.price_per_hour));
+    }
+
+    // Append price_per_km if provided (can be null to clear it)
+    if (payload.price_per_km !== undefined) {
+      formData.append("price_per_km", String(payload.price_per_km));
     }
 
     // Append insurance company if provided
@@ -64,7 +69,7 @@ export const updateCarDetails = async (payload: UpdateCarPayload) => {
     if (payload.insurance_idv_value !== undefined) {
       formData.append(
         "insurance_idv_value",
-        String(payload.insurance_idv_value)
+        String(payload.insurance_idv_value),
       );
     }
 
@@ -81,7 +86,8 @@ export const updateCarDetails = async (payload: UpdateCarPayload) => {
     console.log("📤 Sending update request with payload:", {
       car_id: payload.car_id,
       has_features: !!payload.features,
-      has_price: !!payload.price_per_hour,
+      has_price_per_hour: payload.price_per_hour !== undefined,
+      has_price_per_km: payload.price_per_km !== undefined,
       has_insurance: !!payload.insurance_company,
       has_image: !!payload.insurance_image,
     });
@@ -102,7 +108,7 @@ export const updateCarDetails = async (payload: UpdateCarPayload) => {
   } catch (error: any) {
     console.error(
       "❌ Error updating car:",
-      error.response?.data || error.message
+      error.response?.data || error.message,
     );
     throw error;
   }
