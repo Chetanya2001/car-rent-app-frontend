@@ -3,10 +3,10 @@ import type { UserRegister } from "../../../types/user";
 import { registerUser } from "../../../services/auth";
 import "./Register.css";
 
-export interface RegisterProps {
-  onClose: () => void;
+interface RegisterProps {
   onSwitch: () => void;
   onRegisterSuccess: () => void;
+  onClose?: () => void;
 }
 
 export default function Register({
@@ -22,178 +22,111 @@ export default function Register({
     role: "guest",
   });
 
-  // State to hold error message
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error message on input change
-    if (errorMessage) {
-      setErrorMessage("");
-    }
+    if (errorMessage) setErrorMessage("");
   };
 
-  const handleRoleToggle = () => {
+  const toggleRole = () => {
     setFormData((prev) => ({
       ...prev,
       role: prev.role === "guest" ? "host" : "guest",
     }));
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
       await registerUser(formData);
-      setErrorMessage("");
-      onRegisterSuccess(); // triggers showing login with remark
-    } catch (error: any) {
-      console.error("Error registering user:", error.message);
-      // Show error message from API if available
-      if (error.message) {
-        setErrorMessage(error.message);
-      } else {
-        setErrorMessage("Registration failed. Please try again.");
-      }
+      onRegisterSuccess();
+    } catch (err: any) {
+      setErrorMessage(err?.message || "Registration failed");
     }
   };
 
   return (
-    <div className="register-wrapper">
-      <div
-        className="card shadow-lg border-0 rounded-4 overflow-hidden"
-        style={{ maxWidth: "900px", width: "100%" }}
-      >
-        <div className="row g-0">
-          {/* Form Section */}
-          <div className="col-md-6 p-5 d-flex flex-column justify-content-center bg-white">
-            <h2 className="fw-bold mb-3 display-6">Create Account</h2>
-            {/* Role Toggle Switch */}
-            <div className="mb-4 text-start">
-              <label className="form-label fw-semibold text-secondary d-block mb-2">
-                Role: {formData.role === "guest" ? "Guest" : "Host"}
-              </label>
-              <div className="form-check form-switch big-switch">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="roleToggle"
-                  checked={formData.role === "host"}
-                  onChange={handleRoleToggle}
-                />
-              </div>
+    <div className="rm-overlay">
+      <div className="rm-card">
+        {/* LEFT */}
+        <div className="rm-form">
+          <h2 className="rm-title">Create An Account</h2>
+
+          <div className="rm-role">
+            <span>Role: {formData.role === "guest" ? "Guest" : "Host"}</span>
+            <label className="rm-switch">
+              <input
+                type="checkbox"
+                checked={formData.role === "host"}
+                onChange={toggleRole}
+              />
+              <span className="rm-slider" />
+            </label>
+          </div>
+
+          <form onSubmit={handleSubmit} className="rm-form-body">
+            <div className="rm-row">
+              <input
+                name="first_name"
+                placeholder="First name"
+                value={formData.first_name}
+                onChange={handleChange}
+                required
+              />
+              <input
+                name="last_name"
+                placeholder="Last name"
+                value={formData.last_name}
+                onChange={handleChange}
+                required
+              />
             </div>
-            <form className="d-flex flex-column gap-3" onSubmit={handleSubmit}>
-              <div className="d-flex gap-2">
-                <div className="flex-grow-1">
-                  <label className="form-label small fw-semibold text-secondary">
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    name="first_name"
-                    className="form-control"
-                    placeholder="First Name"
-                    value={formData.first_name}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="flex-grow-1">
-                  <label className="form-label small fw-semibold text-secondary">
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    name="last_name"
-                    className="form-control"
-                    placeholder="Last Name"
-                    value={formData.last_name}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="form-label small fw-semibold text-secondary">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  className={`form-control ${errorMessage ? "is-invalid" : ""}`}
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-                {/* Display error message near email input */}
-                {errorMessage && (
-                  <div
-                    className="invalid-feedback"
-                    style={{ display: "block" }}
-                  >
-                    {errorMessage}
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="form-label small fw-semibold text-secondary">
-                  Phone
-                </label>
-                <input
-                  type="text"
-                  name="phone"
-                  className="form-control"
-                  placeholder="Phone Number"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <label className="form-label small fw-semibold text-secondary">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  className="form-control"
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                className="btn btn-primary w-100 fw-semibold shadow"
-              >
-                Register
-              </button>
-              <p className="text-center text-muted mt-3 mb-0">
-                Already have an account?{" "}
-                <button
-                  type="button"
-                  onClick={onSwitch}
-                  className="btn btn-link p-0 fw-semibold text-primary text-decoration-none"
-                >
-                  Login
-                </button>
-              </p>
-            </form>
-          </div>
-          {/* Image Section */}
-          <div className="col-md-6 d-none d-md-block position-relative">
-            <img
-              src="https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?fit=crop&w=900&q=80"
-              alt="Car background"
-              className="w-100 h-100 object-fit-cover"
+
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              required
             />
-          </div>
+
+            {errorMessage && <div className="rm-error">{errorMessage}</div>}
+
+            <input
+              name="phone"
+              placeholder="Phone number"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+            />
+
+            <input
+              name="password"
+              type="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+
+            <button type="submit" className="rm-submit">
+              Register
+            </button>
+
+            <p className="rm-footer">
+              Already have an account?
+              <button type="button" onClick={onSwitch}>
+                Login
+              </button>
+            </p>
+          </form>
         </div>
+
+        {/* RIGHT */}
+        <div className="rm-image" />
       </div>
     </div>
   );

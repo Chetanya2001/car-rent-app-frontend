@@ -30,8 +30,12 @@ type Booking = {
 
   Car: {
     id: number;
-    make: string;
-    model: string;
+    make: {
+      name: string
+    },
+    model: {
+      name: string
+    }
     year: number;
     price_per_hour: string | null;
     price_per_km: string | null;
