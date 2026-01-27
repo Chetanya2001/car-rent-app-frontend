@@ -204,9 +204,10 @@ export default function BookingManagement() {
           drop_address: editingBooking.dropOffLoc,
           status: editingBooking.status,
           insure_amount: editingBooking.insure ? 1 : 0, // example boolean to number
+          payment_mode: "ZERO_RS",
           // Add others if needed
         },
-        token
+        token,
       );
       setBookingData((prev) =>
         prev.map((b) =>
@@ -222,8 +223,8 @@ export default function BookingManagement() {
                   insure: updatedBooking.booking.insure_amount > 0,
                 },
               }
-            : b
-        )
+            : b,
+        ),
       );
       toast.success("Booking updated successfully!");
       setIsEditing(false);
