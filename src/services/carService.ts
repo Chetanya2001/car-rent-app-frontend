@@ -3,7 +3,7 @@ import type { Car } from "../types/Cars";
 import type { GetAdminCarsResponse } from "../pages/admin/manageCars/manageCars";
 
 // ✅ Use env variable
-const API_URL = `${import.meta.env.VITE_API_URL}/api/cars`;
+const API_URL = `${import.meta.env.VITE_API_URL}/cars`;
 
 export const getCars = async (): Promise<Car[]> => {
   const response = await axios.get<Car[]>(API_URL);
@@ -79,7 +79,7 @@ export const addInsurance = async (insuranceData: {
   formData.append("insurance_company", insuranceData.insurance_company);
   formData.append(
     "insurance_idv_value",
-    String(insuranceData.insurance_idv_value)
+    String(insuranceData.insurance_idv_value),
   );
   formData.append("insurance_valid_till", insuranceData.insurance_valid_till);
   formData.append("insurance_image", insuranceData.insurance_image);
@@ -148,7 +148,7 @@ export const uploadAvailability = async (availabilityData: {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-    }
+    },
   );
 
   return response.data;
@@ -195,7 +195,7 @@ export const getHostCars = async () => {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     return response.data;
@@ -222,7 +222,7 @@ export const getCarLocation = async (car_id: number): Promise<string> => {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-    }
+    },
   );
 
   return response.data.location;
@@ -240,7 +240,7 @@ export const getAdminCars = async (): Promise<GetAdminCarsResponse> => {
           Authorization: token ? `Bearer ${token}` : "",
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     console.log("🚗 Admin Cars API Response:", response.data);
@@ -267,7 +267,7 @@ export const editCar = async (
     insurance_company?: string;
     insurance_idv_value?: number;
     insurance_valid_till?: string;
-  }
+  },
 ) => {
   try {
     const token = localStorage.getItem("token");
@@ -283,7 +283,7 @@ export const editCar = async (
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     console.log("✅ Car Updated Successfully:", response.data);
@@ -291,7 +291,7 @@ export const editCar = async (
   } catch (error: any) {
     console.error(
       "❌ Error editing car:",
-      error.response?.data || error.message
+      error.response?.data || error.message,
     );
     throw error;
   }

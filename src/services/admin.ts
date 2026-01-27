@@ -10,7 +10,7 @@ export interface User {
   is_verified: boolean;
 }
 
-const API_URL = `${import.meta.env.VITE_API_URL}/api/users`;
+const API_URL = `${import.meta.env.VITE_API_URL}/users`;
 
 export const getAllUsers = async (): Promise<User[]> => {
   const token = localStorage.getItem("token");
@@ -26,7 +26,7 @@ export const getAllUsers = async (): Promise<User[]> => {
 
 export const deleteUser = async (
   token: string,
-  userId: string
+  userId: string,
 ): Promise<{ message: string }> => {
   try {
     const response = await axios.delete(`${API_URL}/delete-user/${userId}`, {
@@ -39,7 +39,7 @@ export const deleteUser = async (
     console.error(
       "❌ Error deleting user:",
       error.response?.status,
-      error.response?.data || error.message
+      error.response?.data || error.message,
     );
     throw error.response?.data || new Error("Delete user failed");
   }
@@ -60,7 +60,7 @@ export const getAllHosts = async (): Promise<User[]> => {
 export const updateUser = async (
   token: string,
   userId: string,
-  updateData: Partial<User>
+  updateData: Partial<User>,
 ): Promise<User> => {
   try {
     const response = await axios.put<User>(
@@ -70,14 +70,14 @@ export const updateUser = async (
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     return response.data;
   } catch (error: any) {
     console.error(
       "❌ Error updating user:",
       error.response?.status,
-      error.response?.data || error.message
+      error.response?.data || error.message,
     );
     throw error.response?.data || new Error("Update user failed");
   }

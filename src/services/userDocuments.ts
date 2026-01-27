@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = `${import.meta.env.VITE_API_URL}/api/user-document`;
+const API_URL = `${import.meta.env.VITE_API_URL}/user-document`;
 
 export interface UserDocument {
   id: number;
@@ -40,7 +40,7 @@ export interface GetDocumentsResponse {
 export async function uploadUserDocument(
   file: File,
   doc_type: string,
-  token: string
+  token: string,
 ): Promise<UploadDocumentResponse> {
   const formData = new FormData();
   formData.append("image", file);
@@ -54,14 +54,14 @@ export async function uploadUserDocument(
         "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
   return response.data;
 }
 
 // Get user documents by userId (admin only)
 export async function getUserDocumentsByUserId(
-  token: string
+  token: string,
 ): Promise<GetDocumentsResponse> {
   const response = await axios.get<GetDocumentsResponse>(
     `${API_URL}/get-document`,
@@ -69,14 +69,14 @@ export async function getUserDocumentsByUserId(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
   return response.data;
 }
 
 export async function uploadProfilePicture(
   file: File,
-  token: string
+  token: string,
 ): Promise<UploadProfilePicResponse> {
   const formData = new FormData();
   formData.append("profile_pic", file);
@@ -89,7 +89,7 @@ export async function uploadProfilePicture(
         "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;

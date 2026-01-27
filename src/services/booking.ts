@@ -1,13 +1,9 @@
 // src/services/booking.ts
 import axios from "axios";
 
-const API_URL = `${import.meta.env.VITE_API_URL}/api/bookings`;
-const API_URL_SelfDrive = `${
-  import.meta.env.VITE_API_URL
-}/api/self-drive-bookings`;
-const API_URL_Intercity = `${
-  import.meta.env.VITE_API_URL
-}/api/intercity-bookings`;
+const API_URL = `${import.meta.env.VITE_API_URL}/bookings`;
+const API_URL_SelfDrive = `${import.meta.env.VITE_API_URL}/self-drive-bookings`;
+const API_URL_Intercity = `${import.meta.env.VITE_API_URL}/intercity-bookings`;
 
 // The booking input type matches your API needs
 

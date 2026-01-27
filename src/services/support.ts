@@ -15,18 +15,18 @@ export interface SupportResponse {
 
 // ================== API BASE URL ====================
 
-const API_URL = `${import.meta.env.VITE_API_URL}/api/users`;
+const API_URL = `${import.meta.env.VITE_API_URL}/users`;
 
 // ================= Support Message API ==============
 
 export const sendSupportMessage = async (
-  data: SupportFormData
+  data: SupportFormData,
 ): Promise<SupportResponse> => {
   try {
     // Assuming your Express route is POST /api/users/support
     const res = await axios.post<SupportResponse>(
       `${API_URL}/support-mail`,
-      data
+      data,
     );
     console.log("✅ Support message sent:", res.status, res.data);
     return res.data;
@@ -34,7 +34,7 @@ export const sendSupportMessage = async (
     console.error(
       "❌ Error sending support message:",
       err.response?.status,
-      err.response?.data || err.message
+      err.response?.data || err.message,
     );
     // Throwing error so UI can display feedback
     throw err.response?.data || new Error("Support request failed");
