@@ -73,7 +73,7 @@ const IntercityCarDetails: React.FC = () => {
   const prevImage = () => {
     if (car?.photos?.length) {
       setCurrentImageIndex(
-        (prev) => (prev - 1 + car.photos.length) % car.photos.length
+        (prev) => (prev - 1 + car.photos.length) % car.photos.length,
       );
     }
   };
@@ -100,13 +100,14 @@ const IntercityCarDetails: React.FC = () => {
 
           pax,
           luggage,
-
           distance_km: tripDistanceKm,
           driver_amount: pricing.driverFee,
 
           total_amount: pricing.total,
+
+          payment_mode: "ZERO_RS", // 🔥 ADD THIS
         },
-        token
+        token,
       );
 
       navigate("/guest-mybookings");

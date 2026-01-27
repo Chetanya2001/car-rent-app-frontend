@@ -11,14 +11,19 @@ type HostBooking = {
   booking_type: string;
   Car: {
     id: number;
-    make: string;
-    model: string;
     year: number;
     price_per_hour: string | null;
     price_per_km: string | null;
     description: string;
     photos?: { photo_url: string }[];
+    make: {
+      name: string;
+    };
+    model: {
+      name: string;
+    };
   };
+
   SelfDriveBooking: {
     start_datetime: string;
     end_datetime: string;
@@ -88,7 +93,7 @@ export default function HostMyBookings() {
 
   const handleChatClick = (guest: HostBooking["guest"]) => {
     alert(
-      `Chat feature coming soon! Guest: ${guest.first_name} ${guest.last_name}`
+      `Chat feature coming soon! Guest: ${guest.first_name} ${guest.last_name}`,
     );
   };
 
@@ -139,14 +144,14 @@ export default function HostMyBookings() {
 
             const hourlyRate =
               parseFloat(
-                car.price_per_hour?.toString().replace(/[^\d.]/g, "") || "0"
+                car.price_per_hour?.toString().replace(/[^\d.]/g, "") || "0",
               ) || 0;
 
             const totalHours = Math.max(
               1,
               Math.round(
-                (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)
-              )
+                (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60),
+              ),
             );
 
             const rentalAmount = hourlyRate * totalHours;
@@ -164,7 +169,9 @@ export default function HostMyBookings() {
                 <div className="booking-details">
                   <div>
                     <h3>
-                      {car.make} {car.model} ({car.year})
+                      <h3>
+                        {car.make.name} {car.model.name} ({car.year})
+                      </h3>
                     </h3>
                     <p className="car-description">{car.description}</p>
 
@@ -274,13 +281,14 @@ export default function HostMyBookings() {
           if (ic) {
             const perKmRate =
               parseFloat(
-                car.price_per_km?.toString().replace(/[^\d.]/g, "") || "0"
+                car.price_per_km?.toString().replace(/[^\d.]/g, "") || "0",
               ) || 0;
             const distanceKm = parseFloat(ic.distance_km || "0");
             const driverAmount = ic.driver_amount || 0;
 
             const rentalAmount = perKmRate * distanceKm;
-            const totalAmount = rentalAmount + driverAmount;
+            const subtotal = rentalAmount + driverAmount;
+            const gst = booking.total_amount - subtotal;
 
             return (
               <div key={booking.id} className="booking-card">
@@ -293,7 +301,9 @@ export default function HostMyBookings() {
                 <div className="booking-details">
                   <div>
                     <h3>
-                      {car.make} {car.model} ({car.year})
+                      <h3>
+                        {car.make.name} {car.model.name} ({car.year})
+                      </h3>
                     </h3>
                     <p className="car-description">{car.description}</p>
 
@@ -379,16 +389,25 @@ export default function HostMyBookings() {
                         <strong>= ₹{rentalAmount.toLocaleString()}</strong>
                       </div>
                     </div>
-
                     <div className="total-breakdown">
                       <div className="amount-row">
                         <span>Driver: ₹{driverAmount.toLocaleString()}</span>
                       </div>
 
+                      <div className="amount-row">
+                        <span>Subtotal: ₹{subtotal.toFixed(2)}</span>
+                      </div>
+
+                      <div className="amount-row">
+                        <span>GST (18%): ₹{Math.max(0, gst).toFixed(2)}</span>
+                      </div>
+
                       <hr />
 
                       <div className="total-row">
-                        <strong>Total: ₹{totalAmount.toLocaleString()}</strong>
+                        <strong>
+                          Total: ₹{booking.total_amount.toLocaleString()}
+                        </strong>
                       </div>
                     </div>
 

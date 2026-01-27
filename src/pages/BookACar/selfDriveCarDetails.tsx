@@ -173,6 +173,7 @@ const SelfDriveCarDetails: React.FC = () => {
         insure_amount: pricing.insurance,
         driver_amount: pricing.driver,
         total_amount: pricing.total,
+        payment_mode:"PAID"
       };
 
       const res = await bookCar(payload, token);

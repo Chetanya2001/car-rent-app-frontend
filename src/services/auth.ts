@@ -3,10 +3,10 @@ import type { UserRegister, UserLogin, AuthResponse } from "../types/user";
 import { jwtDecode } from "jwt-decode";
 
 // ✅ Use Vite env variable instead of localhost
-const API_URL = `${import.meta.env.VITE_API_URL}/api/users`;
+const API_URL = `${import.meta.env.VITE_API_URL}/users`;
 
 export const registerUser = async (
-  data: UserRegister
+  data: UserRegister,
 ): Promise<AuthResponse> => {
   try {
     const res = await axios.post<AuthResponse>(`${API_URL}/register`, data);
@@ -16,7 +16,7 @@ export const registerUser = async (
     console.error(
       "❌ Error registering user:",
       err.response?.status,
-      err.response?.data || err.message
+      err.response?.data || err.message,
     );
     throw err.response?.data || new Error("Registration failed");
   }
@@ -31,7 +31,7 @@ export const loginUser = async (data: UserLogin): Promise<AuthResponse> => {
     console.error(
       "❌ Error logging in:",
       err.response?.status,
-      err.response?.data || err.message
+      err.response?.data || err.message,
     );
     throw err.response?.data || new Error("Login failed");
   }
@@ -69,7 +69,7 @@ export const fetchUserProfile = async (token: string) => {
     }
   } catch (error: any) {
     throw new Error(
-      error.response?.data?.message || error.message || "API error"
+      error.response?.data?.message || error.message || "API error",
     );
   }
 };

@@ -21,21 +21,20 @@ type IntercityBooking = {
   luggage: number;
 };
 
+// ✅ FIXED: make/model can be string OR object (handles both API formats)
+type CarMake = string | { name: string };
+type CarModel = string | { name: string };
+
 type Booking = {
   id: number;
   booking_type: "SELF_DRIVE" | "INTERCITY";
   status: string;
   total_amount: number;
   createdAt: string;
-
   Car: {
     id: number;
-    make: {
-      name: string
-    },
-    model: {
-      name: string
-    }
+    make: CarMake; // ✅ Flexible: string | {name: string}
+    model: CarModel; // ✅ Flexible: string | {name: string}
     year: number;
     price_per_hour: string | null;
     price_per_km: string | null;
@@ -49,9 +48,19 @@ type Booking = {
       phone: string;
     };
   };
-
   SelfDriveBooking: SelfDriveBooking | null;
   IntercityBooking: IntercityBooking | null;
+};
+
+// ✅ HELPER: Safely get make/model name (handles string OR object)
+const getMakeName = (make: CarMake): string => {
+  if (typeof make === "string") return make;
+  return make?.name || "Unknown Make";
+};
+
+const getModelName = (model: CarModel): string => {
+  if (typeof model === "string") return model;
+  return model?.name || "Unknown Model";
 };
 
 export default function GuestMyBookings() {
@@ -65,9 +74,10 @@ export default function GuestMyBookings() {
       try {
         if (!token) return;
         const data = await getGuestBookings(token);
+        console.log("✅ Bookings loaded:", data);
         setBookings(data);
       } catch (err) {
-        console.error("Error loading bookings", err);
+        console.error("❌ Error loading bookings", err);
       }
     };
     fetchBookings();
@@ -120,16 +130,26 @@ export default function GuestMyBookings() {
       <Navbar />
       <div className="bookings-container">
         <h2 className="bookings-title">My Bookings</h2>
-
         {bookings.map((booking) => {
           const car = booking.Car;
           const isCarAvailable = Boolean(car);
           const image = car?.photos?.[0]?.photo_url || "/default-car.png";
           const host = car?.host;
 
+          // ✅ SAFE: Using helper functions - NO CRASH
+          const makeName = getMakeName(car?.make);
+          const modelName = getModelName(car?.model);
+
+          console.log(`🚗 Booking ${booking.id}:`, {
+            make: car?.make,
+            makeName,
+            model: car?.model,
+            modelName,
+            year: car?.year,
+          });
+
           const isSelfDrive = booking.booking_type === "SELF_DRIVE";
           const isIntercity = booking.booking_type === "INTERCITY";
-
           const sdb = booking.SelfDriveBooking;
           const icb = booking.IntercityBooking;
 
@@ -145,7 +165,6 @@ export default function GuestMyBookings() {
           if (isSelfDrive && sdb) {
             const startDate = new Date(sdb.start_datetime);
             const endDate = new Date(sdb.end_datetime);
-
             pickupDate = startDate.toLocaleDateString();
             pickupTime = startDate.toLocaleTimeString([], {
               hour: "2-digit",
@@ -159,14 +178,12 @@ export default function GuestMyBookings() {
             totalHours = Math.max(
               1,
               Math.round(
-                (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)
-              )
+                (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60),
+              ),
             );
-
             hourlyRate =
-              parseFloat(car.price_per_hour?.replace(/[^\d.]/g, "") || "0") ||
+              parseFloat((car?.price_per_hour || "0").replace(/[^\d.]/g, "")) ||
               0;
-
             rentalAmount = hourlyRate * totalHours;
           }
 
@@ -174,9 +191,8 @@ export default function GuestMyBookings() {
           let pricePerKm = 0;
           let distanceKm = 0;
           let baseFare = 0;
-
           if (isIntercity && icb) {
-            pricePerKm = parseFloat(car.price_per_km || "0");
+            pricePerKm = parseFloat(car?.price_per_km || "0");
             distanceKm = parseFloat(icb.distance_km);
             baseFare = Math.round(pricePerKm * distanceKm);
           }
@@ -185,20 +201,19 @@ export default function GuestMyBookings() {
             <div key={booking.id} className="booking-card">
               <img
                 src={image}
-                alt={
-                  isCarAvailable ? `${car!.make} ${car!.model}` : "Car removed"
-                }
+                alt={`${makeName} ${modelName}`}
                 className="booking-image"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/default-car.png";
+                }}
               />
-
               <div className="booking-details">
                 <div>
                   <h3>
                     {isCarAvailable
-                      ? `${car!.make} ${car!.model} (${car!.year})`
+                      ? `${makeName} ${modelName} (${car!.year})` // ✅ SAFE: strings only
                       : "Car no longer available"}
                   </h3>
-
                   {isCarAvailable && (
                     <p className="car-description">{car!.description}</p>
                   )}
@@ -254,7 +269,6 @@ export default function GuestMyBookings() {
                     <p>
                       {host ? `${host.first_name} ${host.last_name}` : "N/A"}
                     </p>
-
                     {host && (
                       <div className="contact-icons">
                         <button
@@ -267,14 +281,12 @@ export default function GuestMyBookings() {
                             {copiedPhone === booking.id ? "Copied!" : "Call"}
                           </span>
                         </button>
-
                         <button
                           className="contact-icon-btn chat-btn"
                           onClick={() => handleChatClick(host)}
                         >
                           <span>Chat</span>
                         </button>
-
                         <button
                           className="contact-icon-btn email-btn"
                           onClick={() => handleEmailClick(host.email)}
@@ -299,16 +311,13 @@ export default function GuestMyBookings() {
                           <strong>= ₹{rentalAmount.toLocaleString()}</strong>
                         </div>
                       </div>
-
                       <div className="total-breakdown">
                         <div className="amount-row">
                           <span>
                             Insure: ₹{sdb.insure_amount.toLocaleString()}
                           </span>
                         </div>
-
                         <hr />
-
                         <div className="total-row">
                           <strong>
                             Total: ₹{booking.total_amount.toLocaleString()}
@@ -330,16 +339,13 @@ export default function GuestMyBookings() {
                           <strong>= ₹{baseFare.toLocaleString()}</strong>
                         </div>
                       </div>
-
                       <div className="total-breakdown">
                         <div className="amount-row">
                           <span>
                             Driver: ₹{icb.driver_amount.toLocaleString()}
                           </span>
                         </div>
-
                         <hr />
-
                         <div className="total-row">
                           <strong>
                             Total: ₹{booking.total_amount.toLocaleString()}
@@ -352,10 +358,9 @@ export default function GuestMyBookings() {
                   <p className="status-row">
                     Status: <strong>{booking.status}</strong>
                   </p>
-
                   <button
                     className="view-details-btn"
-                    onClick={() => handleViewDetails(car.id)}
+                    onClick={() => handleViewDetails(car!.id)}
                   >
                     View Details
                   </button>

@@ -47,6 +47,7 @@ export interface BookIntercityRequest {
   driver_amount: number;
 
   total_amount: number;
+  payment_mode: string;
 }
 
 export interface UpdateBookingRequest {
@@ -61,6 +62,7 @@ export interface UpdateBookingRequest {
   insure_amount?: number;
   driver_amount?: number;
   status?: string;
+  payment_mode: string;
 }
 
 export interface UpdateBookingResponse {
@@ -70,7 +72,7 @@ export interface UpdateBookingResponse {
 
 export const bookCar = async (
   bookingData: BookCarRequest,
-  token: string
+  token: string,
 ): Promise<BookCarResponse> => {
   try {
     const res = await axios.post<BookCarResponse>(
@@ -80,21 +82,21 @@ export const bookCar = async (
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     return res.data;
   } catch (err: any) {
     console.error(
       "❌ Error booking car:",
       err.response?.status,
-      err.response?.data || err.message
+      err.response?.data || err.message,
     );
     throw err.response?.data || new Error("Booking failed");
   }
 };
 export const bookCarIntercity = async (
   bookingData: BookIntercityRequest,
-  token: string
+  token: string,
 ): Promise<BookCarResponse> => {
   try {
     const res = await axios.post<BookCarResponse>(
@@ -104,7 +106,7 @@ export const bookCarIntercity = async (
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     return res.data;
@@ -112,7 +114,7 @@ export const bookCarIntercity = async (
     console.error(
       "❌ Error booking intercity car:",
       err.response?.status,
-      err.response?.data || err.message
+      err.response?.data || err.message,
     );
     throw err.response?.data || new Error("Intercity booking failed");
   }
@@ -130,7 +132,7 @@ export const getAllBookingsAdmin = async (token: string): Promise<any[]> => {
     console.error(
       "❌ Error fetching admin bookings:",
       err.response?.status,
-      err.response?.data || err.message
+      err.response?.data || err.message,
     );
     throw err.response?.data || new Error("Failed to fetch admin bookings");
   }
@@ -148,7 +150,7 @@ export const getHostBookings = async (token: string): Promise<any[]> => {
     console.error(
       "❌ Error fetching host bookings:",
       err.response?.status,
-      err.response?.data || err.message
+      err.response?.data || err.message,
     );
     throw err.response?.data || new Error("Failed to fetch host bookings");
   }
@@ -165,7 +167,7 @@ export const getGuestBookings = async (token: string): Promise<any[]> => {
     console.error(
       "❌ Error fetching guest bookings:",
       err.response?.status,
-      err.response?.data || err.message
+      err.response?.data || err.message,
     );
     throw err.response?.data || new Error("Failed to fetch guest bookings");
   }
@@ -173,7 +175,7 @@ export const getGuestBookings = async (token: string): Promise<any[]> => {
 
 export const deleteBooking = async (
   bookingId: string,
-  token: string
+  token: string,
 ): Promise<{ message: string }> => {
   try {
     const res = await axios.delete(`${API_URL}/delete-booking/${bookingId}`, {
@@ -186,7 +188,7 @@ export const deleteBooking = async (
     console.error(
       "❌ Error deleting booking:",
       err.response?.status,
-      err.response?.data || err.message
+      err.response?.data || err.message,
     );
     throw err.response?.data || new Error("Delete booking failed");
   }
@@ -195,7 +197,7 @@ export const deleteBooking = async (
 export const updateBooking = async (
   bookingId: string,
   updateData: UpdateBookingRequest,
-  token: string
+  token: string,
 ): Promise<UpdateBookingResponse> => {
   try {
     const res = await axios.put<UpdateBookingResponse>(
@@ -205,14 +207,14 @@ export const updateBooking = async (
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     return res.data;
   } catch (err: any) {
     console.error(
       "❌ Error updating booking:",
       err.response?.status,
-      err.response?.data || err.message
+      err.response?.data || err.message,
     );
     throw err.response?.data || new Error("Update booking failed");
   }
