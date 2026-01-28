@@ -102,13 +102,8 @@ export default function SearchedCars() {
 
   const handleSearch = async () => {
     try {
-      const pickupDateTime = new Date(
-        `${filters.pickupDate}T${filters.pickupTime}:00+05:30`,
-      ).toISOString();
-
-      const dropoffDateTime = new Date(
-        `${filters.dropDate}T${filters.dropTime}:00+05:30`,
-      ).toISOString();
+      const pickupDateTime = `${filters.pickupDate} ${filters.pickupTime}:00`;
+      const dropoffDateTime = `${filters.dropDate} ${filters.dropTime}:00`;
 
       if (!pickupLocation?.lat || !pickupLocation?.lng) {
         alert("Pickup location not selected");
