@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "./pickup-otp.css";
+import "./PickupOTP.css";
 
 interface PickupOTPProps {
   bookingId: number;
