@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { toIST } from "../../utils/time";
+
 import "./PickupOTP.css";
 
 interface PickupOTPProps {
@@ -21,7 +23,8 @@ export default function PickupOTP({
   // Calculate if OTP should be visible (30 mins before pickup)
   const checkOTPVisibility = () => {
     const now = new Date();
-    const pickup = new Date(pickupDateTime);
+    const pickup = toIST(pickupDateTime);
+
     const thirtyMinsBefore = new Date(pickup.getTime() - 30 * 60 * 1000);
 
     // OTP visible if: current time >= 30 mins before pickup AND before pickup time

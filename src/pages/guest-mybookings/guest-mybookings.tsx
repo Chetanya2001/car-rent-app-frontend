@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
 import { getGuestBookings } from "../../services/booking";
 import PickupOTP from "../../components/PickupOTP/PickupOTP";
+import { toIST } from "../../utils/time";
+
 import "./guest-mybooking.css";
 
 type SelfDriveBooking = {
@@ -164,8 +166,9 @@ export default function GuestMyBookings() {
           let rentalAmount = 0;
 
           if (isSelfDrive && sdb) {
-            const startDate = new Date(sdb.start_datetime);
-            const endDate = new Date(sdb.end_datetime);
+            const startDate = toIST(sdb.start_datetime);
+            const endDate = toIST(sdb.end_datetime);
+
             pickupDate = startDate.toLocaleDateString();
             pickupTime = startDate.toLocaleTimeString([], {
               hour: "2-digit",
