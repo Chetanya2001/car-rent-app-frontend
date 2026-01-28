@@ -44,7 +44,7 @@ function getDateAndTime(dateObj: Date) {
   const pad = (num: number) => num.toString().padStart(2, "0");
   return {
     date: `${dateObj.getFullYear()}-${pad(dateObj.getMonth() + 1)}-${pad(
-      dateObj.getDate()
+      dateObj.getDate(),
     )}`,
     time: `${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}`,
   };
@@ -103,11 +103,11 @@ export default function SearchedCars() {
   const handleSearch = async () => {
     try {
       const pickupDateTime = new Date(
-        `${filters.pickupDate}T${filters.pickupTime}`
+        `${filters.pickupDate}T${filters.pickupTime}:00+05:30`,
       ).toISOString();
 
       const dropoffDateTime = new Date(
-        `${filters.dropDate}T${filters.dropTime}`
+        `${filters.dropDate}T${filters.dropTime}:00+05:30`,
       ).toISOString();
 
       if (!pickupLocation?.lat || !pickupLocation?.lng) {
