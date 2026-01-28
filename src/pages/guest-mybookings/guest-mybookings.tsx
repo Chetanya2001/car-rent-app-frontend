@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
 import { getGuestBookings } from "../../services/booking";
+import PickupOTP from "../../components/PickupOTP/PickupOTP";
 import "./guest-mybooking.css";
 
 type SelfDriveBooking = {
@@ -220,24 +221,33 @@ export default function GuestMyBookings() {
 
                   {/* SELF DRIVE BOOKING */}
                   {isSelfDrive && sdb && (
-                    <div className="booking-dates">
-                      <div>
-                        <p className="label">Pickup</p>
-                        <p>
-                          {sdb.pickup_address}
-                          <br />
-                          {pickupDate}, {pickupTime}
-                        </p>
+                    <>
+                      <div className="booking-dates">
+                        <div>
+                          <p className="label">Pickup</p>
+                          <p>
+                            {sdb.pickup_address}
+                            <br />
+                            {pickupDate}, {pickupTime}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="label">Drop-off</p>
+                          <p>
+                            {sdb.drop_address}
+                            <br />
+                            {dropoffDate}, {dropoffTime}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="label">Drop-off</p>
-                        <p>
-                          {sdb.drop_address}
-                          <br />
-                          {dropoffDate}, {dropoffTime}
-                        </p>
-                      </div>
-                    </div>
+
+                      {/* ✅ NEW: Pickup OTP Component */}
+                      <PickupOTP
+                        bookingId={booking.id}
+                        pickupDateTime={sdb.start_datetime}
+                        bookingStatus={booking.status}
+                      />
+                    </>
                   )}
 
                   {/* INTERCITY BOOKING */}
