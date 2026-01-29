@@ -8,12 +8,14 @@ interface PickupOTPProps {
   bookingId: number;
   pickupDateTime: string;
   bookingStatus: string;
+  onOtpVerified?: () => void;
 }
 
 export default function PickupOTP({
   bookingId,
   pickupDateTime,
   bookingStatus,
+  onOtpVerified,
 }: PickupOTPProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [timeUntilVisible, setTimeUntilVisible] = useState("");
@@ -73,7 +75,9 @@ export default function PickupOTP({
       });
 
       const data = await res.json();
-
+      if (res.ok) {
+        onOtpVerified;
+      }
       if (!res.ok) {
         throw new Error(data.message || "OTP verification failed");
       }

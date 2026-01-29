@@ -71,18 +71,17 @@ export default function GuestMyBookings() {
   const [copiedPhone, setCopiedPhone] = useState<number | null>(null);
   const navigate = useNavigate();
   const token = localStorage.getItem("token") || "";
+  const fetchBookings = async () => {
+    try {
+      if (!token) return;
+      const data = await getGuestBookings(token);
+      setBookings(data);
+    } catch (err) {
+      console.error("❌ Error loading bookings", err);
+    }
+  };
 
   useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        if (!token) return;
-        const data = await getGuestBookings(token);
-        console.log("✅ Bookings loaded:", data);
-        setBookings(data);
-      } catch (err) {
-        console.error("❌ Error loading bookings", err);
-      }
-    };
     fetchBookings();
   }, [token]);
 
@@ -249,6 +248,7 @@ export default function GuestMyBookings() {
                         bookingId={booking.id}
                         pickupDateTime={sdb.start_datetime}
                         bookingStatus={booking.status}
+                        onOtpVerified={fetchBookings}
                       />
                     </>
                   )}
