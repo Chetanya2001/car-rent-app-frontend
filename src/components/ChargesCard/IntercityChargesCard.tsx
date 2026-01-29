@@ -24,7 +24,7 @@ interface IntercityChargesCardProps {
     gst: number;
     total: number;
   }) => void;
-  onPay: () => void;
+  onPay: () => Promise<void>;
 }
 
 const GST_RATE = 0.18;
@@ -43,6 +43,21 @@ const IntercityChargesCard: React.FC<IntercityChargesCardProps> = ({
   onPay,
 }) => {
   const [isAgreed, setIsAgreed] = useState(false);
+  const [isPaying, setIsPaying] = useState(false);
+  const [isBooked, setIsBooked] = useState(false);
+  const handlePayNow = async () => {
+    if (!isAgreed || isPaying || isBooked) return;
+
+    setIsPaying(true);
+
+    try {
+      await onPay(); // 🔥 API call
+      setIsBooked(true); // ✅ permanently disable
+    } catch (e) {
+      console.error("Intercity booking failed", e);
+      setIsPaying(false); // ❌ re-enable on error
+    }
+  };
 
   const pricing = useMemo(() => {
     const baseFare = Math.round(tripKm * pricePerKm);
@@ -173,14 +188,20 @@ const IntercityChargesCard: React.FC<IntercityChargesCardProps> = ({
 
         <button
           className="pay-btn"
-          disabled={!isAgreed}
-          onClick={onPay}
+          disabled={!isAgreed || isPaying || isBooked}
+          onClick={handlePayNow}
           style={{
-            opacity: isAgreed ? 1 : 0.6,
-            cursor: isAgreed ? "pointer" : "not-allowed",
+            opacity: !isAgreed || isPaying || isBooked ? 0.6 : 1,
+            cursor:
+              !isAgreed || isPaying || isBooked ? "not-allowed" : "pointer",
+            transition: "opacity 0.2s",
           }}
         >
-          Confirm Booking
+          {isPaying
+            ? "Processing..."
+            : isBooked
+              ? "Booking Confirmed"
+              : "Confirm Booking"}
         </button>
       </div>
     </div>

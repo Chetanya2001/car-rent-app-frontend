@@ -8,7 +8,7 @@ interface ChargesCardProps {
   pickDropCharges: number;
   gst: number;
   carLocation?: string;
-  onPay: () => void;
+  onPay: () => Promise<void>;
 }
 
 const ChargesCard: React.FC<ChargesCardProps> = ({
@@ -23,6 +23,21 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
   const totalCost =
     carCharges + insuranceCharges + driverCharges + pickDropCharges + gst;
   const [isAgreed, setIsAgreed] = useState(false);
+  const [isPaying, setIsPaying] = useState(false);
+  const [isBooked, setIsBooked] = useState(false);
+  const handlePayNow = async () => {
+    if (!isAgreed || isPaying || isBooked) return;
+
+    setIsPaying(true);
+
+    try {
+      await onPay(); // 🔥 booking API call
+      setIsBooked(true); // ✅ success → permanently disabled
+    } catch (error) {
+      console.error("Booking failed:", error);
+      setIsPaying(false); // ❌ error → re-enable button
+    }
+  };
 
   // 🔎 Debug log
   console.log("👉 ChargesCard props:", {
@@ -143,15 +158,20 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
 
         <button
           className="pay-btn"
-          onClick={onPay}
-          disabled={!isAgreed}
+          onClick={handlePayNow}
+          disabled={!isAgreed || isPaying || isBooked}
           style={{
-            opacity: isAgreed ? 1 : 0.6,
-            cursor: isAgreed ? "pointer" : "not-allowed",
+            opacity: !isAgreed || isPaying || isBooked ? 0.6 : 1,
+            cursor:
+              !isAgreed || isPaying || isBooked ? "not-allowed" : "pointer",
             transition: "opacity 0.2s",
           }}
         >
-          Pay Now
+          {isPaying
+            ? "Processing..."
+            : isBooked
+              ? "Booking Confirmed"
+              : "Pay Now"}
         </button>
       </div>
     </div>

@@ -49,27 +49,27 @@ const SelfDriveCarDetails: React.FC = () => {
 
   const pad = (n: number) => n.toString().padStart(2, "0");
   const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
-    now.getDate()
+    now.getDate(),
   )}`;
   const timeNow = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
   const [pickupDate, setPickupDate] = useState(
-    bookingDetails.pickupDate || today
+    bookingDetails.pickupDate || today,
   );
   const [pickupTime, setPickupTime] = useState(
-    bookingDetails.pickupTime || timeNow
+    bookingDetails.pickupTime || timeNow,
   );
   const [dropDate, setDropDate] = useState(bookingDetails.dropDate || today);
   const [dropTime, setDropTime] = useState(bookingDetails.dropTime || timeNow);
 
   const [insureTrip, setInsureTrip] = useState(
-    bookingDetails.insureTrip ?? false
+    bookingDetails.insureTrip ?? false,
   );
   const [driverRequired, setDriverRequired] = useState(
-    bookingDetails.driverRequired ?? false
+    bookingDetails.driverRequired ?? false,
   );
   const [differentDrop, setDifferentDrop] = useState(
-    bookingDetails.differentDrop ?? false
+    bookingDetails.differentDrop ?? false,
   );
 
   const [dropCity, setDropCity] = useState(bookingDetails.dropCity || "");
@@ -128,7 +128,7 @@ const SelfDriveCarDetails: React.FC = () => {
   const prevImage = () => {
     if (car?.photos?.length) {
       setCurrentImageIndex(
-        (prev) => (prev - 1 + car.photos.length) % car.photos.length
+        (prev) => (prev - 1 + car.photos.length) % car.photos.length,
       );
     }
   };
@@ -150,7 +150,7 @@ const SelfDriveCarDetails: React.FC = () => {
         : pickupGeo;
       if (!pickupGeo || !dropGeo) {
         throw new Error(
-          "Unable to calculate distance: invalid pickup or drop location"
+          "Unable to calculate distance: invalid pickup or drop location",
         );
       }
 
@@ -173,7 +173,7 @@ const SelfDriveCarDetails: React.FC = () => {
         insure_amount: pricing.insurance,
         driver_amount: pricing.driver,
         total_amount: pricing.total,
-        payment_mode:"PAID"
+        payment_mode: "PAID",
       };
 
       const res = await bookCar(payload, token);
