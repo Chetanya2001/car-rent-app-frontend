@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate, NavLink } from "react-router-dom";
 
 import logo from "../../assets/logo.png";
 import defaultAvatar from "../../assets/user.png";
@@ -7,7 +7,6 @@ import "./Navbar.css";
 import Login from "../../pages/auth/Login/Login";
 import Register from "../../pages/auth/Register/Register";
 import ModalWrapper from "../ModalWrapper/ModalWrapper";
-import { NavLink, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -48,14 +47,8 @@ export default function Navbar({
 
   const hamburgerRef = useRef<HTMLDivElement | null>(null);
   const navMenuRef = useRef<HTMLUListElement | null>(null);
-  useEffect(() => {
-    if (location.state?.openLogin) {
-      setActiveModal("login");
-    }
-  }, [location.state]);
 
-  /* ---------------- NAV CONFIG ---------------- */
-
+  // ── NAV ITEMS ────────────────────────────────────────────────
   const publicNavItems = [
     { label: "Home", path: "/" },
     { label: "SelfDrive", path: "/searched-cars" },
@@ -78,8 +71,7 @@ export default function Navbar({
     { label: "Support", path: "/support", icon: faLifeRing },
   ];
 
-  /* ---------------- OUTSIDE CLICK ---------------- */
-
+  // ── CLOSE MOBILE MENU ON OUTSIDE CLICK ───────────────────────
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -95,13 +87,16 @@ export default function Navbar({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  /* ---------------- LOAD USER ---------------- */
-
+  // ── LOAD USER FROM LOCALSTORAGE ON MOUNT ─────────────────────
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
 
-    if (storedUser) setUser(JSON.parse(storedUser));
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {}
+    }
 
     if (token) {
       try {
@@ -113,8 +108,7 @@ export default function Navbar({
     }
   }, []);
 
-  /* ---------------- FETCH PROFILE ---------------- */
-
+  // ── FETCH FRESH PROFILE IF TOKEN EXISTS ──────────────────────
   useEffect(() => {
     const loadUserProfile = async () => {
       const token = localStorage.getItem("token");
@@ -123,11 +117,9 @@ export default function Navbar({
       try {
         const profile = await fetchUserProfile(token);
         setUser(profile);
-
         if (profile.profile_pic) {
           setProfilePicUrl(profile.profile_pic);
         }
-
         const decoded = jwtDecode<TokenPayload>(token);
         setRole(decoded.role);
       } catch (err) {
@@ -138,8 +130,23 @@ export default function Navbar({
     loadUserProfile();
   }, []);
 
-  /* ---------------- ACTIONS ---------------- */
+  // ── AUTO-OPEN LOGIN MODAL WHEN NAVIGATED WITH openLogin: true ─
+  useEffect(() => {
+    if (location.state?.openLogin === true) {
+      setActiveModal("login");
 
+      // Clean up the state so refreshing or remount doesn't re-open
+      navigate(location.pathname, {
+        replace: true,
+        state: {
+          ...location.state,
+          openLogin: undefined,
+        },
+      });
+    }
+  }, [location.state, navigate, location.pathname]);
+
+  // ── ACTIONS ──────────────────────────────────────────────────
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
@@ -165,10 +172,22 @@ export default function Navbar({
 
     setRemark("");
     setActiveModal(null);
+
+    // If user was trying to book a car → redirect after login
+    if (location.state?.intendedCarId) {
+      navigate("/selfdrive/car", {
+        state: {
+          carId: location.state.intendedCarId,
+          bookingDetails: location.state.intendedBookingDetails,
+          pickupLocation: location.state.intendedPickupLocation,
+        },
+      });
+    }
   };
 
-  /* ---------------- JSX ---------------- */
+  const openLogin = () => setActiveModal("login");
 
+  // ── JSX ──────────────────────────────────────────────────────
   return (
     <>
       <nav className="scroll-navbar">
@@ -192,7 +211,7 @@ export default function Navbar({
           className={`scroll-navbar-links${navOpen ? " active" : ""}`}
           ref={navMenuRef}
         >
-          {/* Public (only before login) */}
+          {/* Public (not logged in) */}
           {!user &&
             publicNavItems.map((item) => (
               <li key={item.label}>
@@ -222,7 +241,7 @@ export default function Navbar({
               </li>
             ))}
 
-          {/* Profile & Logout */}
+          {/* Logged in user */}
           {user && (
             <>
               <li>
@@ -239,24 +258,21 @@ export default function Navbar({
           )}
         </ul>
 
-        {/* LOGIN BUTTON */}
+        {/* LOGIN BUTTON (only visible when not logged in) */}
         {!user && (
           <div className="scroll-navbar-login">
-            <button
-              className="btn btn-custom"
-              onClick={() => setActiveModal("login")}
-            >
+            <button className="btn btn-custom" onClick={openLogin}>
               Login
             </button>
           </div>
         )}
 
-        {/* Avatar (optional visual only) */}
+        {/* Profile avatar (visual only) */}
         {user && (
           <img
             src={profilePicUrl || user.avatar || defaultAvatar}
             className="profile-avatar"
-            alt="User"
+            alt="User avatar"
           />
         )}
       </nav>

@@ -395,18 +395,32 @@ export default function SearchedCars() {
                     className="searched-btn-book"
                     onClick={() => {
                       if (!isLoggedIn) {
-                        alert("Please login to continue booking");
-                        navigate("/", { state: { openLogin: true } });
-                        return;
-                      }
+                        // Option A: Navigate + state (preferred in your current setup)
+                        navigate("/searched-cars", {
+                          state: {
+                            ...location.state, // preserve existing state if any
+                            openLogin: true,
+                            intendedCarId: car.id, // optional – useful for post-login redirect
+                            intendedBookingDetails: {
+                              ...filters,
+                              dropCity,
+                            },
+                            intendedPickupLocation: pickupLocation,
+                          },
+                          replace: true, // ← prevents adding another history entry
+                        });
 
-                      navigate("/selfdrive/car", {
-                        state: {
-                          carId: car.id,
-                          bookingDetails: { ...filters, dropCity },
-                          pickupLocation,
-                        },
-                      });
+                        // Option B (alternative – if you want to avoid navigation):
+                        // setShowLoginModal(true);     // ← would require local state + modal in this component
+                      } else {
+                        navigate("/selfdrive/car", {
+                          state: {
+                            carId: car.id,
+                            bookingDetails: { ...filters, dropCity },
+                            pickupLocation,
+                          },
+                        });
+                      }
                     }}
                   >
                     Book now
