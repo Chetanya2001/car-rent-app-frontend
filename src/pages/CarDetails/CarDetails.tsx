@@ -4,7 +4,6 @@ import "./CarDetails.css";
 import type { CarDetailsType } from "../../types/CarDetails";
 import { getCarDetails } from "../../services/carDetails";
 import CarTabs from "../../components/CarTabs/CarsTab";
-import ChargesCard from "../../components/ChargesCard/ChargesCard";
 import Footer from "../../components/Footer/Footer";
 import Navbar from "../../components/Navbar/Navbar";
 
@@ -57,7 +56,7 @@ const CarDetails: React.FC = () => {
     const dropoff = new Date(state.dropoff_datetime);
     const hours = Math.max(
       1,
-      Math.ceil((dropoff.getTime() - pickup.getTime()) / (1000 * 60 * 60))
+      Math.ceil((dropoff.getTime() - pickup.getTime()) / (1000 * 60 * 60)),
     );
 
     const hourlyRate = car.price_per_hour || state.price_per_hour;
@@ -93,7 +92,7 @@ const CarDetails: React.FC = () => {
   const prevImage = () => {
     if (car.photos?.length) {
       setCurrentImageIndex(
-        (prev) => (prev - 1 + car.photos.length) % car.photos.length
+        (prev) => (prev - 1 + car.photos.length) % car.photos.length,
       );
     }
   };
@@ -140,23 +139,6 @@ const CarDetails: React.FC = () => {
 
         {/* Tabs */}
         <CarTabs car={car} />
-
-        {/* Charges - only if state exists */}
-        {state &&
-          (carCharges > 0 ||
-            insuranceCharges > 0 ||
-            driverCharges > 0 ||
-            pickDropCharges > 0 ||
-            gst > 0) && (
-            <ChargesCard
-              carCharges={carCharges}
-              insuranceCharges={insuranceCharges}
-              driverCharges={driverCharges}
-              pickDropCharges={pickDropCharges}
-              gst={gst}
-              onPay={() => alert("Proceeding to payment...")}
-            />
-          )}
       </div>
       <div>
         <button></button>
