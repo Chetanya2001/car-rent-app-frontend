@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
+
 import logo from "../../assets/logo.png";
 import defaultAvatar from "../../assets/user.png";
 import "./Navbar.css";
@@ -31,20 +33,26 @@ export default function Navbar({
   profilePicUrl: propProfilePicUrl,
 }: NavbarProps) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<"host" | "guest" | "admin" | null>(null);
   const [activeModal, setActiveModal] = useState<"login" | "register" | null>(
-    null
+    null,
   );
   const [remark, setRemark] = useState("");
   const [navOpen, setNavOpen] = useState(false);
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(
-    propProfilePicUrl ?? null
+    propProfilePicUrl ?? null,
   );
 
   const hamburgerRef = useRef<HTMLDivElement | null>(null);
   const navMenuRef = useRef<HTMLUListElement | null>(null);
+  useEffect(() => {
+    if (location.state?.openLogin) {
+      setActiveModal("login");
+    }
+  }, [location.state]);
 
   /* ---------------- NAV CONFIG ---------------- */
 

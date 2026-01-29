@@ -24,6 +24,7 @@ import HostMyBookings from "../pages/host-mybookings/host-mybookings";
 import IntercityCars from "../pages/intercity-car/IntercityCars";
 import SelfDriveCarDetails from "../pages/BookACar/selfDriveCarDetails";
 import IntercityCarDetails from "../pages/BookACar/IntercityCarDetails";
+// import RequireAuth from "../components/Auth/auth/RequireAuth";
 
 const AppRoutes = () => (
   <BrowserRouter>

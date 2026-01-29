@@ -53,6 +53,7 @@ function getDateAndTime(dateObj: Date) {
 export default function SearchedCars() {
   const location = useLocation();
   const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem("token");
 
   const now = new Date();
 
@@ -392,15 +393,21 @@ export default function SearchedCars() {
                 <div className="searched-car-actions">
                   <button
                     className="searched-btn-book"
-                    onClick={() =>
+                    onClick={() => {
+                      if (!isLoggedIn) {
+                        alert("Please login to continue booking");
+                        navigate("/", { state: { openLogin: true } });
+                        return;
+                      }
+
                       navigate("/selfdrive/car", {
                         state: {
                           carId: car.id,
                           bookingDetails: { ...filters, dropCity },
                           pickupLocation,
                         },
-                      })
-                    }
+                      });
+                    }}
                   >
                     Book now
                   </button>
