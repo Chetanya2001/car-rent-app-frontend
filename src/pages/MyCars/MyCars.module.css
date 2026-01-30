@@ -1,19 +1,23 @@
 /* ==================== BASE STYLES ==================== */
+.myCarsScopeWrapper {
+  isolation: isolate;
+}
 
-.my-cars-page {
+.myCarsPage {
   padding: 2rem;
   background: #f8f9fa;
   min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
 }
 
-.page-header {
+.pageHeader {
   margin-bottom: 2rem;
   text-align: center;
 }
 
-.page-header h2 {
+.pageHeader h2 {
   font-size: 2rem;
   margin: 0 0 0.5rem 0;
   font-weight: 600;
@@ -29,7 +33,7 @@
 
 /* ==================== EMPTY STATE ==================== */
 
-.empty-state {
+.emptyState {
   grid-column: 1 / -1;
   text-align: center;
   padding: 4rem 2rem;
@@ -38,26 +42,26 @@
   border: 1px solid #dee2e6;
 }
 
-.empty-icon {
+.emptyIcon {
   font-size: 4rem;
   margin-bottom: 1rem;
 }
 
-.empty-state p:first-of-type {
+.emptyState p:first-of-type {
   font-size: 1.25rem;
   color: #212529;
   margin-bottom: 0.5rem;
   font-weight: 600;
 }
 
-.empty-subtitle {
+.emptySubtitle {
   font-size: 1rem;
   color: #6c757d;
 }
 
 /* ==================== CARS GRID ==================== */
 
-.cars-grid {
+.carsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
@@ -67,7 +71,7 @@
 
 /* ==================== CAR CARD ==================== */
 
-.car-card {
+.carCard {
   background: #ffffff;
   border-radius: 8px;
   border: 1px solid #dee2e6;
@@ -77,11 +81,11 @@
   transition: box-shadow 0.2s ease;
 }
 
-.car-card:hover {
+.carCard:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.car-image-container {
+.carImageContainer {
   position: relative;
   width: 100%;
   height: 200px;
@@ -89,13 +93,13 @@
   background: #e9ecef;
 }
 
-.car-img {
+.carImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.car-img.placeholder {
+.carImgPlaceholder {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -103,13 +107,15 @@
   color: #6c757d;
   font-size: 1rem;
   gap: 0.5rem;
+  width: 100%;
+  height: 100%;
 }
 
-.car-img.placeholder span:first-child {
+.carImgPlaceholder span:first-child {
   font-size: 3rem;
 }
 
-.car-info {
+.carInfo {
   padding: 1.5rem;
   flex: 1;
   display: flex;
@@ -117,14 +123,39 @@
   gap: 1rem;
 }
 
-.car-title {
+.carTitle {
   font-size: 1.25rem;
   margin: 0;
   color: #212529;
   font-weight: 600;
 }
 
-.car-details-grid {
+.tripTypeBadges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badgeSelfdrive {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.badgeIntercity {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.carDetailsGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
@@ -133,13 +164,13 @@
   border-radius: 6px;
 }
 
-.detail-item {
+.detailItem {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.detail-label {
+.detailLabel {
   font-size: 0.75rem;
   color: #6c757d;
   font-weight: 500;
@@ -147,31 +178,33 @@
   letter-spacing: 0.5px;
 }
 
-.detail-value {
+.detailValue {
   font-size: 1rem;
   color: #212529;
   font-weight: 600;
 }
 
-.price-item .detail-value {
+.priceItem .detailValue {
   color: #10b981;
   font-size: 1.125rem;
 }
-.detail-value.price:before {
+
+.detailValuePrice::before {
   content: none !important;
 }
 
-.price-item .detail-value:before {
+.priceItem .detailValue::before {
   content: none !important;
 }
-.availability-box {
+
+.availabilityBox {
   padding: 0.75rem 1rem;
   background: #e8f5f1;
   border-radius: 6px;
   border-left: 3px solid #10b981;
 }
 
-.availability-label {
+.availabilityLabel {
   font-size: 0.75rem;
   color: #0d9668;
   font-weight: 600;
@@ -181,13 +214,13 @@
   margin-bottom: 0.25rem;
 }
 
-.availability-dates {
+.availabilityDates {
   font-size: 0.875rem;
   color: #212529;
   font-weight: 500;
 }
 
-.document-info {
+.documentInfo {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -195,31 +228,31 @@
   border-top: 1px solid #dee2e6;
 }
 
-.doc-item {
+.docItem {
   display: flex;
   justify-content: space-between;
   font-size: 0.875rem;
 }
 
-.doc-label {
+.docLabel {
   color: #6c757d;
   font-weight: 500;
 }
 
-.doc-value {
+.docValue {
   color: #212529;
   font-weight: 600;
 }
 
 /* ==================== ACTION BUTTONS ==================== */
 
-.car-actions {
+.carActions {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   border-top: 1px solid #dee2e6;
 }
 
-.action-btn {
+.actionBtn {
   padding: 0.875rem;
   border: none;
   background: #ffffff;
@@ -230,37 +263,37 @@
   border-right: 1px solid #dee2e6;
 }
 
-.action-btn:last-child {
+.actionBtn:last-child {
   border-right: none;
 }
 
-.details-btn {
+.detailsBtn {
   color: #0d6efd;
 }
 
-.details-btn:hover {
+.detailsBtn:hover {
   background: #f0f7ff;
 }
 
-.update-btn {
+.updateBtn {
   color: #10b981;
 }
 
-.update-btn:hover {
+.updateBtn:hover {
   background: #e8f5f1;
 }
 
-.delete-btn {
+.deleteBtn {
   color: #dc3545;
 }
 
-.delete-btn:hover {
+.deleteBtn:hover {
   background: #fff5f5;
 }
 
 /* ==================== MODAL BASE ==================== */
 
-.modal-overlay {
+.modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -275,7 +308,7 @@
 
 /* ==================== DELETE MODAL ==================== */
 
-.modal-content {
+.modalContent {
   background: #ffffff;
   border-radius: 8px;
   max-width: 450px;
@@ -283,7 +316,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
-.modal-header {
+.modalHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -291,14 +324,14 @@
   border-bottom: 1px solid #dee2e6;
 }
 
-.modal-header h3 {
+.modalHeader h3 {
   margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
   color: #212529;
 }
 
-.modal-close {
+.modalClose {
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -314,39 +347,39 @@
   transition: background-color 0.15s ease;
 }
 
-.modal-close:hover {
+.modalClose:hover {
   background: #f8f9fa;
   color: #212529;
 }
 
-.modal-body {
+.modalBody {
   padding: 1.5rem;
   text-align: center;
 }
 
-.warning-icon {
+.warningIcon {
   font-size: 3rem;
   margin-bottom: 1rem;
 }
 
-.modal-body p {
+.modalBody p {
   margin: 0.5rem 0;
   color: #495057;
   font-size: 1rem;
 }
 
-.modal-body strong {
+.modalBody strong {
   color: #212529;
   font-weight: 600;
 }
 
-.warning-text {
+.warningText {
   color: #dc3545;
   font-size: 0.875rem;
   margin-top: 0.75rem;
 }
 
-.modal-footer {
+.modalFooter {
   display: flex;
   gap: 0.75rem;
   padding: 1.25rem 1.5rem;
@@ -354,7 +387,7 @@
   background: #f8f9fa;
 }
 
-.modal-btn {
+.modalBtn {
   flex: 1;
   padding: 0.625rem 1.25rem;
   border: 1px solid transparent;
@@ -365,33 +398,33 @@
   transition: all 0.15s ease;
 }
 
-.cancel-btn {
+.cancelBtn {
   background: #ffffff;
   color: #6c757d;
   border-color: #dee2e6;
 }
 
-.cancel-btn:hover:not(:disabled) {
+.cancelBtn:hover:not(:disabled) {
   background: #e9ecef;
 }
 
-.confirm-btn {
+.confirmBtn {
   background: #dc3545;
   color: #ffffff;
 }
 
-.confirm-btn:hover:not(:disabled) {
+.confirmBtn:hover:not(:disabled) {
   background: #bb2d3b;
 }
 
-.modal-btn:disabled {
+.modalBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* ==================== EDIT MODAL ==================== */
 
-.premium-edit-modal {
+.premiumEditModal {
   background: #ffffff;
   border-radius: 8px;
   max-width: 900px;
@@ -402,7 +435,7 @@
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
 }
 
-.premium-modal-header {
+.premiumModalHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -411,31 +444,31 @@
   color: #ffffff;
 }
 
-.modal-header-content {
+.modalHeaderContent {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.modal-icon {
+.modalIcon {
   font-size: 1.5rem;
 }
 
-.modal-title {
+.modalTitle {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
   color: #ffffff;
 }
 
-.modal-subtitle {
+.modalSubtitle {
   margin: 0.25rem 0 0 0;
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 400;
 }
 
-.premium-close-btn {
+.premiumCloseBtn {
   background: rgba(255, 255, 255, 0.2);
   border: none;
   font-size: 1.5rem;
@@ -450,11 +483,11 @@
   transition: background-color 0.15s ease;
 }
 
-.premium-close-btn:hover {
+.premiumCloseBtn:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 
-.premium-modal-body {
+.premiumModalBody {
   padding: 1.5rem;
   overflow-y: auto;
   flex: 1;
@@ -463,7 +496,7 @@
 
 /* ==================== SECTIONS ==================== */
 
-.premium-section {
+.premiumSection {
   background: #ffffff;
   border-radius: 8px;
   padding: 1.5rem;
@@ -471,7 +504,7 @@
   border: 1px solid #dee2e6;
 }
 
-.section-header {
+.sectionHeader {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -480,11 +513,11 @@
   border-bottom: 1px solid #dee2e6;
 }
 
-.section-icon {
+.sectionIcon {
   font-size: 1.25rem;
 }
 
-.section-title {
+.sectionTitle {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
@@ -493,13 +526,13 @@
 
 /* ==================== TOGGLE SWITCHES ==================== */
 
-.features-toggle-grid {
+.featuresToggleGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 0.75rem;
 }
 
-.toggle-item {
+.toggleItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -509,24 +542,24 @@
   border: 1px solid #e9ecef;
 }
 
-.toggle-label-wrapper {
+.toggleLabelWrapper {
   display: flex;
   align-items: center;
   gap: 0.625rem;
 }
 
-.toggle-icon {
+.toggleIcon {
   font-size: 1.125rem;
 }
 
-.toggle-label {
+.toggleLabel {
   font-size: 0.875rem;
   font-weight: 500;
   color: #212529;
 }
 
 /* Toggle Switch Component */
-.toggle-switch {
+.toggleSwitch {
   position: relative;
   display: inline-block;
   width: 44px;
@@ -534,13 +567,13 @@
   flex-shrink: 0;
 }
 
-.toggle-switch input {
+.toggleSwitch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-.toggle-slider {
+.toggleSlider {
   position: absolute;
   cursor: pointer;
   top: 0;
@@ -552,7 +585,7 @@
   border-radius: 24px;
 }
 
-.toggle-slider:before {
+.toggleSlider::before {
   position: absolute;
   content: "";
   height: 18px;
@@ -564,25 +597,53 @@
   border-radius: 50%;
 }
 
-input:checked + .toggle-slider {
+.toggleSwitch input:checked + .toggleSlider {
   background-color: #10b981;
 }
 
-input:checked + .toggle-slider:before {
+.toggleSwitch input:checked + .toggleSlider::before {
   transform: translateX(20px);
 }
 
-input:focus + .toggle-slider {
+.toggleSwitch input:focus + .toggleSlider {
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+/* ==================== PRICING TYPE TOGGLE ==================== */
+
+.pricingTypeToggle {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.pricingTypeToggle label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #495057;
+  cursor: pointer;
+}
+
+.pricingTypeToggle input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #10b981;
 }
 
 /* ==================== FORM INPUTS ==================== */
 
-.premium-input-wrapper {
+.premiumInputWrapper {
   margin-bottom: 1.25rem;
 }
 
-.premium-label {
+.premiumLabel {
   display: block;
   font-size: 0.75rem;
   font-weight: 600;
@@ -592,7 +653,7 @@ input:focus + .toggle-slider {
   letter-spacing: 0.5px;
 }
 
-.premium-input {
+.premiumInput {
   width: 100%;
   padding: 0.625rem 0.875rem;
   border: 1px solid #ced4da;
@@ -600,28 +661,30 @@ input:focus + .toggle-slider {
   font-size: 0.875rem;
   color: #212529;
   background: #ffffff;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
   box-sizing: border-box;
 }
 
-.premium-input:focus {
+.premiumInput:focus {
   outline: none;
   border-color: #10b981;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
-.premium-input::placeholder {
+.premiumInput::placeholder {
   color: #adb5bd;
 }
 
 /* Input with Icon */
-.input-with-icon {
+.inputWithIcon {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.input-icon {
+.inputIcon {
   position: absolute;
   left: 0.875rem;
   font-size: 0.875rem;
@@ -630,32 +693,32 @@ input:focus + .toggle-slider {
   pointer-events: none;
 }
 
-.input-with-icon .premium-input {
+.inputWithIcon .premiumInput {
   padding-left: 2rem;
 }
 
 /* Insurance Grid */
-.insurance-grid {
+.insuranceGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.25rem;
 }
 
-.full-width {
+.fullWidth {
   grid-column: 1 / -1;
 }
 
 /* ==================== FILE UPLOAD ==================== */
 
-.file-input-hidden {
+.fileInputHidden {
   display: none;
 }
 
-.file-upload-area {
+.fileUploadArea {
   margin-top: 0.5rem;
 }
 
-.file-upload-label {
+.fileUploadLabel {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -667,31 +730,31 @@ input:focus + .toggle-slider {
   transition: all 0.15s ease;
 }
 
-.file-upload-label:hover {
+.fileUploadLabel:hover {
   background: #e9ecef;
   border-color: #10b981;
 }
 
-.upload-icon {
+.uploadIcon {
   font-size: 1.25rem;
   color: #6c757d;
 }
 
-.upload-text {
+.uploadText {
   font-size: 0.875rem;
   color: #495057;
   font-weight: 500;
 }
 
 /* Image Preview */
-.premium-image-preview {
+.premiumImagePreview {
   margin-top: 1rem;
   border-radius: 6px;
   overflow: hidden;
   border: 1px solid #dee2e6;
 }
 
-.premium-image-preview img {
+.premiumImagePreview img {
   width: 100%;
   max-height: 300px;
   object-fit: contain;
@@ -701,7 +764,7 @@ input:focus + .toggle-slider {
 
 /* ==================== MODAL FOOTER ==================== */
 
-.premium-modal-footer {
+.premiumModalFooter {
   display: flex;
   gap: 0.75rem;
   padding: 1.25rem 1.5rem;
@@ -709,7 +772,7 @@ input:focus + .toggle-slider {
   background: #ffffff;
 }
 
-.premium-btn {
+.premiumBtn {
   flex: 1;
   padding: 0.625rem 1.25rem;
   border: 1px solid transparent;
@@ -724,26 +787,26 @@ input:focus + .toggle-slider {
   gap: 0.5rem;
 }
 
-.premium-btn.cancel {
+.premiumBtnCancel {
   background: #ffffff;
   color: #6c757d;
   border-color: #dee2e6;
 }
 
-.premium-btn.cancel:hover:not(:disabled) {
+.premiumBtnCancel:hover:not(:disabled) {
   background: #e9ecef;
 }
 
-.premium-btn.save {
+.premiumBtnSave {
   background: #10b981;
   color: #ffffff;
 }
 
-.premium-btn.save:hover:not(:disabled) {
+.premiumBtnSave:hover:not(:disabled) {
   background: #0d9668;
 }
 
-.premium-btn:disabled {
+.premiumBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -767,77 +830,77 @@ input:focus + .toggle-slider {
 /* ==================== RESPONSIVE ==================== */
 
 @media (max-width: 1024px) {
-  .cars-grid {
+  .carsGrid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
 
-  .features-toggle-grid {
+  .featuresToggleGrid {
     grid-template-columns: 1fr;
   }
 
-  .insurance-grid {
+  .insuranceGrid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  .my-cars-page {
+  .myCarsPage {
     padding: 1rem;
   }
 
-  .premium-edit-modal {
+  .premiumEditModal {
     width: 98%;
     max-height: 95vh;
   }
 
-  .premium-modal-header {
+  .premiumModalHeader {
     padding: 1.25rem;
   }
 
-  .modal-title {
+  .modalTitle {
     font-size: 1.125rem;
   }
 
-  .premium-modal-body {
+  .premiumModalBody {
     padding: 1rem;
   }
 
-  .premium-section {
+  .premiumSection {
     padding: 1.25rem;
   }
 
-  .car-actions {
+  .carActions {
     grid-template-columns: 1fr;
   }
 
-  .action-btn {
+  .actionBtn {
     border-right: none;
     border-bottom: 1px solid #dee2e6;
   }
 
-  .action-btn:last-child {
+  .actionBtn:last-child {
     border-bottom: none;
   }
 }
 
 @media (max-width: 480px) {
-  .page-header h2 {
+  .pageHeader h2 {
     font-size: 1.5rem;
   }
 
-  .modal-header-content {
+  .modalHeaderContent {
     gap: 0.75rem;
   }
 
-  .modal-icon {
+  .modalIcon {
     font-size: 1.25rem;
   }
 
-  .modal-title {
+  .modalTitle {
     font-size: 1rem;
   }
 
-  .modal-subtitle {
+  .modalSubtitle {
     font-size: 0.8125rem;
   }
 }

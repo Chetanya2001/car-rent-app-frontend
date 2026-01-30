@@ -5,7 +5,7 @@ import { updateCarDetails } from "../../services/carDetails";
 import { updateCarFeatures } from "../../services/carFeatures";
 import type { Car } from "../../types/Cars";
 import Navbar from "../../components/Navbar/Navbar";
-import "./MyCars.css";
+import styles from "./MyCars.module.css";
 
 const FEATURES = [
   { key: "airconditions", label: "Air Conditioning", icon: "❄️" },
@@ -252,175 +252,205 @@ export default function MyCars() {
   return (
     <>
       <Navbar />
-      <div className="my-cars-page">
-        <div className="page-header">
-          <h2>My Listed Cars</h2>
-          <p className="subtitle">Manage and view all your listed vehicles</p>
-        </div>
+      <div className={styles.myCarsScopeWrapper}>
+        <div className={styles.myCarsPage}>
+          <div className={styles.pageHeader}>
+            <h2>My Listed Cars</h2>
+            <p className={styles.subtitle}>
+              Manage and view all your listed vehicles
+            </p>
+          </div>
 
-        <div className="cars-grid">
-          {cars.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">🚗</div>
-              <p>No cars found.</p>
-              <p className="empty-subtitle">
-                Start by adding your first vehicle
-              </p>
-            </div>
-          ) : (
-            cars.map((car) => {
-              const mainImage =
-                car.photos && car.photos.length > 0 ? car.photos[0] : "";
+          <div className={styles.carsGrid}>
+            {cars.length === 0 ? (
+              <div className={styles.emptyState}>
+                <div className={styles.emptyIcon}>🚗</div>
+                <p>No cars found.</p>
+                <p className={styles.emptySubtitle}>
+                  Start by adding your first vehicle
+                </p>
+              </div>
+            ) : (
+              cars.map((car) => {
+                const mainImage =
+                  car.photos && car.photos.length > 0 ? car.photos[0] : "";
 
-              return (
-                <div key={car.id} className="car-card">
-                  <div className="car-image-container">
-                    {mainImage ? (
-                      <img
-                        src={mainImage}
-                        alt={`${car.make} ${car.model}`}
-                        className="car-img"
-                        loading="lazy"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
-                          const placeholder = (e.target as HTMLElement)
-                            .nextElementSibling;
-                          if (placeholder)
-                            placeholder.setAttribute("style", "display: flex;");
-                        }}
-                      />
-                    ) : null}
-                    <div
-                      className="car-img placeholder"
-                      style={{ display: "none" }}
-                    >
-                      <span>📷</span>
-                      <span>No Image</span>
-                    </div>
-                  </div>
-
-                  <div className="car-info">
-                    <h3 className="car-title">
-                      {car.make} {car.model}
-                    </h3>
-                    <div className="trip-type-badges">
-                      {car.price_per_hour !== null && (
-                        <span className="badge selfdrive">Self-Drive</span>
-                      )}
-                      {car.price_per_km !== null && (
-                        <span className="badge intercity">Intercity</span>
-                      )}
-                    </div>
-
-                    <div className="car-details-grid">
-                      <div className="detail-item">
-                        <span className="detail-label">Year</span>
-                        <span className="detail-value">{car.year}</span>
+                return (
+                  <div key={car.id} className={styles.carCard}>
+                    <div className={styles.carImageContainer}>
+                      {mainImage ? (
+                        <img
+                          src={mainImage}
+                          alt={`${car.make} ${car.model}`}
+                          className={styles.carImg}
+                          loading="lazy"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display =
+                              "none";
+                            const placeholder = (e.target as HTMLElement)
+                              .nextElementSibling;
+                            if (placeholder)
+                              placeholder.setAttribute(
+                                "style",
+                                "display: flex;",
+                              );
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className={styles.carImgPlaceholder}
+                        style={{ display: mainImage ? "none" : "flex" }}
+                      >
+                        <span>📷</span>
+                        <span>No Image</span>
                       </div>
-                      <div className="detail-item price-item">
-                        <span className="detail-label">Price</span>
+                    </div>
 
+                    <div className={styles.carInfo}>
+                      <h3 className={styles.carTitle}>
+                        {car.make} {car.model}
+                      </h3>
+                      <div className={styles.tripTypeBadges}>
                         {car.price_per_hour !== null && (
-                          <span className="detail-value price">
-                            ₹{car.price_per_hour}/hr
+                          <span
+                            className={`${styles.badge} ${styles.badgeSelfdrive}`}
+                          >
+                            Self-Drive
                           </span>
                         )}
-
                         {car.price_per_km !== null && (
-                          <span className="detail-value price">
-                            ₹{car.price_per_km}/km
+                          <span
+                            className={`${styles.badge} ${styles.badgeIntercity}`}
+                          >
+                            Intercity
                           </span>
                         )}
                       </div>
+
+                      <div className={styles.carDetailsGrid}>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Year</span>
+                          <span className={styles.detailValue}>{car.year}</span>
+                        </div>
+                        <div
+                          className={`${styles.detailItem} ${styles.priceItem}`}
+                        >
+                          <span className={styles.detailLabel}>Price</span>
+
+                          {car.price_per_hour !== null && (
+                            <span
+                              className={`${styles.detailValue} ${styles.detailValuePrice}`}
+                            >
+                              ₹{car.price_per_hour}/hr
+                            </span>
+                          )}
+
+                          {car.price_per_km !== null && (
+                            <span
+                              className={`${styles.detailValue} ${styles.detailValuePrice}`}
+                            >
+                              ₹{car.price_per_km}/km
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {car.available_from && car.available_till && (
+                        <div className={styles.availabilityBox}>
+                          <span className={styles.availabilityLabel}>
+                            Available
+                          </span>
+                          <span className={styles.availabilityDates}>
+                            {new Date(car.available_from).toLocaleDateString()}{" "}
+                            -{" "}
+                            {new Date(car.available_till).toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
+
+                      {car.documents && (
+                        <div className={styles.documentInfo}>
+                          <div className={styles.docItem}>
+                            <span className={styles.docLabel}>RC Number:</span>
+                            <span className={styles.docValue}>
+                              {car.documents.rc_number}
+                            </span>
+                          </div>
+                          <div className={styles.docItem}>
+                            <span className={styles.docLabel}>Owner:</span>
+                            <span className={styles.docValue}>
+                              {car.documents.owner_name}
+                            </span>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
-                    {car.available_from && car.available_till && (
-                      <div className="availability-box">
-                        <span className="availability-label">Available</span>
-                        <span className="availability-dates">
-                          {new Date(car.available_from).toLocaleDateString()} -{" "}
-                          {new Date(car.available_till).toLocaleDateString()}
-                        </span>
-                      </div>
-                    )}
-
-                    {car.documents && (
-                      <div className="document-info">
-                        <div className="doc-item">
-                          <span className="doc-label">RC Number:</span>
-                          <span className="doc-value">
-                            {car.documents.rc_number}
-                          </span>
-                        </div>
-                        <div className="doc-item">
-                          <span className="doc-label">Owner:</span>
-                          <span className="doc-value">
-                            {car.documents.owner_name}
-                          </span>
-                        </div>
-                      </div>
-                    )}
+                    <div className={styles.carActions}>
+                      <button
+                        className={`${styles.actionBtn} ${styles.detailsBtn}`}
+                        onClick={() => handleDetails(car.id)}
+                      >
+                        View Details
+                      </button>
+                      <button
+                        className={`${styles.actionBtn} ${styles.updateBtn}`}
+                        onClick={() => handleUpdate(car)}
+                      >
+                        Update
+                      </button>
+                      <button
+                        className={`${styles.actionBtn} ${styles.deleteBtn}`}
+                        onClick={() => handleDeleteClick(car.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
-
-                  <div className="car-actions">
-                    <button
-                      className="action-btn details-btn"
-                      onClick={() => handleDetails(car.id)}
-                    >
-                      View Details
-                    </button>
-                    <button
-                      className="action-btn update-btn"
-                      onClick={() => handleUpdate(car)}
-                    >
-                      Update
-                    </button>
-                    <button
-                      className="action-btn delete-btn"
-                      onClick={() => handleDeleteClick(car.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              );
-            })
-          )}
+                );
+              })
+            )}
+          </div>
         </div>
       </div>
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="modal-overlay" onClick={handleDeleteCancel}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className={styles.modalOverlay} onClick={handleDeleteCancel}>
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
               <h3>Confirm Delete</h3>
               <button
-                className="modal-close"
+                className={styles.modalClose}
                 onClick={handleDeleteCancel}
                 disabled={isDeleting}
               >
                 ×
               </button>
             </div>
-            <div className="modal-body">
-              <div className="warning-icon">⚠️</div>
+            <div className={styles.modalBody}>
+              <div className={styles.warningIcon}>⚠️</div>
               <p>
                 Are you sure you want to delete{" "}
                 <strong>{getCarName(carToDelete!)}</strong>?
               </p>
-              <p className="warning-text">This action cannot be undone.</p>
+              <p className={styles.warningText}>
+                This action cannot be undone.
+              </p>
             </div>
-            <div className="modal-footer">
+            <div className={styles.modalFooter}>
               <button
-                className="modal-btn cancel-btn"
+                className={`${styles.modalBtn} ${styles.cancelBtn}`}
                 onClick={handleDeleteCancel}
                 disabled={isDeleting}
               >
                 Cancel
               </button>
               <button
-                className="modal-btn confirm-btn"
+                className={`${styles.modalBtn} ${styles.confirmBtn}`}
                 onClick={handleDeleteConfirm}
                 disabled={isDeleting}
               >
@@ -433,22 +463,22 @@ export default function MyCars() {
 
       {/* Premium Edit Modal */}
       {showEditModal && carToEdit && (
-        <div className="modal-overlay" onClick={handleEditCancel}>
+        <div className={styles.modalOverlay} onClick={handleEditCancel}>
           <div
-            className="premium-edit-modal"
+            className={styles.premiumEditModal}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="premium-modal-header">
-              <div className="modal-header-content">
+            <div className={styles.premiumModalHeader}>
+              <div className={styles.modalHeaderContent}>
                 <div>
-                  <h3 className="modal-title">Edit Car Details</h3>
-                  <p className="modal-subtitle">
+                  <h3 className={styles.modalTitle}>Edit Car Details</h3>
+                  <p className={styles.modalSubtitle}>
                     {carToEdit.make} {carToEdit.model} • {carToEdit.year}
                   </p>
                 </div>
               </div>
               <button
-                className="premium-close-btn"
+                className={styles.premiumCloseBtn}
                 onClick={handleEditCancel}
                 disabled={isSaving}
               >
@@ -456,21 +486,25 @@ export default function MyCars() {
               </button>
             </div>
 
-            <div className="premium-modal-body">
+            <div className={styles.premiumModalBody}>
               {/* Features Section with Toggle Switches */}
-              <div className="premium-section">
-                <div className="section-header">
-                  <span className="section-icon">🎯</span>
-                  <h4 className="section-title">Features</h4>
+              <div className={styles.premiumSection}>
+                <div className={styles.sectionHeader}>
+                  <span className={styles.sectionIcon}>🎯</span>
+                  <h4 className={styles.sectionTitle}>Features</h4>
                 </div>
-                <div className="features-toggle-grid">
+                <div className={styles.featuresToggleGrid}>
                   {FEATURES.map((feature) => (
-                    <div key={feature.key} className="toggle-item">
-                      <div className="toggle-label-wrapper">
-                        <span className="toggle-icon">{feature.icon}</span>
-                        <span className="toggle-label">{feature.label}</span>
+                    <div key={feature.key} className={styles.toggleItem}>
+                      <div className={styles.toggleLabelWrapper}>
+                        <span className={styles.toggleIcon}>
+                          {feature.icon}
+                        </span>
+                        <span className={styles.toggleLabel}>
+                          {feature.label}
+                        </span>
                       </div>
-                      <label className="toggle-switch">
+                      <label className={styles.toggleSwitch}>
                         <input
                           type="checkbox"
                           checked={!!editingFeatures[feature.key]}
@@ -481,7 +515,7 @@ export default function MyCars() {
                             }))
                           }
                         />
-                        <span className="toggle-slider"></span>
+                        <span className={styles.toggleSlider}></span>
                       </label>
                     </div>
                   ))}
@@ -489,13 +523,13 @@ export default function MyCars() {
               </div>
 
               {/* Pricing Section */}
-              <div className="premium-section">
-                <div className="section-header">
-                  <span className="section-icon">💰</span>
-                  <h4 className="section-title">Pricing</h4>
+              <div className={styles.premiumSection}>
+                <div className={styles.sectionHeader}>
+                  <span className={styles.sectionIcon}>💰</span>
+                  <h4 className={styles.sectionTitle}>Pricing</h4>
                 </div>
 
-                <div className="pricing-type-toggle">
+                <div className={styles.pricingTypeToggle}>
                   <label>
                     <input
                       type="radio"
@@ -515,17 +549,17 @@ export default function MyCars() {
                   </label>
                 </div>
 
-                <div className="premium-input-wrapper">
-                  <label className="premium-label">
+                <div className={styles.premiumInputWrapper}>
+                  <label className={styles.premiumLabel}>
                     {pricingType === "hour" ? "Hourly Rate" : "Per KM Rate"}
                   </label>
-                  <div className="input-with-icon">
-                    <span className="input-icon">₹</span>
+                  <div className={styles.inputWithIcon}>
+                    <span className={styles.inputIcon}>₹</span>
                     <input
                       type="number"
                       value={editingPrice}
                       onChange={(e) => setEditingPrice(e.target.value)}
-                      className="premium-input"
+                      className={styles.premiumInput}
                       min="0"
                       step="0.01"
                     />
@@ -534,15 +568,17 @@ export default function MyCars() {
               </div>
 
               {/* Insurance Section */}
-              <div className="premium-section">
-                <div className="section-header">
-                  <span className="section-icon">🛡️</span>
-                  <h4 className="section-title">Insurance Details</h4>
+              <div className={styles.premiumSection}>
+                <div className={styles.sectionHeader}>
+                  <span className={styles.sectionIcon}>🛡️</span>
+                  <h4 className={styles.sectionTitle}>Insurance Details</h4>
                 </div>
 
-                <div className="insurance-grid">
-                  <div className="premium-input-wrapper">
-                    <label className="premium-label">Insurance Company</label>
+                <div className={styles.insuranceGrid}>
+                  <div className={styles.premiumInputWrapper}>
+                    <label className={styles.premiumLabel}>
+                      Insurance Company
+                    </label>
                     <input
                       type="text"
                       value={editingInsuranceCompany}
@@ -550,52 +586,56 @@ export default function MyCars() {
                         setEditingInsuranceCompany(e.target.value)
                       }
                       placeholder="e.g., ICICI Lombard"
-                      className="premium-input"
+                      className={styles.premiumInput}
                     />
                   </div>
 
-                  <div className="premium-input-wrapper">
-                    <label className="premium-label">IDV Value</label>
-                    <div className="input-with-icon">
-                      <span className="input-icon">₹</span>
+                  <div className={styles.premiumInputWrapper}>
+                    <label className={styles.premiumLabel}>IDV Value</label>
+                    <div className={styles.inputWithIcon}>
+                      <span className={styles.inputIcon}>₹</span>
                       <input
                         type="number"
                         value={editingIdvValue}
                         onChange={(e) => setEditingIdvValue(e.target.value)}
                         placeholder="Insured Declared Value"
-                        className="premium-input"
+                        className={styles.premiumInput}
                         step="0.01"
                         min="0"
                       />
                     </div>
                   </div>
 
-                  <div className="premium-input-wrapper">
-                    <label className="premium-label">Valid Till</label>
+                  <div className={styles.premiumInputWrapper}>
+                    <label className={styles.premiumLabel}>Valid Till</label>
                     <input
                       type="date"
                       value={editingValidTill}
                       onChange={(e) => setEditingValidTill(e.target.value)}
-                      className="premium-input"
+                      className={styles.premiumInput}
                     />
                   </div>
 
-                  <div className="premium-input-wrapper full-width">
-                    <label className="premium-label">Insurance Document</label>
-                    <div className="file-upload-area">
+                  <div
+                    className={`${styles.premiumInputWrapper} ${styles.fullWidth}`}
+                  >
+                    <label className={styles.premiumLabel}>
+                      Insurance Document
+                    </label>
+                    <div className={styles.fileUploadArea}>
                       <input
                         type="file"
                         accept="image/*"
                         onChange={handleImageChange}
-                        className="file-input-hidden"
+                        className={styles.fileInputHidden}
                         id="insurance-upload"
                       />
                       <label
                         htmlFor="insurance-upload"
-                        className="file-upload-label"
+                        className={styles.fileUploadLabel}
                       >
-                        <span className="upload-icon">📎</span>
-                        <span className="upload-text">
+                        <span className={styles.uploadIcon}>📎</span>
+                        <span className={styles.uploadText}>
                           {selectedImage
                             ? selectedImage.name
                             : "Click to upload insurance document"}
@@ -603,7 +643,7 @@ export default function MyCars() {
                       </label>
                     </div>
                     {imagePreview && (
-                      <div className="premium-image-preview">
+                      <div className={styles.premiumImagePreview}>
                         <img src={imagePreview} alt="Insurance preview" />
                       </div>
                     )}
@@ -612,22 +652,22 @@ export default function MyCars() {
               </div>
             </div>
 
-            <div className="premium-modal-footer">
+            <div className={styles.premiumModalFooter}>
               <button
-                className="premium-btn cancel"
+                className={`${styles.premiumBtn} ${styles.premiumBtnCancel}`}
                 onClick={handleEditCancel}
                 disabled={isSaving}
               >
                 Cancel
               </button>
               <button
-                className="premium-btn save"
+                className={`${styles.premiumBtn} ${styles.premiumBtnSave}`}
                 onClick={handleSaveEdit}
                 disabled={isSaving}
               >
                 {isSaving ? (
                   <>
-                    <span className="spinner"></span>
+                    <span className={styles.spinner}></span>
                     Saving...
                   </>
                 ) : (
