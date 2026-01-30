@@ -57,6 +57,7 @@ type HostBooking = {
     first_name: string;
     last_name: string;
     phone: string;
+    email: string;
   };
 };
 
@@ -71,7 +72,12 @@ export default function HostMyBookings() {
       try {
         if (!token) return;
         const data = await getHostBookings(token);
-        setBookings(data);
+        // Sort bookings by creation date, latest first
+        const sortedData = data.sort(
+          (a: HostBooking, b: HostBooking) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
+        setBookings(sortedData);
       } catch (err) {
         console.error("Error loading host bookings", err);
       }
@@ -96,6 +102,10 @@ export default function HostMyBookings() {
     }
   };
 
+  const handleEmailClick = (email: string) => {
+    window.location.href = `mailto:${email}`;
+  };
+
   const handleChatClick = (guest: HostBooking["guest"]) => {
     alert(
       `Chat feature coming soon! Guest: ${guest.first_name} ${guest.last_name}`,
@@ -115,6 +125,12 @@ export default function HostMyBookings() {
       default:
         return "status-default";
     }
+  };
+
+  const calculateHostEarnings = (totalAmount: number) => {
+    const platformFee = totalAmount * 0.1; // 10% platform fee
+    const hostEarnings = totalAmount - platformFee;
+    return { platformFee, hostEarnings };
   };
 
   if (bookings.length === 0) {
@@ -140,7 +156,7 @@ export default function HostMyBookings() {
           <p className="subtitle">Manage your vehicle reservations</p>
         </div>
 
-        <div className="bookings-grid">
+        <div className="bookings-list">
           {bookings.map((booking) => {
             const car = booking.Car;
             const guest = booking.guest;
@@ -154,6 +170,11 @@ export default function HostMyBookings() {
             const bookingDate = new Date(
               booking.createdAt,
             ).toLocaleDateString();
+
+            // Calculate platform fee and host earnings
+            const totalAmount = sd ? sd.total_amount : ic ? ic.total_amount : 0;
+            const { platformFee, hostEarnings } =
+              calculateHostEarnings(totalAmount);
 
             // ===== SELF DRIVE BOOKING =====
             if (sd) {
@@ -189,42 +210,46 @@ export default function HostMyBookings() {
 
               return (
                 <div key={booking.id} className="booking-card">
-                  <div className="booking-header">
-                    <div className="booking-id-section">
-                      <span className="booking-label">Booking ID</span>
-                      <span className="booking-id">#{booking.id}</span>
-                    </div>
-                    <span
-                      className={`status-badge ${getStatusBadgeClass(
-                        booking.status,
-                      )}`}
-                    >
-                      {booking.status}
-                    </span>
-                  </div>
-
-                  <div className="car-info-section">
+                  {/* Left Section - Car Image */}
+                  <div className="booking-image-section">
                     <img
                       src={image}
                       alt={`${car.make.name} ${car.model.name}`}
-                      className="car-image"
+                      className="booking-car-image"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/default-car.png";
                       }}
                     />
-                    <div className="car-details">
+                    <span className="booking-type-badge-overlay">
+                      Self Drive
+                    </span>
+                  </div>
+
+                  {/* Middle Section - Main Details */}
+                  <div className="booking-main-details">
+                    <div className="booking-header-inline">
+                      <div className="booking-id-section">
+                        <span className="booking-label">Booking ID</span>
+                        <span className="booking-id">#{booking.id}</span>
+                      </div>
+                      <span
+                        className={`status-badge ${getStatusBadgeClass(
+                          booking.status,
+                        )}`}
+                      >
+                        {booking.status}
+                      </span>
+                    </div>
+
+                    <div className="car-info-inline">
                       <h3 className="car-title">
                         {car.make.name} {car.model.name}
                       </h3>
                       <p className="car-year">{car.year}</p>
-                      <p className="car-description">{car.description}</p>
-                      <span className="booking-type-badge">Self Drive</span>
                     </div>
-                  </div>
 
-                  <div className="booking-details-section">
-                    <div className="detail-row">
-                      <div className="detail-item">
+                    <div className="trip-details-grid">
+                      <div className="trip-detail-item">
                         <span className="detail-icon">📍</span>
                         <div className="detail-content">
                           <span className="detail-label">Pickup</span>
@@ -237,7 +262,7 @@ export default function HostMyBookings() {
                         </div>
                       </div>
 
-                      <div className="detail-item">
+                      <div className="trip-detail-item">
                         <span className="detail-icon">🏁</span>
                         <div className="detail-content">
                           <span className="detail-label">Drop-off</span>
@@ -249,116 +274,107 @@ export default function HostMyBookings() {
                           </span>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="duration-info">
-                      <span className="duration-icon">⏱️</span>
-                      <span className="duration-text">
-                        Duration: {totalHours} hours
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="guest-info-section">
-                    <div className="guest-header">
-                      <span className="guest-icon">👤</span>
-                      <div className="guest-details">
-                        <span className="guest-name">
-                          {guest.first_name} {guest.last_name}
-                        </span>
-                        <span className="guest-phone">{guest.phone}</span>
+                      <div className="trip-detail-item">
+                        <span className="detail-icon">⏱️</span>
+                        <div className="detail-content">
+                          <span className="detail-label">Duration</span>
+                          <span className="detail-value">
+                            {totalHours} hours
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <div className="guest-actions">
-                      <button
-                        className="action-btn call-btn"
-                        onClick={() =>
-                          handlePhoneClick(guest.phone, booking.id)
-                        }
-                        title={`Call ${guest.phone}`}
-                      >
-                        📞 Call
-                      </button>
-                      {copiedPhone === booking.id && (
-                        <span className="copied-toast">Phone copied!</span>
-                      )}
-                      <button
-                        className="action-btn chat-btn"
-                        onClick={() => handleChatClick(guest)}
-                      >
-                        💬 Chat
-                      </button>
+
+                    <div className="guest-info-inline">
+                      <div className="guest-header-row">
+                        <span className="guest-icon">👤</span>
+                        <div className="guest-details">
+                          <span className="guest-name">
+                            {guest.first_name} {guest.last_name}
+                          </span>
+                          <span className="guest-contact">{guest.phone}</span>
+                          {guest.email && (
+                            <span className="guest-contact">{guest.email}</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="guest-actions">
+                        <button
+                          className="action-btn call-btn"
+                          onClick={() =>
+                            handlePhoneClick(guest.phone, booking.id)
+                          }
+                          title={`Call ${guest.phone}`}
+                        >
+                          📞
+                        </button>
+                        {copiedPhone === booking.id && (
+                          <span className="copied-toast">Copied!</span>
+                        )}
+                        {guest.email && (
+                          <button
+                            className="action-btn email-btn"
+                            onClick={() => handleEmailClick(guest.email)}
+                            title={`Email ${guest.email}`}
+                          >
+                            ✉️
+                          </button>
+                        )}
+                        <button
+                          className="action-btn chat-btn"
+                          onClick={() => handleChatClick(guest)}
+                          title="Chat with guest"
+                        >
+                          💬
+                        </button>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="pricing-section">
-                    <h4 className="pricing-title">Price Breakdown</h4>
-                    <div className="price-details">
+                  {/* Right Section - Pricing */}
+                  <div className="booking-pricing-section">
+                    <h4 className="pricing-title">Earnings</h4>
+
+                    <div className="price-summary">
                       <div className="price-row">
-                        <span className="price-label">Base Amount</span>
+                        <span className="price-label">Booking Amount</span>
                         <span className="price-value">
-                          ₹{sd.base_amount.toLocaleString()}
-                        </span>
-                      </div>
-                      {sd.insure_amount > 0 && (
-                        <div className="price-row">
-                          <span className="price-label">Insurance</span>
-                          <span className="price-value">
-                            ₹{sd.insure_amount.toLocaleString()}
-                          </span>
-                        </div>
-                      )}
-                      {sd.driver_amount > 0 && (
-                        <div className="price-row">
-                          <span className="price-label">Driver Charges</span>
-                          <span className="price-value">
-                            ₹{sd.driver_amount.toLocaleString()}
-                          </span>
-                        </div>
-                      )}
-                      {sd.drop_charge > 0 && (
-                        <div className="price-row">
-                          <span className="price-label">Drop Charges</span>
-                          <span className="price-value">
-                            ₹{sd.drop_charge.toLocaleString()}
-                          </span>
-                        </div>
-                      )}
-                      {sd.gst_amount > 0 && (
-                        <div className="price-row">
-                          <span className="price-label">GST (18%)</span>
-                          <span className="price-value">
-                            ₹{sd.gst_amount.toLocaleString()}
-                          </span>
-                        </div>
-                      )}
-                      <div className="price-row total-row">
-                        <span className="price-label">Total Amount</span>
-                        <span className="price-value total-price">
                           ₹{sd.total_amount.toLocaleString()}
                         </span>
                       </div>
-                      <div className="payment-status">
-                        <span className="payment-label">Payment Status:</span>
-                        <span
-                          className={`payment-badge ${booking.payment_status.toLowerCase()}`}
-                        >
-                          {booking.payment_status}
+                      <div className="price-row platform-fee-row">
+                        <span className="price-label">Platform Fee (10%)</span>
+                        <span className="price-value negative">
+                          -₹{platformFee.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="price-row earnings-row">
+                        <span className="price-label">Your Earnings</span>
+                        <span className="price-value earnings">
+                          ₹{hostEarnings.toLocaleString()}
                         </span>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="booking-footer">
-                    <span className="booking-date">
-                      Booked on {bookingDate}
-                    </span>
-                    <button
-                      className="view-car-btn"
-                      onClick={() => handleViewCar(car.id)}
-                    >
-                      View Car Details
-                    </button>
+                    <div className="payment-status-inline">
+                      <span className="payment-label">Payment:</span>
+                      <span
+                        className={`payment-badge ${booking.payment_status.toLowerCase()}`}
+                      >
+                        {booking.payment_status}
+                      </span>
+                    </div>
+
+                    <div className="booking-actions">
+                      <span className="booking-date">{bookingDate}</span>
+                      <button
+                        className="view-details-btn"
+                        onClick={() => handleViewCar(car.id)}
+                      >
+                        View Car
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -370,44 +386,46 @@ export default function HostMyBookings() {
 
               return (
                 <div key={booking.id} className="booking-card">
-                  <div className="booking-header">
-                    <div className="booking-id-section">
-                      <span className="booking-label">Booking ID</span>
-                      <span className="booking-id">#{booking.id}</span>
-                    </div>
-                    <span
-                      className={`status-badge ${getStatusBadgeClass(
-                        booking.status,
-                      )}`}
-                    >
-                      {booking.status}
-                    </span>
-                  </div>
-
-                  <div className="car-info-section">
+                  {/* Left Section - Car Image */}
+                  <div className="booking-image-section">
                     <img
                       src={image}
                       alt={`${car.make.name} ${car.model.name}`}
-                      className="car-image"
+                      className="booking-car-image"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/default-car.png";
                       }}
                     />
-                    <div className="car-details">
+                    <span className="booking-type-badge-overlay intercity">
+                      Intercity
+                    </span>
+                  </div>
+
+                  {/* Middle Section - Main Details */}
+                  <div className="booking-main-details">
+                    <div className="booking-header-inline">
+                      <div className="booking-id-section">
+                        <span className="booking-label">Booking ID</span>
+                        <span className="booking-id">#{booking.id}</span>
+                      </div>
+                      <span
+                        className={`status-badge ${getStatusBadgeClass(
+                          booking.status,
+                        )}`}
+                      >
+                        {booking.status}
+                      </span>
+                    </div>
+
+                    <div className="car-info-inline">
                       <h3 className="car-title">
                         {car.make.name} {car.model.name}
                       </h3>
                       <p className="car-year">{car.year}</p>
-                      <p className="car-description">{car.description}</p>
-                      <span className="booking-type-badge intercity">
-                        Intercity
-                      </span>
                     </div>
-                  </div>
 
-                  <div className="booking-details-section">
-                    <div className="detail-row">
-                      <div className="detail-item">
+                    <div className="trip-details-grid">
+                      <div className="trip-detail-item">
                         <span className="detail-icon">📍</span>
                         <div className="detail-content">
                           <span className="detail-label">Pickup</span>
@@ -417,7 +435,7 @@ export default function HostMyBookings() {
                         </div>
                       </div>
 
-                      <div className="detail-item">
+                      <div className="trip-detail-item">
                         <span className="detail-icon">🏁</span>
                         <div className="detail-content">
                           <span className="detail-label">Drop-off</span>
@@ -426,119 +444,123 @@ export default function HostMyBookings() {
                           </span>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="trip-info-grid">
-                      <div className="trip-info-item">
-                        <span className="info-icon">🚗</span>
-                        <div className="info-content">
-                          <span className="info-label">Distance</span>
-                          <span className="info-value">
+                      <div className="trip-detail-item">
+                        <span className="detail-icon">🚗</span>
+                        <div className="detail-content">
+                          <span className="detail-label">Distance</span>
+                          <span className="detail-value">
                             {distanceKm.toFixed(2)} km
                           </span>
                         </div>
                       </div>
-                      <div className="trip-info-item">
-                        <span className="info-icon">👥</span>
-                        <div className="info-content">
-                          <span className="info-label">Passengers</span>
-                          <span className="info-value">{ic.pax}</span>
+
+                      <div className="trip-detail-item">
+                        <span className="detail-icon">👥</span>
+                        <div className="detail-content">
+                          <span className="detail-label">Passengers</span>
+                          <span className="detail-value">{ic.pax}</span>
                         </div>
                       </div>
-                      <div className="trip-info-item">
-                        <span className="info-icon">🧳</span>
-                        <div className="info-content">
-                          <span className="info-label">Luggage</span>
-                          <span className="info-value">{ic.luggage}</span>
+
+                      <div className="trip-detail-item">
+                        <span className="detail-icon">🧳</span>
+                        <div className="detail-content">
+                          <span className="detail-label">Luggage</span>
+                          <span className="detail-value">{ic.luggage}</span>
                         </div>
+                      </div>
+                    </div>
+
+                    <div className="guest-info-inline">
+                      <div className="guest-header-row">
+                        <span className="guest-icon">👤</span>
+                        <div className="guest-details">
+                          <span className="guest-name">
+                            {guest.first_name} {guest.last_name}
+                          </span>
+                          <span className="guest-contact">{guest.phone}</span>
+                          {guest.email && (
+                            <span className="guest-contact">{guest.email}</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="guest-actions">
+                        <button
+                          className="action-btn call-btn"
+                          onClick={() =>
+                            handlePhoneClick(guest.phone, booking.id)
+                          }
+                          title={`Call ${guest.phone}`}
+                        >
+                          📞
+                        </button>
+                        {copiedPhone === booking.id && (
+                          <span className="copied-toast">Copied!</span>
+                        )}
+                        {guest.email && (
+                          <button
+                            className="action-btn email-btn"
+                            onClick={() => handleEmailClick(guest.email)}
+                            title={`Email ${guest.email}`}
+                          >
+                            ✉️
+                          </button>
+                        )}
+                        <button
+                          className="action-btn chat-btn"
+                          onClick={() => handleChatClick(guest)}
+                          title="Chat with guest"
+                        >
+                          💬
+                        </button>
                       </div>
                     </div>
                   </div>
 
-                  <div className="guest-info-section">
-                    <div className="guest-header">
-                      <span className="guest-icon">👤</span>
-                      <div className="guest-details">
-                        <span className="guest-name">
-                          {guest.first_name} {guest.last_name}
-                        </span>
-                        <span className="guest-phone">{guest.phone}</span>
-                      </div>
-                    </div>
-                    <div className="guest-actions">
-                      <button
-                        className="action-btn call-btn"
-                        onClick={() =>
-                          handlePhoneClick(guest.phone, booking.id)
-                        }
-                        title={`Call ${guest.phone}`}
-                      >
-                        📞 Call
-                      </button>
-                      {copiedPhone === booking.id && (
-                        <span className="copied-toast">Phone copied!</span>
-                      )}
-                      <button
-                        className="action-btn chat-btn"
-                        onClick={() => handleChatClick(guest)}
-                      >
-                        💬 Chat
-                      </button>
-                    </div>
-                  </div>
+                  {/* Right Section - Pricing */}
+                  <div className="booking-pricing-section">
+                    <h4 className="pricing-title">Earnings</h4>
 
-                  <div className="pricing-section">
-                    <h4 className="pricing-title">Price Breakdown</h4>
-                    <div className="price-details">
+                    <div className="price-summary">
                       <div className="price-row">
-                        <span className="price-label">Base Amount</span>
+                        <span className="price-label">Booking Amount</span>
                         <span className="price-value">
-                          ₹{ic.base_amount.toLocaleString()}
-                        </span>
-                      </div>
-                      {ic.driver_amount > 0 && (
-                        <div className="price-row">
-                          <span className="price-label">Driver Charges</span>
-                          <span className="price-value">
-                            ₹{ic.driver_amount.toLocaleString()}
-                          </span>
-                        </div>
-                      )}
-                      {ic.gst_amount > 0 && (
-                        <div className="price-row">
-                          <span className="price-label">GST (18%)</span>
-                          <span className="price-value">
-                            ₹{ic.gst_amount.toLocaleString()}
-                          </span>
-                        </div>
-                      )}
-                      <div className="price-row total-row">
-                        <span className="price-label">Total Amount</span>
-                        <span className="price-value total-price">
                           ₹{ic.total_amount.toLocaleString()}
                         </span>
                       </div>
-                      <div className="payment-status">
-                        <span className="payment-label">Payment Status:</span>
-                        <span
-                          className={`payment-badge ${booking.payment_status.toLowerCase()}`}
-                        >
-                          {booking.payment_status}
+                      <div className="price-row platform-fee-row">
+                        <span className="price-label">Platform Fee (10%)</span>
+                        <span className="price-value negative">
+                          -₹{platformFee.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="price-row earnings-row">
+                        <span className="price-label">Your Earnings</span>
+                        <span className="price-value earnings">
+                          ₹{hostEarnings.toLocaleString()}
                         </span>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="booking-footer">
-                    <span className="booking-date">
-                      Booked on {bookingDate}
-                    </span>
-                    <button
-                      className="view-car-btn"
-                      onClick={() => handleViewCar(car.id)}
-                    >
-                      View Car Details
-                    </button>
+                    <div className="payment-status-inline">
+                      <span className="payment-label">Payment:</span>
+                      <span
+                        className={`payment-badge ${booking.payment_status.toLowerCase()}`}
+                      >
+                        {booking.payment_status}
+                      </span>
+                    </div>
+
+                    <div className="booking-actions">
+                      <span className="booking-date">{bookingDate}</span>
+                      <button
+                        className="view-details-btn"
+                        onClick={() => handleViewCar(car.id)}
+                      >
+                        View Car
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
