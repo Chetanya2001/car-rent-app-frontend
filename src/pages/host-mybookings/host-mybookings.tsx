@@ -127,10 +127,14 @@ export default function HostMyBookings() {
     }
   };
 
-  const calculateHostEarnings = (totalAmount: number) => {
+  const calculateHostEarnings = (
+    baseAmount: number,
+    dropCharge: number,
+    totalAmount: number,
+  ) => {
     const platformFee = totalAmount * 0.1; // 10% platform fee
     const hostEarnings = totalAmount - platformFee;
-    return { platformFee, hostEarnings };
+    return { baseAmount, dropCharge, platformFee, hostEarnings };
   };
 
   if (bookings.length === 0) {
@@ -172,9 +176,14 @@ export default function HostMyBookings() {
             ).toLocaleDateString();
 
             // Calculate platform fee and host earnings
+            const baseAmount = sd ? sd.base_amount : ic ? ic.base_amount : 0;
+            const dropCharge = sd ? sd.drop_charge : 0;
             const totalAmount = sd ? sd.total_amount : ic ? ic.total_amount : 0;
-            const { platformFee, hostEarnings } =
-              calculateHostEarnings(totalAmount);
+            const { platformFee, hostEarnings } = calculateHostEarnings(
+              baseAmount,
+              dropCharge,
+              totalAmount,
+            );
 
             // ===== SELF DRIVE BOOKING =====
             if (sd) {
@@ -295,7 +304,7 @@ export default function HostMyBookings() {
                           </span>
                           <span className="guest-contact">{guest.phone}</span>
                           {guest.email && (
-                            <span className="guest-contact">{guest.email}</span>
+                            <span className="guest-email">{guest.email}</span>
                           )}
                         </div>
                       </div>
@@ -334,13 +343,29 @@ export default function HostMyBookings() {
 
                   {/* Right Section - Pricing */}
                   <div className="booking-pricing-section">
-                    <h4 className="pricing-title">Earnings</h4>
+                    <h4 className="pricing-title">Earnings Breakdown</h4>
 
                     <div className="price-summary">
                       <div className="price-row">
-                        <span className="price-label">Booking Amount</span>
+                        <span className="price-label">Base Amount</span>
                         <span className="price-value">
-                          ₹{sd.total_amount.toLocaleString()}
+                          ₹{baseAmount.toLocaleString()}
+                        </span>
+                      </div>
+                      {dropCharge > 0 && (
+                        <div className="price-row">
+                          <span className="price-label">
+                            Pickup/Drop Charges
+                          </span>
+                          <span className="price-value">
+                            ₹{dropCharge.toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                      <div className="price-row total-row">
+                        <span className="price-label">Total Amount</span>
+                        <span className="price-value">
+                          ₹{totalAmount.toLocaleString()}
                         </span>
                       </div>
                       <div className="price-row platform-fee-row">
@@ -481,7 +506,7 @@ export default function HostMyBookings() {
                           </span>
                           <span className="guest-contact">{guest.phone}</span>
                           {guest.email && (
-                            <span className="guest-contact">{guest.email}</span>
+                            <span className="guest-email">{guest.email}</span>
                           )}
                         </div>
                       </div>
@@ -520,13 +545,19 @@ export default function HostMyBookings() {
 
                   {/* Right Section - Pricing */}
                   <div className="booking-pricing-section">
-                    <h4 className="pricing-title">Earnings</h4>
+                    <h4 className="pricing-title">Earnings Breakdown</h4>
 
                     <div className="price-summary">
                       <div className="price-row">
-                        <span className="price-label">Booking Amount</span>
+                        <span className="price-label">Base Amount</span>
                         <span className="price-value">
-                          ₹{ic.total_amount.toLocaleString()}
+                          ₹{baseAmount.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="price-row total-row">
+                        <span className="price-label">Total Amount</span>
+                        <span className="price-value">
+                          ₹{totalAmount.toLocaleString()}
                         </span>
                       </div>
                       <div className="price-row platform-fee-row">
