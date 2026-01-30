@@ -152,7 +152,9 @@ export default function GuestMyBookings() {
                       : "Car no longer available"}
                   </h3>
                   {isCarAvailable && (
-                    <p>{car?.description || "No description"}</p>
+                    <p className="car-description">
+                      {car?.description || "No description"}
+                    </p>
                   )}
 
                   {/* SELF DRIVE */}
@@ -174,12 +176,6 @@ export default function GuestMyBookings() {
                           {toIST(sdb.end_datetime).toLocaleString()}
                         </p>
                       </div>
-                      <PickupOTP
-                        bookingId={booking.id}
-                        pickupDateTime={sdb.start_datetime}
-                        bookingStatus={booking.status}
-                        onOtpVerified={fetchBookings}
-                      />
                     </div>
                   )}
 
@@ -241,8 +237,27 @@ export default function GuestMyBookings() {
                   </div>
                 </div>
 
-                {/* ONLY SHOW TOTAL AMOUNT */}
+                {/* PRICE SECTION WITH OTP ON TOP */}
                 <div className="price-section">
+                  {/* ✅ OTP COMPONENT - Shows above total for SELF_DRIVE bookings */}
+                  {isSelfDrive && sdb && (
+                    <PickupOTP
+                      bookingId={booking.id}
+                      pickupDateTime={sdb.start_datetime}
+                      bookingStatus={booking.status}
+                      onOtpVerified={fetchBookings}
+                    />
+                  )}
+                  {isIntercity && icb && (
+                    <PickupOTP
+                      bookingId={booking.id}
+                      pickupDateTime={booking.createdAt} // Using createdAt as placeholder
+                      bookingStatus={booking.status}
+                      onOtpVerified={fetchBookings}
+                    />
+                  )}
+
+                  {/* TOTAL AMOUNT */}
                   <div className="total-breakdown">
                     <div className="total-row">
                       <strong>
@@ -250,9 +265,13 @@ export default function GuestMyBookings() {
                       </strong>
                     </div>
                   </div>
+
+                  {/* STATUS */}
                   <p className="status-row">
                     Status: <strong>{booking.status}</strong>
                   </p>
+
+                  {/* VIEW DETAILS BUTTON */}
                   <button
                     className="view-details-btn"
                     onClick={() => handleViewDetails(car?.id || 0)}
