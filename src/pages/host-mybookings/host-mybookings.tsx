@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
 import { getHostBookings } from "../../services/booking";
-import styles from "./host-bookings.module.css";
+import styles from "./host-mybookings.module.css";
 
 type HostBooking = {
   id: number;
