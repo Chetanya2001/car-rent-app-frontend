@@ -128,10 +128,14 @@ export default function HostMyBookings() {
     }
   };
 
-  const calculateHostEarnings = (baseAmount: number) => {
-    const platformFee = baseAmount * 0.1; // 10% platform fee
-    const hostEarnings = baseAmount - platformFee;
-    return { platformFee, hostEarnings };
+  const calculateHostEarnings = (
+    baseAmount: number,
+    dropCharge: number = 0,
+  ) => {
+    const platformFee = baseAmount * 0.1; // 10% platform fee on base amount only
+    const baseAfterFee = baseAmount - platformFee;
+    const hostEarnings = baseAfterFee + dropCharge; // Add drop charge to earnings
+    return { platformFee, baseAfterFee, hostEarnings };
   };
 
   if (bookings.length === 0) {
@@ -172,10 +176,13 @@ export default function HostMyBookings() {
               booking.createdAt,
             ).toLocaleDateString();
 
-            // Calculate platform fee and host earnings from base amount only
+            // Calculate platform fee and host earnings
+            // Platform fee is 10% of base amount only
+            // Host earnings = (base amount - platform fee) + drop charges
             const baseAmount = sd ? sd.base_amount : ic ? ic.base_amount : 0;
-            const { platformFee, hostEarnings } =
-              calculateHostEarnings(baseAmount);
+            const dropCharge = sd ? sd.drop_charge : 0;
+            const { platformFee, baseAfterFee, hostEarnings } =
+              calculateHostEarnings(baseAmount, dropCharge);
 
             // ===== SELF DRIVE BOOKING =====
             if (sd) {
@@ -356,6 +363,18 @@ export default function HostMyBookings() {
                         <span className="price-label">Platform Fee (10%)</span>
                         <span className="price-value negative">
                           -₹{platformFee.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="price-row base-after-fee-row">
+                        <span className="price-label">Base After Fee</span>
+                        <span className="price-value">
+                          ₹{baseAfterFee.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="price-row">
+                        <span className="price-label">Drop Charge</span>
+                        <span className="price-value">
+                          ₹{dropCharge.toLocaleString()}
                         </span>
                       </div>
                       <div className="price-row earnings-row">
@@ -546,12 +565,25 @@ export default function HostMyBookings() {
                           ₹{baseAmount.toLocaleString()}
                         </span>
                       </div>
+                      <div className="price-row">
+                        <span className="price-label">Drop Charge</span>
+                        <span className="price-value">
+                          ₹{dropCharge.toLocaleString()}
+                        </span>
+                      </div>
                       <div className="price-row platform-fee-row">
                         <span className="price-label">Platform Fee (10%)</span>
                         <span className="price-value negative">
                           -₹{platformFee.toFixed(2)}
                         </span>
                       </div>
+                      <div className="price-row base-after-fee-row">
+                        <span className="price-label">Base After Fee</span>
+                        <span className="price-value">
+                          ₹{baseAfterFee.toFixed(2)}
+                        </span>
+                      </div>
+
                       <div className="price-row earnings-row">
                         <span className="price-label">You Will Receive</span>
                         <span className="price-value earnings">
