@@ -302,10 +302,6 @@ export default function HostMyBookings() {
                           <span className="guest-name">
                             {guest.first_name} {guest.last_name}
                           </span>
-                          <span className="guest-contact">{guest.phone}</span>
-                          {guest.email && (
-                            <span className="guest-email">{guest.email}</span>
-                          )}
                         </div>
                       </div>
                       <div className="guest-actions">
