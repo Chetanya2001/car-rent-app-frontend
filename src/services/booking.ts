@@ -11,14 +11,20 @@ export interface BookCarRequest {
   car_id: number;
   start_datetime: string;
   end_datetime: string;
+
   pickup_address: string;
   pickup_lat: number | null;
   pickup_long: number | null;
+
   drop_address: string;
   drop_lat: number | null;
   drop_long: number | null;
+
   insure_amount?: number;
   driver_amount?: number;
+  drop_charge?: number;
+  base_amount?: number;
+  gst_amount?: number;
 }
 
 export interface BookCarResponse {

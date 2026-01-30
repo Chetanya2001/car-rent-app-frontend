@@ -164,16 +164,22 @@ const SelfDriveCarDetails: React.FC = () => {
         car_id: Number(carId),
         start_datetime: `${pickupDate}T${pickupTime}:00`,
         end_datetime: `${dropDate}T${dropTime}:00`,
+
         pickup_address: pickupAddress,
         pickup_lat: pickupGeo.lat,
         pickup_long: pickupGeo.lng,
+
         drop_address: dropCity || pickupAddress,
         drop_lat: dropGeo.lat,
         drop_long: dropGeo.lng,
+
         insure_amount: pricing.insurance,
         driver_amount: pricing.driver,
+        drop_charge: pricing.drop,
+        base_amount: pricing.base,
+        gst_amount: pricing.gst,
+
         total_amount: pricing.total,
-        payment_mode: "PAID",
       };
 
       const res = await bookCar(payload, token);
