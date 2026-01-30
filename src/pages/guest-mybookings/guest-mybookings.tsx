@@ -12,7 +12,6 @@ type SelfDriveBooking = {
   end_datetime: string;
   pickup_address: string;
   drop_address: string;
-  insure_amount: number;
 };
 
 type IntercityBooking = {
@@ -24,7 +23,6 @@ type IntercityBooking = {
   luggage: number;
 };
 
-// ✅ FIXED: make/model can be string OR object (handles both API formats)
 type CarMake = string | { name: string };
 type CarModel = string | { name: string };
 
@@ -36,34 +34,31 @@ type Booking = {
   createdAt: string;
   Car: {
     id: number;
-    make: CarMake; // ✅ Flexible: string | {name: string}
-    model: CarModel; // ✅ Flexible: string | {name: string}
-    year: number;
-    price_per_hour: string | null;
-    price_per_km: string | null;
-    description: string;
+    make?: CarMake;
+    model?: CarModel;
+    year?: number;
+    description?: string;
     photos?: { photo_url: string }[];
     host?: {
       id: number;
       first_name: string;
       last_name: string;
-      email: string;
       phone: string;
+      email?: string;
     };
   };
-  SelfDriveBooking: SelfDriveBooking | null;
-  IntercityBooking: IntercityBooking | null;
+  SelfDriveBooking?: SelfDriveBooking | null;
+  IntercityBooking?: IntercityBooking | null;
 };
 
-// ✅ HELPER: Safely get make/model name (handles string OR object)
-const getMakeName = (make: CarMake): string => {
-  if (typeof make === "string") return make;
-  return make?.name || "Unknown Make";
+// Helper functions
+const getMakeName = (make?: CarMake) => {
+  if (!make) return "Unknown Make";
+  return typeof make === "string" ? make : make.name || "Unknown Make";
 };
-
-const getModelName = (model: CarModel): string => {
-  if (typeof model === "string") return model;
-  return model?.name || "Unknown Model";
+const getModelName = (model?: CarModel) => {
+  if (!model) return "Unknown Model";
+  return typeof model === "string" ? model : model.name || "Unknown Model";
 };
 
 export default function GuestMyBookings() {
@@ -71,6 +66,7 @@ export default function GuestMyBookings() {
   const [copiedPhone, setCopiedPhone] = useState<number | null>(null);
   const navigate = useNavigate();
   const token = localStorage.getItem("token") || "";
+
   const fetchBookings = async () => {
     try {
       if (!token) return;
@@ -86,34 +82,26 @@ export default function GuestMyBookings() {
   }, [token]);
 
   const handleBookNow = () => navigate("/cars");
-
-  const handleViewDetails = (carId: number) => {
+  const handleViewDetails = (carId: number) =>
     navigate(`/car-details/${carId}`);
-  };
-
   const handlePhoneClick = async (phone: string, bookingId: number) => {
     try {
       await navigator.clipboard.writeText(phone);
       setCopiedPhone(bookingId);
       setTimeout(() => setCopiedPhone(null), 2000);
       window.location.href = `tel:${phone}`;
-    } catch (err) {
-      console.error("Failed to copy phone number", err);
+    } catch {
       window.location.href = `tel:${phone}`;
     }
   };
-
-  const handleEmailClick = (email: string) => {
-    window.location.href = `mailto:${email}`;
+  const handleEmailClick = (email?: string) => {
+    if (email) window.location.href = `mailto:${email}`;
+  };
+  const handleChatClick = (host?: Booking["Car"]["host"]) => {
+    if (host) alert("Chat feature coming soon!");
   };
 
-  const handleChatClick = (host: Booking["Car"]["host"] | null | undefined) => {
-    if (host) {
-      alert(`Chat feature coming soon!`);
-    }
-  };
-
-  if (bookings.length === 0) {
+  if (!bookings.length) {
     return (
       <>
         <Navbar />
@@ -138,67 +126,13 @@ export default function GuestMyBookings() {
           const image = car?.photos?.[0]?.photo_url || "/default-car.png";
           const host = car?.host;
 
-          // ✅ SAFE: Using helper functions - NO CRASH
           const makeName = getMakeName(car?.make);
           const modelName = getModelName(car?.model);
-
-          console.log(`🚗 Booking ${booking.id}:`, {
-            make: car?.make,
-            makeName,
-            model: car?.model,
-            modelName,
-            year: car?.year,
-          });
 
           const isSelfDrive = booking.booking_type === "SELF_DRIVE";
           const isIntercity = booking.booking_type === "INTERCITY";
           const sdb = booking.SelfDriveBooking;
           const icb = booking.IntercityBooking;
-
-          // Self-drive calculations
-          let pickupDate = "";
-          let pickupTime = "";
-          let dropoffDate = "";
-          let dropoffTime = "";
-          let totalHours = 0;
-          let hourlyRate = 0;
-          let rentalAmount = 0;
-
-          if (isSelfDrive && sdb) {
-            const startDate = toIST(sdb.start_datetime);
-            const endDate = toIST(sdb.end_datetime);
-
-            pickupDate = startDate.toLocaleDateString();
-            pickupTime = startDate.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            });
-            dropoffDate = endDate.toLocaleDateString();
-            dropoffTime = endDate.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            });
-            totalHours = Math.max(
-              1,
-              Math.round(
-                (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60),
-              ),
-            );
-            hourlyRate =
-              parseFloat((car?.price_per_hour || "0").replace(/[^\d.]/g, "")) ||
-              0;
-            rentalAmount = hourlyRate * totalHours;
-          }
-
-          // Intercity calculations
-          let pricePerKm = 0;
-          let distanceKm = 0;
-          let baseFare = 0;
-          if (isIntercity && icb) {
-            pricePerKm = parseFloat(car?.price_per_km || "0");
-            distanceKm = parseFloat(icb.distance_km);
-            baseFare = Math.round(pricePerKm * distanceKm);
-          }
 
           return (
             <div key={booking.id} className="booking-card">
@@ -214,64 +148,60 @@ export default function GuestMyBookings() {
                 <div>
                   <h3>
                     {isCarAvailable
-                      ? `${makeName} ${modelName} (${car!.year})` // ✅ SAFE: strings only
+                      ? `${makeName} ${modelName} (${car?.year || "N/A"})`
                       : "Car no longer available"}
                   </h3>
                   {isCarAvailable && (
-                    <p className="car-description">{car!.description}</p>
+                    <p>{car?.description || "No description"}</p>
                   )}
 
-                  {/* SELF DRIVE BOOKING */}
+                  {/* SELF DRIVE */}
                   {isSelfDrive && sdb && (
-                    <>
-                      <div className="booking-dates">
-                        <div>
-                          <p className="label">Pickup</p>
-                          <p>
-                            {sdb.pickup_address}
-                            <br />
-                            {pickupDate}, {pickupTime}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="label">Drop-off</p>
-                          <p>
-                            {sdb.drop_address}
-                            <br />
-                            {dropoffDate}, {dropoffTime}
-                          </p>
-                        </div>
+                    <div className="booking-dates">
+                      <div>
+                        <p className="label">Pickup</p>
+                        <p>
+                          {sdb.pickup_address || "-"}
+                          <br />
+                          {toIST(sdb.start_datetime).toLocaleString()}
+                        </p>
                       </div>
-
-                      {/* ✅ NEW: Pickup OTP Component */}
+                      <div>
+                        <p className="label">Drop-off</p>
+                        <p>
+                          {sdb.drop_address || "-"}
+                          <br />
+                          {toIST(sdb.end_datetime).toLocaleString()}
+                        </p>
+                      </div>
                       <PickupOTP
                         bookingId={booking.id}
                         pickupDateTime={sdb.start_datetime}
                         bookingStatus={booking.status}
                         onOtpVerified={fetchBookings}
                       />
-                    </>
+                    </div>
                   )}
 
-                  {/* INTERCITY BOOKING */}
+                  {/* INTERCITY */}
                   {isIntercity && icb && (
                     <div className="booking-dates">
                       <div>
                         <p className="label">Pickup Station</p>
-                        <p>{icb.pickup_address}</p>
+                        <p>{icb.pickup_address || "-"}</p>
                       </div>
                       <div>
                         <p className="label">Drop Location</p>
-                        <p>{icb.drop_address}</p>
+                        <p>{icb.drop_address || "-"}</p>
                       </div>
                       <div>
                         <p className="label">Distance</p>
-                        <p>{distanceKm} km</p>
+                        <p>{icb.distance_km} km</p>
                       </div>
                       <div>
                         <p className="label">Passengers</p>
                         <p>
-                          PAX: {icb.pax} | Luggage: {icb.luggage}
+                          PAX: {icb.pax || "-"} | Luggage: {icb.luggage || "-"}
                         </p>
                       </div>
                     </div>
@@ -311,69 +241,21 @@ export default function GuestMyBookings() {
                   </div>
                 </div>
 
+                {/* ONLY SHOW TOTAL AMOUNT */}
                 <div className="price-section">
-                  {/* SELF DRIVE PRICING */}
-                  {isSelfDrive && sdb && (
-                    <>
-                      <div className="calculation-breakdown">
-                        <div className="calc-row">
-                          <span>₹{hourlyRate}/hr</span>
-                          <span>× {totalHours} hr</span>
-                        </div>
-                        <div className="calc-equals">
-                          <strong>= ₹{rentalAmount.toLocaleString()}</strong>
-                        </div>
-                      </div>
-                      <div className="total-breakdown">
-                        <div className="amount-row">
-                          <span>
-                            Insure: ₹{sdb.insure_amount.toLocaleString()}
-                          </span>
-                        </div>
-                        <hr />
-                        <div className="total-row">
-                          <strong>
-                            Total: ₹{booking.total_amount.toLocaleString()}
-                          </strong>
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {/* INTERCITY PRICING */}
-                  {isIntercity && icb && (
-                    <>
-                      <div className="calculation-breakdown">
-                        <div className="calc-row">
-                          <span>₹{pricePerKm}/km</span>
-                          <span>× {distanceKm} km</span>
-                        </div>
-                        <div className="calc-equals">
-                          <strong>= ₹{baseFare.toLocaleString()}</strong>
-                        </div>
-                      </div>
-                      <div className="total-breakdown">
-                        <div className="amount-row">
-                          <span>
-                            Driver: ₹{icb.driver_amount.toLocaleString()}
-                          </span>
-                        </div>
-                        <hr />
-                        <div className="total-row">
-                          <strong>
-                            Total: ₹{booking.total_amount.toLocaleString()}
-                          </strong>
-                        </div>
-                      </div>
-                    </>
-                  )}
-
+                  <div className="total-breakdown">
+                    <div className="total-row">
+                      <strong>
+                        Total: ₹{booking.total_amount.toLocaleString()}
+                      </strong>
+                    </div>
+                  </div>
                   <p className="status-row">
                     Status: <strong>{booking.status}</strong>
                   </p>
                   <button
                     className="view-details-btn"
-                    onClick={() => handleViewDetails(car!.id)}
+                    onClick={() => handleViewDetails(car?.id || 0)}
                   >
                     View Details
                   </button>
