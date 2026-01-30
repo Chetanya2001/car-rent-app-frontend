@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
 import { getHostBookings } from "../../services/booking";
+import DropOTP from "../../components/DropOTP/DropOTP";
 import "./host-mybookings.css";
 
 type HostBooking = {
@@ -67,22 +68,22 @@ export default function HostMyBookings() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token") || "";
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        if (!token) return;
-        const data = await getHostBookings(token);
-        // Sort bookings by creation date, latest first
-        const sortedData = data.sort(
-          (a: HostBooking, b: HostBooking) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        );
-        setBookings(sortedData);
-      } catch (err) {
-        console.error("Error loading host bookings", err);
-      }
-    };
+  const fetchBookings = async () => {
+    try {
+      if (!token) return;
+      const data = await getHostBookings(token);
+      // Sort bookings by creation date, latest first
+      const sortedData = data.sort(
+        (a: HostBooking, b: HostBooking) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+      setBookings(sortedData);
+    } catch (err) {
+      console.error("Error loading host bookings", err);
+    }
+  };
 
+  useEffect(() => {
     fetchBookings();
   }, [token]);
 
@@ -302,6 +303,10 @@ export default function HostMyBookings() {
                           <span className="guest-name">
                             {guest.first_name} {guest.last_name}
                           </span>
+                          <span className="guest-contact">{guest.phone}</span>
+                          {guest.email && (
+                            <span className="guest-email">{guest.email}</span>
+                          )}
                         </div>
                       </div>
                       <div className="guest-actions">
@@ -335,6 +340,14 @@ export default function HostMyBookings() {
                         </button>
                       </div>
                     </div>
+
+                    {/* ✅ DROP OTP COMPONENT - Below guest contact section */}
+                    <DropOTP
+                      bookingId={booking.id}
+                      dropDateTime={sd.end_datetime}
+                      bookingStatus={booking.status}
+                      onOtpVerified={fetchBookings}
+                    />
                   </div>
 
                   {/* Right Section - Pricing */}
@@ -348,12 +361,16 @@ export default function HostMyBookings() {
                           ₹{baseAmount.toLocaleString()}
                         </span>
                       </div>
-                      <div className="price-row">
-                        <span className="price-label">Pickup/Drop Charges</span>
-                        <span className="price-value">
-                          ₹{dropCharge.toLocaleString()}
-                        </span>
-                      </div>
+                      {dropCharge > 0 && (
+                        <div className="price-row">
+                          <span className="price-label">
+                            Pickup/Drop Charges
+                          </span>
+                          <span className="price-value">
+                            ₹{dropCharge.toLocaleString()}
+                          </span>
+                        </div>
+                      )}
                       <div className="price-row total-row">
                         <span className="price-label">Total Amount</span>
                         <span className="price-value">
@@ -533,6 +550,14 @@ export default function HostMyBookings() {
                         </button>
                       </div>
                     </div>
+
+                    {/* ✅ DROP OTP COMPONENT - For intercity, use createdAt as placeholder */}
+                    <DropOTP
+                      bookingId={booking.id}
+                      dropDateTime={booking.createdAt}
+                      bookingStatus={booking.status}
+                      onOtpVerified={fetchBookings}
+                    />
                   </div>
 
                   {/* Right Section - Pricing */}
