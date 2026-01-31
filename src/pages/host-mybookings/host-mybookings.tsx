@@ -191,32 +191,33 @@ export default function HostMyBookings() {
               const startDate = new Date(sd.start_datetime);
               const endDate = new Date(sd.end_datetime);
 
-              // Formatting Options for IST
-              const options: Intl.DateTimeFormatOptions = {
-                timeZone: "Asia/Kolkata",
+              const pickupDate = startDate.toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
                 year: "numeric",
-              };
+                timeZone: "UTC", // This keeps it at Jan 30
+              });
 
-              const timeOptions: Intl.DateTimeFormatOptions = {
-                timeZone: "Asia/Kolkata",
+              const pickupTime = startDate.toLocaleTimeString("en-US", {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
-              };
+                timeZone: "UTC", // This keeps it at 07:00 PM
+              });
 
-              const pickupDate = startDate.toLocaleDateString("en-IN", options);
-              const pickupTime = startDate.toLocaleTimeString(
-                "en-IN",
-                timeOptions,
-              );
+              const dropoffDate = endDate.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+                timeZone: "UTC", // This keeps it at Jan 31
+              });
 
-              const dropoffDate = endDate.toLocaleDateString("en-IN", options);
-              const dropoffTime = endDate.toLocaleTimeString(
-                "en-IN",
-                timeOptions,
-              );
+              const dropoffTime = endDate.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+                timeZone: "UTC", // This keeps it at 12:00 PM
+              });
 
               // totalHours remains the same as it calculates absolute time difference
               const totalHours = Math.max(
