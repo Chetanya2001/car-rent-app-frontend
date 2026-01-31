@@ -191,26 +191,34 @@ export default function HostMyBookings() {
               const startDate = new Date(sd.start_datetime);
               const endDate = new Date(sd.end_datetime);
 
-              const pickupDate = startDate.toLocaleDateString("en-US", {
+              // Formatting Options for IST
+              const options: Intl.DateTimeFormatOptions = {
+                timeZone: "Asia/Kolkata",
                 month: "short",
                 day: "numeric",
                 year: "numeric",
-              });
-              const pickupTime = startDate.toLocaleTimeString([], {
+              };
+
+              const timeOptions: Intl.DateTimeFormatOptions = {
+                timeZone: "Asia/Kolkata",
                 hour: "2-digit",
                 minute: "2-digit",
-              });
+                hour12: true,
+              };
 
-              const dropoffDate = endDate.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              });
-              const dropoffTime = endDate.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              });
+              const pickupDate = startDate.toLocaleDateString("en-IN", options);
+              const pickupTime = startDate.toLocaleTimeString(
+                "en-IN",
+                timeOptions,
+              );
 
+              const dropoffDate = endDate.toLocaleDateString("en-IN", options);
+              const dropoffTime = endDate.toLocaleTimeString(
+                "en-IN",
+                timeOptions,
+              );
+
+              // totalHours remains the same as it calculates absolute time difference
               const totalHours = Math.max(
                 1,
                 Math.round(
