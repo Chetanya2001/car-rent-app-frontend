@@ -5,6 +5,14 @@ import AdminNavBar from "../../../components/AdminNavbar/AdminNavbar";
 import toast, { Toaster } from "react-hot-toast";
 import "./manageGuest.css";
 
+type Document = {
+  id: number;
+  doc_type: string;
+  verification_status: "Pending" | "Verified" | "Rejected";
+  image: string;
+  createdAt: string;
+};
+
 type Guest = {
   id: number;
   first_name: string;
@@ -13,7 +21,7 @@ type Guest = {
   phone: string;
   role: "admin" | "host" | "guest";
   is_verified: boolean;
-  hasPendingVerification: boolean;
+  documents: Document[];
 };
 
 const ManageGuests = () => {
@@ -31,18 +39,13 @@ const ManageGuests = () => {
     const fetchGuests = async () => {
       try {
         const res = await getAllUsers();
+
         setGuests(
           res
             .filter((u: any) => u.role === "guest")
             .map((u: any) => ({
-              id: u.id,
-              first_name: u.first_name,
-              last_name: u.last_name,
-              email: u.email,
-              phone: u.phone,
-              role: "guest",
-              is_verified: u.is_verified,
-              hasPendingVerification: u.hasPendingVerification ?? false,
+              ...u,
+              documents: u.documents || [],
             })),
         );
       } catch (err) {
@@ -184,53 +187,106 @@ const ManageGuests = () => {
               </thead>
               <tbody>
                 {displayedGuests.length > 0 ? (
-                  displayedGuests.map((guest) => (
-                    <tr key={guest.id}>
-                      <td className="guest-name">
-                        {guest.first_name} {guest.last_name}
-                      </td>
-                      <td className="guest-contact">{guest.email}</td>
-                      <td>{guest.phone}</td>
-                      <td>
-                        <span
-                          className={`status ${
-                            guest.is_verified ? "active" : "inactive"
-                          }`}
-                        >
-                          {guest.is_verified ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                      <td>
-                        {guest.hasPendingVerification ? (
-                          <span className="doc-badge pending">
-                            🟠 Pending Review
-                          </span>
-                        ) : (
-                          <span className="doc-badge verified">
-                            🟢 Verified
-                          </span>
-                        )}
-                      </td>
+                  displayedGuests.map((guest) => {
+                    const hasPendingDocs = guest.documents.some(
+                      (doc) => doc.verification_status === "Pending",
+                    );
 
-                      <td className="actions">
-                        <button
-                          className="edit"
-                          onClick={() => handleEditGuest(guest)}
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          className="delete"
-                          onClick={() => handleDeleteGuest(guest.id)}
-                        >
-                          🗑️
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                    const allVerified =
+                      guest.documents.length > 0 &&
+                      guest.documents.every(
+                        (doc) => doc.verification_status === "Verified",
+                      );
+
+                    return (
+                      <tr key={guest.id}>
+                        <td className="guest-name">
+                          {guest.first_name} {guest.last_name}
+                        </td>
+
+                        <td className="guest-contact">{guest.email}</td>
+
+                        <td>{guest.phone}</td>
+
+                        <td>
+                          <span
+                            className={`status ${
+                              guest.is_verified ? "active" : "inactive"
+                            }`}
+                          >
+                            {guest.is_verified ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+
+                        {/* ✅ Document Status (Summary + Details) */}
+                        <td>
+                          {guest.documents.length === 0 && (
+                            <span className="doc-badge none">
+                              ⚪ No Documents
+                            </span>
+                          )}
+
+                          {hasPendingDocs && (
+                            <div className="doc-summary">
+                              <span className="doc-badge pending">
+                                🟠 Pending Review
+                              </span>
+                            </div>
+                          )}
+
+                          {!hasPendingDocs && allVerified && (
+                            <div className="doc-summary">
+                              <span className="doc-badge verified">
+                                🟢 All Verified
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Individual document rows */}
+                          {guest.documents.map((doc) => (
+                            <div key={doc.id} className="doc-row">
+                              <strong>
+                                {doc.doc_type || "Unknown Document"}:
+                              </strong>{" "}
+                              {doc.verification_status === "Pending" && (
+                                <span className="doc-badge pending">
+                                  Pending
+                                </span>
+                              )}
+                              {doc.verification_status === "Verified" && (
+                                <span className="doc-badge verified">
+                                  Verified
+                                </span>
+                              )}
+                              {doc.verification_status === "Rejected" && (
+                                <span className="doc-badge rejected">
+                                  Rejected
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </td>
+
+                        <td className="actions">
+                          <button
+                            className="edit"
+                            onClick={() => handleEditGuest(guest)}
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            className="delete"
+                            onClick={() => handleDeleteGuest(guest.id)}
+                          >
+                            🗑️
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
-                    <td colSpan={5} className="no-data">
+                    <td colSpan={6} className="no-data">
                       No guests found
                     </td>
                   </tr>

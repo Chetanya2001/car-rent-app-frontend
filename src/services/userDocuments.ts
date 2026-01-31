@@ -21,6 +21,12 @@ export interface UploadProfilePicResponse {
   profile_pic: string;
 }
 
+export interface BookingEligibilityResponse {
+  eligible: boolean;
+  reason?: "MISSING_DOCUMENTS" | "PENDING_VERIFICATION";
+  missingDocs?: string[];
+  pendingDocs?: string[];
+}
 export interface GetDocumentsResponse {
   user: {
     id: number;
@@ -93,5 +99,19 @@ export async function uploadProfilePicture(
     },
   );
 
+  return response.data;
+}
+
+export async function checkBookingEligibility(
+  token: string,
+): Promise<BookingEligibilityResponse> {
+  const response = await axios.get<BookingEligibilityResponse>(
+    `${API_URL}/check-eligibility`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
   return response.data;
 }
