@@ -7,7 +7,7 @@ import {
 } from "../../services/userDocuments";
 
 // Only allow "Passport" or "Aadhar" for ID1 and only "Driver's License" for ID2
-const id1Types = ["Passport", "Aadhar"];
+const id1Types = ["Passport", "Aadhaar"];
 const id2Types = ["Driver's License"];
 
 interface DocumentSectionProps {
