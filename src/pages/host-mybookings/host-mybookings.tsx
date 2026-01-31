@@ -181,8 +181,10 @@ export default function HostMyBookings() {
             // Host earnings = (base amount - platform fee) + drop charges
             const baseAmount = sd ? sd.base_amount : ic ? ic.base_amount : 0;
             const dropCharge = sd ? sd.drop_charge : 0;
-            const { platformFee, baseAfterFee, hostEarnings } =
-              calculateHostEarnings(baseAmount, dropCharge);
+            const { platformFee, hostEarnings } = calculateHostEarnings(
+              baseAmount,
+              dropCharge,
+            );
 
             // ===== SELF DRIVE BOOKING =====
             if (sd) {
@@ -363,12 +365,6 @@ export default function HostMyBookings() {
                         <span className="price-label">Platform Fee (10%)</span>
                         <span className="price-value negative">
                           -₹{platformFee.toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="price-row base-after-fee-row">
-                        <span className="price-label">Base After Fee</span>
-                        <span className="price-value">
-                          ₹{baseAfterFee.toFixed(2)}
                         </span>
                       </div>
                       <div className="price-row">
@@ -575,12 +571,6 @@ export default function HostMyBookings() {
                         <span className="price-label">Platform Fee (10%)</span>
                         <span className="price-value negative">
                           -₹{platformFee.toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="price-row base-after-fee-row">
-                        <span className="price-label">Base After Fee</span>
-                        <span className="price-value">
-                          ₹{baseAfterFee.toFixed(2)}
                         </span>
                       </div>
 
