@@ -8,6 +8,10 @@ export interface User {
   phone: string;
   role: "admin" | "host" | "guest";
   is_verified: boolean;
+
+  // 🔹 document-related flags (derived on backend)
+  hasPendingVerification?: boolean;
+  documentsVerified?: boolean;
 }
 
 const API_URL = `${import.meta.env.VITE_API_URL}/users`;

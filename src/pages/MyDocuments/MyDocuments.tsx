@@ -21,6 +21,7 @@ interface DocumentSectionProps {
   previewUrl?: string | null;
   onUploadSuccess?: () => void;
   allowedTypes: string[];
+  rejectionReason?: string | null;
 }
 
 function DocumentSection({
@@ -34,6 +35,7 @@ function DocumentSection({
   previewUrl,
   onUploadSuccess,
   allowedTypes,
+  rejectionReason,
 }: DocumentSectionProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,8 +58,8 @@ function DocumentSection({
     if (!idType || !file) {
       setError(
         `Please select a valid ${allowedTypes.join(
-          " or "
-        )} and upload a file before submitting.`
+          " or ",
+        )} and upload a file before submitting.`,
       );
       return;
     }
@@ -111,12 +113,29 @@ function DocumentSection({
             verificationStatus === "Verified"
               ? "green"
               : verificationStatus === "Rejected"
-              ? "red"
-              : "#555",
+                ? "red"
+                : "#555",
         }}
       >
         Verification status: {verificationStatus}
       </span>
+
+      {verificationStatus === "Rejected" && (
+        <div
+          style={{
+            marginTop: 10,
+            background: "#fff1f2",
+            color: "#991b1b",
+            padding: "10px",
+            borderRadius: "6px",
+            fontSize: "0.9rem",
+          }}
+        >
+          ❌ Document rejected. Please re-upload.
+          <br />
+          <strong>Reason:</strong> {rejectionReason || "Not specified"}
+        </div>
+      )}
 
       {/* Document Preview Section */}
       {previewUrl && !file && (
@@ -361,6 +380,8 @@ export default function MyDocumentsPage() {
   const [id2File, setId2File] = useState<File | null>(null);
   const [id2Status, setId2Status] = useState<string>("Pending");
   const [id2Url, setId2Url] = useState<string | null>(null);
+  const [id1RejectReason, setId1RejectReason] = useState<string | null>(null);
+  const [id2RejectReason, setId2RejectReason] = useState<string | null>(null);
 
   const userToken = localStorage.getItem("token") || "";
 
@@ -372,11 +393,13 @@ export default function MyDocumentsPage() {
         setId1Type(docs[0].doc_type);
         setId1Url(docs[0].image);
         setId1Status(docs[0].verification_status);
+        setId1RejectReason(docs[0].rejection_reason);
       }
       if (docs[1]) {
         setId2Type(docs[1].doc_type);
         setId2Url(docs[1].image);
         setId2Status(docs[1].verification_status);
+        setId2RejectReason(docs[1].rejection_reason);
       }
     } catch (error) {
       console.error("Failed to fetch documents:", error);
@@ -419,6 +442,7 @@ export default function MyDocumentsPage() {
             previewUrl={id1Url}
             onUploadSuccess={fetchDocuments}
             allowedTypes={id1Types}
+            rejectionReason={id1RejectReason}
           />
           <DocumentSection
             label="Upload Driver's License"
@@ -431,6 +455,7 @@ export default function MyDocumentsPage() {
             previewUrl={id2Url}
             onUploadSuccess={fetchDocuments}
             allowedTypes={id2Types}
+            rejectionReason={id2RejectReason}
           />
         </div>
       </div>

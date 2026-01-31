@@ -6,8 +6,9 @@
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
   background: #f8fafc;
   min-height: 100vh;
 }
@@ -400,6 +401,22 @@
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
+}
+.doc-badge {
+  padding: 6px 10px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.doc-badge.pending {
+  background: #fff4e5;
+  color: #c2410c;
+}
+
+.doc-badge.verified {
+  background: #ecfdf5;
+  color: #047857;
 }
 
 .guest-edit-buttons button:hover {

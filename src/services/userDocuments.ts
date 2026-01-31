@@ -31,6 +31,7 @@ export interface GetDocumentsResponse {
     doc_type: string;
     image: string;
     verification_status: string;
+    rejection_reason: string | null;
     createdAt: string;
     updatedAt: string;
   }>;

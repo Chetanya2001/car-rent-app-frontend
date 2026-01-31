@@ -13,6 +13,7 @@ type Guest = {
   phone: string;
   role: "admin" | "host" | "guest";
   is_verified: boolean;
+  hasPendingVerification: boolean;
 };
 
 const ManageGuests = () => {
@@ -30,7 +31,20 @@ const ManageGuests = () => {
     const fetchGuests = async () => {
       try {
         const res = await getAllUsers();
-        setGuests(res.filter((u: Guest) => u.role === "guest"));
+        setGuests(
+          res
+            .filter((u: any) => u.role === "guest")
+            .map((u: any) => ({
+              id: u.id,
+              first_name: u.first_name,
+              last_name: u.last_name,
+              email: u.email,
+              phone: u.phone,
+              role: "guest",
+              is_verified: u.is_verified,
+              hasPendingVerification: u.hasPendingVerification ?? false,
+            })),
+        );
       } catch (err) {
         console.error("Failed to fetch guests:", err);
       } finally {
@@ -56,7 +70,7 @@ const ManageGuests = () => {
   const totalPages = Math.ceil(filteredGuests.length / guestsPerPage);
   const displayedGuests = filteredGuests.slice(
     (currentPage - 1) * guestsPerPage,
-    currentPage * guestsPerPage
+    currentPage * guestsPerPage,
   );
 
   // ✅ Edit guest
@@ -75,7 +89,7 @@ const ManageGuests = () => {
     }
 
     try {
-      const updatedGuest = await updateUser(token, String(editingGuest.id), {
+      await updateUser(token, String(editingGuest.id), {
         first_name: editingGuest.first_name,
         last_name: editingGuest.last_name,
         email: editingGuest.email,
@@ -83,7 +97,17 @@ const ManageGuests = () => {
       });
 
       setGuests((prev) =>
-        prev.map((g) => (g.id === updatedGuest.id ? updatedGuest : g))
+        prev.map((g) =>
+          g.id === editingGuest.id
+            ? {
+                ...g, // keep Guest-only fields
+                first_name: editingGuest.first_name,
+                last_name: editingGuest.last_name,
+                email: editingGuest.email,
+                phone: editingGuest.phone,
+              }
+            : g,
+        ),
       );
 
       toast.success("Guest updated successfully!");
@@ -153,7 +177,8 @@ const ManageGuests = () => {
                   <th>Full Name</th>
                   <th>Email</th>
                   <th>Phone</th>
-                  <th>Verified</th>
+                  <th>Verified Guest</th>
+                  <th>Document Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -175,6 +200,18 @@ const ManageGuests = () => {
                           {guest.is_verified ? "Active" : "Inactive"}
                         </span>
                       </td>
+                      <td>
+                        {guest.hasPendingVerification ? (
+                          <span className="doc-badge pending">
+                            🟠 Pending Review
+                          </span>
+                        ) : (
+                          <span className="doc-badge verified">
+                            🟢 Verified
+                          </span>
+                        )}
+                      </td>
+
                       <td className="actions">
                         <button
                           className="edit"
