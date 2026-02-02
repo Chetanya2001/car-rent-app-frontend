@@ -8,7 +8,12 @@ interface ChargesCardProps {
   pickDropCharges: number;
   gst: number;
   carLocation?: string;
-  onPay: () => Promise<void>;
+
+  onPay?: () => Promise<void>; // ✅ optional
+  disabled?: boolean;
+
+  isEligible: boolean | null;
+  eligibilityReason?: string;
 }
 
 const ChargesCard: React.FC<ChargesCardProps> = ({
@@ -19,6 +24,9 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
   gst,
   carLocation,
   onPay,
+  disabled,
+  isEligible,
+  eligibilityReason,
 }) => {
   const totalCost =
     carCharges + insuranceCharges + driverCharges + pickDropCharges + gst;
@@ -31,7 +39,9 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
     setIsPaying(true);
 
     try {
-      await onPay(); // 🔥 booking API call
+      if (!onPay) return;
+      await onPay();
+      // 🔥 booking API call
       setIsBooked(true); // ✅ success → permanently disabled
     } catch (error) {
       console.error("Booking failed:", error);
@@ -62,10 +72,24 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
             {carLocation || "Not specified"}
           </span>
         </div>
-
         <div className="detail-item">
-          <span className="icon">🤝</span>
-          <span>You have a valid license and documents to drive.</span>
+          <span className="icon">📄</span>
+
+          {isEligible ? (
+            <span style={{ color: "#22c55e", fontWeight: 600 }}>
+              ✅ Your documents are verified.
+            </span>
+          ) : (
+            <span style={{ color: "#ef4444", fontWeight: 600 }}>
+              ❌ Documents not verified.
+              {eligibilityReason && (
+                <>
+                  <br />
+                  <small>Reason: {eligibilityReason}</small>
+                </>
+              )}
+            </span>
+          )}
         </div>
       </div>
 
@@ -159,7 +183,9 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
         <button
           className="pay-btn"
           onClick={handlePayNow}
-          disabled={!isAgreed || isPaying || isBooked}
+          disabled={
+            !isAgreed || isPaying || isBooked || disabled || !isEligible
+          }
           style={{
             opacity: !isAgreed || isPaying || isBooked ? 0.6 : 1,
             cursor:
@@ -171,7 +197,9 @@ const ChargesCard: React.FC<ChargesCardProps> = ({
             ? "Processing..."
             : isBooked
               ? "Booking Confirmed"
-              : "Pay Now"}
+              : !isEligible
+                ? "Verify Documents First"
+                : "Pay Now"}
         </button>
       </div>
     </div>

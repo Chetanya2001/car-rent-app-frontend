@@ -18,6 +18,7 @@ import {
 import { getCarDetails } from "../../services/carDetails";
 import { getCarLocation } from "../../services/carService";
 import { bookCar } from "../../services/booking";
+import { checkBookingEligibility } from "../../services/userDocuments";
 
 import { geocodeAddress } from "../../utils/geocode";
 import type { CarDetailsType } from "../../types/CarDetails";
@@ -74,23 +75,31 @@ const SelfDriveCarDetails: React.FC = () => {
 
   const [dropCity, setDropCity] = useState(bookingDetails.dropCity || "");
   const [showDropMap, setShowDropMap] = useState(false);
+  const [isEligible, setIsEligible] = useState<boolean | null>(null);
+  const [eligibilityReason, setEligibilityReason] = useState<string>("");
 
   /* -------------------- FETCH DATA -------------------- */
   useEffect(() => {
     const load = async () => {
       try {
-        const [carData, location] = await Promise.all([
+        const [carData, location, eligibility] = await Promise.all([
           getCarDetails(Number(carId)),
           getCarLocation(Number(carId)),
+          checkBookingEligibility(localStorage.getItem("token") || ""),
         ]);
+
         setCar(carData);
         setFetchedCarLocation(location);
+
+        setIsEligible(eligibility.eligible);
+        setEligibilityReason(eligibility.reason || "");
       } catch (e) {
         console.error(e);
       } finally {
         setLoading(false);
       }
     };
+
     load();
   }, [carId]);
 
@@ -141,6 +150,15 @@ const SelfDriveCarDetails: React.FC = () => {
 
       if (differentDrop && !dropCity) {
         alert("Please select drop-off city");
+        return;
+      }
+      const eligibility = await checkBookingEligibility(
+        localStorage.getItem("token") || "",
+      );
+      if (!eligibility.eligible) {
+        alert(
+          `You are not eligible to book a car. Reason: ${eligibility.reason}`,
+        );
         return;
       }
 
@@ -353,6 +371,9 @@ const SelfDriveCarDetails: React.FC = () => {
             gst={pricing.gst}
             carLocation={fetchedCarLocation}
             onPay={handleBookNow}
+            disabled={!isEligible}
+            isEligible={isEligible}
+            eligibilityReason={eligibilityReason}
           />
         </div>
       </div>
