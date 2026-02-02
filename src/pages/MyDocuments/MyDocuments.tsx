@@ -595,18 +595,35 @@ export default function MyDocumentsPage() {
     try {
       const data = await getUserDocumentsByUserId(userToken);
       const docs = data.documents || [];
-      if (docs[0]) {
-        setId1Type(docs[0].doc_type);
-        setId1Url(docs[0].image);
-        setId1Status(docs[0].verification_status);
-        setId1RejectReason(docs[0].rejection_reason);
-      }
-      if (docs[1]) {
-        setId2Type(docs[1].doc_type);
-        setId2Url(docs[1].image);
-        setId2Status(docs[1].verification_status);
-        setId2RejectReason(docs[1].rejection_reason);
-      }
+
+      // Reset first
+      setId1Type("");
+      setId1Url(null);
+      setId1Status("Not Uploaded");
+      setId1RejectReason(null);
+
+      setId2Type("");
+      setId2Url(null);
+      setId2Status("Not Uploaded");
+      setId2RejectReason(null);
+
+      docs.forEach((doc: any) => {
+        // Passport / Aadhaar → ID1
+        if (doc.doc_type === "Aadhaar" || doc.doc_type === "Passport") {
+          setId1Type(doc.doc_type);
+          setId1Url(doc.image);
+          setId1Status(doc.verification_status);
+          setId1RejectReason(doc.rejection_reason);
+        }
+
+        // Driver License → ID2
+        if (doc.doc_type === "Driver's License") {
+          setId2Type(doc.doc_type);
+          setId2Url(doc.image);
+          setId2Status(doc.verification_status);
+          setId2RejectReason(doc.rejection_reason);
+        }
+      });
     } catch (error) {
       console.error("Failed to fetch documents:", error);
     }
