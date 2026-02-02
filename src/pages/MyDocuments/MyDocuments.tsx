@@ -389,9 +389,23 @@ function VerificationStatusBanner({
   id1RejectReason,
   id2RejectReason,
 }: VerificationStatusBannerProps) {
-  const allVerified = id1Status === "Verified" && id2Status === "Verified";
-  const anyRejected = id1Status === "Rejected" || id2Status === "Rejected";
-  const anyPending = id1Status === "Pending" || id2Status === "Pending";
+  // Only consider documents that have been uploaded
+  const id1Uploaded = id1Status !== "Not Uploaded" && id1Type;
+  const id2Uploaded = id2Status !== "Not Uploaded" && id2Type;
+
+  const allVerified =
+    id1Uploaded &&
+    id2Uploaded &&
+    id1Status === "Verified" &&
+    id2Status === "Verified";
+
+  const anyRejected =
+    (id1Uploaded && id1Status === "Rejected") ||
+    (id2Uploaded && id2Status === "Rejected");
+
+  const anyPending =
+    (id1Uploaded && id1Status === "Pending") ||
+    (id2Uploaded && id2Status === "Pending");
 
   let bannerColor = "#fff3cd";
   let borderColor = "#ffc107";
@@ -445,8 +459,8 @@ function VerificationStatusBanner({
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-        {/* ID1 Status */}
-        {id1Type && (
+        {/* ID1 Status - only show if uploaded */}
+        {id1Uploaded && (
           <div
             style={{
               display: "flex",
@@ -501,8 +515,8 @@ function VerificationStatusBanner({
           </div>
         )}
 
-        {/* ID2 Status */}
-        {id2Type && (
+        {/* ID2 Status - only show if uploaded */}
+        {id2Uploaded && (
           <div
             style={{
               display: "flex",
@@ -594,9 +608,13 @@ export default function MyDocumentsPage() {
   const fetchDocuments = async () => {
     try {
       const data = await getUserDocumentsByUserId(userToken);
-      const docs = data.documents || [];
 
-      // Reset first
+      console.log("API DOCUMENT RESPONSE:", data);
+
+      // Handle both data.documents and direct array response
+      const docs = data.documents || data || [];
+
+      // Reset all states first
       setId1Type("");
       setId1Url(null);
       setId1Status("Not Uploaded");
@@ -607,21 +625,24 @@ export default function MyDocumentsPage() {
       setId2Status("Not Uploaded");
       setId2RejectReason(null);
 
+      // Map documents by type instead of by index
       docs.forEach((doc: any) => {
-        // Passport / Aadhaar → ID1
+        if (!doc || !doc.doc_type) return;
+
+        // Check if it's an ID1 type (Aadhaar or Passport)
         if (doc.doc_type === "Aadhaar" || doc.doc_type === "Passport") {
           setId1Type(doc.doc_type);
           setId1Url(doc.image);
-          setId1Status(doc.verification_status);
-          setId1RejectReason(doc.rejection_reason);
+          setId1Status(doc.verification_status || "Pending");
+          setId1RejectReason(doc.rejection_reason || null);
         }
 
-        // Driver License → ID2
+        // Check if it's an ID2 type (Driver's License)
         if (doc.doc_type === "Driver's License") {
           setId2Type(doc.doc_type);
           setId2Url(doc.image);
-          setId2Status(doc.verification_status);
-          setId2RejectReason(doc.rejection_reason);
+          setId2Status(doc.verification_status || "Pending");
+          setId2RejectReason(doc.rejection_reason || null);
         }
       });
     } catch (error) {
@@ -653,7 +674,7 @@ export default function MyDocumentsPage() {
         </p>
 
         {/* Show verification status banner if documents exist */}
-        {(id1Type || id2Type) && (
+        {(id1Status !== "Not Uploaded" || id2Status !== "Not Uploaded") && (
           <VerificationStatusBanner
             id1Status={id1Status}
             id2Status={id2Status}
