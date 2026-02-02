@@ -86,3 +86,59 @@ export const updateUser = async (
     throw error.response?.data || new Error("Update user failed");
   }
 };
+
+export const updateDocumentStatus = async (
+  token: string,
+  documentId: number,
+  status: "Pending" | "Verified" | "Rejected",
+  rejection_reason?: string,
+) => {
+  const response = await axios.patch(
+    `${API_URL}/user-document/admin/update-status/${documentId}`,
+    {
+      status,
+      rejection_reason: status === "Rejected" ? rejection_reason : null,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+  return response.data;
+};
+
+// Bulk update multiple documents
+export const bulkUpdateDocuments = async (
+  token: string,
+  updates: Array<{
+    documentId: number;
+    status: "Pending" | "Verified" | "Rejected";
+    rejection_reason?: string;
+    userId?: number;
+  }>,
+) => {
+  const response = await axios.post(
+    `${API_URL}/user-document/admin/bulk-update`,
+    { updates },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+  return response.data;
+};
+
+// Get pending documents
+export const getPendingDocuments = async (token: string) => {
+  const response = await axios.get(
+    `${API_URL}/user-document/admin/get-pending-documents`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+  return response.data;
+};
