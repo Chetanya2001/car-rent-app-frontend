@@ -479,9 +479,15 @@ const ManageGuests = () => {
                             alt={doc.doc_type}
                             className="document-image"
                           />
-                          <button className="download-btn">
+                          <a
+                            href={doc.image}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="download-btn"
+                          >
                             <span className="download-icon">⬇</span> Download
-                          </button>
+                          </a>
                         </div>
 
                         {/* Status Update Section */}
