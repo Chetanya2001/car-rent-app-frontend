@@ -234,9 +234,11 @@ function DocumentSection({
     </div>
   );
 }
+
 interface ProfilePicSectionProps {
   setProfilePicUrl: React.Dispatch<React.SetStateAction<string | null>>;
 }
+
 function ProfilePicSection({ setProfilePicUrl }: ProfilePicSectionProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -369,16 +371,220 @@ function ProfilePicSection({ setProfilePicUrl }: ProfilePicSectionProps) {
   );
 }
 
+// New component to show overall verification status
+interface VerificationStatusBannerProps {
+  id1Status: string;
+  id2Status: string;
+  id1Type: string;
+  id2Type: string;
+  id1RejectReason: string | null;
+  id2RejectReason: string | null;
+}
+
+function VerificationStatusBanner({
+  id1Status,
+  id2Status,
+  id1Type,
+  id2Type,
+  id1RejectReason,
+  id2RejectReason,
+}: VerificationStatusBannerProps) {
+  const allVerified = id1Status === "Verified" && id2Status === "Verified";
+  const anyRejected = id1Status === "Rejected" || id2Status === "Rejected";
+  const anyPending = id1Status === "Pending" || id2Status === "Pending";
+
+  let bannerColor = "#fff3cd";
+  let borderColor = "#ffc107";
+  let textColor = "#856404";
+  let icon = "⏳";
+  let message = "Your documents are pending verification";
+
+  if (allVerified) {
+    bannerColor = "#d4edda";
+    borderColor = "#28a745";
+    textColor = "#155724";
+    icon = "✅";
+    message = "All documents verified successfully!";
+  } else if (anyRejected) {
+    bannerColor = "#fff1f2";
+    borderColor = "#dc3545";
+    textColor = "#991b1b";
+    icon = "❌";
+    message = "Some documents were rejected. Please review and reupload.";
+  }
+
+  return (
+    <div
+      style={{
+        background: bannerColor,
+        border: `2px solid ${borderColor}`,
+        borderRadius: "12px",
+        padding: "20px",
+        marginBottom: "30px",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          marginBottom: "15px",
+        }}
+      >
+        <span style={{ fontSize: "32px" }}>{icon}</span>
+        <h3
+          style={{
+            margin: 0,
+            color: textColor,
+            fontWeight: "700",
+            fontSize: "1.3em",
+          }}
+        >
+          {message}
+        </h3>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        {/* ID1 Status */}
+        {id1Type && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "12px",
+              background: "white",
+              borderRadius: "8px",
+              border: "1px solid #e0e0e0",
+            }}
+          >
+            <div>
+              <strong>{id1Type}</strong>
+              <div
+                style={{
+                  fontSize: "0.9em",
+                  color:
+                    id1Status === "Verified"
+                      ? "green"
+                      : id1Status === "Rejected"
+                        ? "red"
+                        : "#555",
+                  marginTop: "4px",
+                }}
+              >
+                Status: {id1Status}
+              </div>
+              {id1Status === "Rejected" && id1RejectReason && (
+                <div
+                  style={{
+                    fontSize: "0.85em",
+                    color: "#991b1b",
+                    marginTop: "6px",
+                    fontStyle: "italic",
+                  }}
+                >
+                  Reason: {id1RejectReason}
+                </div>
+              )}
+            </div>
+            <div
+              style={{
+                fontSize: "24px",
+              }}
+            >
+              {id1Status === "Verified"
+                ? "✅"
+                : id1Status === "Rejected"
+                  ? "❌"
+                  : "⏳"}
+            </div>
+          </div>
+        )}
+
+        {/* ID2 Status */}
+        {id2Type && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "12px",
+              background: "white",
+              borderRadius: "8px",
+              border: "1px solid #e0e0e0",
+            }}
+          >
+            <div>
+              <strong>{id2Type}</strong>
+              <div
+                style={{
+                  fontSize: "0.9em",
+                  color:
+                    id2Status === "Verified"
+                      ? "green"
+                      : id2Status === "Rejected"
+                        ? "red"
+                        : "#555",
+                  marginTop: "4px",
+                }}
+              >
+                Status: {id2Status}
+              </div>
+              {id2Status === "Rejected" && id2RejectReason && (
+                <div
+                  style={{
+                    fontSize: "0.85em",
+                    color: "#991b1b",
+                    marginTop: "6px",
+                    fontStyle: "italic",
+                  }}
+                >
+                  Reason: {id2RejectReason}
+                </div>
+              )}
+            </div>
+            <div
+              style={{
+                fontSize: "24px",
+              }}
+            >
+              {id2Status === "Verified"
+                ? "✅"
+                : id2Status === "Rejected"
+                  ? "❌"
+                  : "⏳"}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {anyPending && (
+        <div
+          style={{
+            marginTop: "15px",
+            fontSize: "0.9em",
+            color: textColor,
+            fontStyle: "italic",
+          }}
+        >
+          Your documents are being reviewed by our admin team. This usually
+          takes 24-48 hours.
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function MyDocumentsPage() {
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
   const [id1Type, setId1Type] = useState<string>("");
   const [id1File, setId1File] = useState<File | null>(null);
-  const [id1Status, setId1Status] = useState<string>("Pending");
+  const [id1Status, setId1Status] = useState<string>("Not Uploaded");
   const [id1Url, setId1Url] = useState<string | null>(null);
 
   const [id2Type, setId2Type] = useState<string>("");
   const [id2File, setId2File] = useState<File | null>(null);
-  const [id2Status, setId2Status] = useState<string>("Pending");
+  const [id2Status, setId2Status] = useState<string>("Not Uploaded");
   const [id2Url, setId2Url] = useState<string | null>(null);
   const [id1RejectReason, setId1RejectReason] = useState<string | null>(null);
   const [id2RejectReason, setId2RejectReason] = useState<string | null>(null);
@@ -415,7 +621,7 @@ export default function MyDocumentsPage() {
       <Navbar profilePicUrl={profilePicUrl} />
       <div
         style={{
-          maxWidth: "650px",
+          maxWidth: "750px",
           margin: "40px auto",
           background: "#fff",
           borderRadius: "12px",
@@ -426,9 +632,21 @@ export default function MyDocumentsPage() {
         <h2 style={{ fontWeight: "800" }}>Verify Your Identity</h2>
         <p style={{ marginBottom: "24px", color: "#555" }}>
           Please upload your profile picture, a Passport or Aadhar, and your
-          Driver's License. If already uploaded, you can preview and reupload
-          new ones.
+          Driver's License. Track your verification status below.
         </p>
+
+        {/* Show verification status banner if documents exist */}
+        {(id1Type || id2Type) && (
+          <VerificationStatusBanner
+            id1Status={id1Status}
+            id2Status={id2Status}
+            id1Type={id1Type}
+            id2Type={id2Type}
+            id1RejectReason={id1RejectReason}
+            id2RejectReason={id2RejectReason}
+          />
+        )}
+
         <ProfilePicSection setProfilePicUrl={setProfilePicUrl} />
         <div style={{ display: "flex", gap: "28px", flexWrap: "wrap" }}>
           <DocumentSection
