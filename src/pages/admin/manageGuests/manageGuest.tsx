@@ -10,6 +10,7 @@ type Document = {
   doc_type: string;
   verification_status: "Pending" | "Verified" | "Rejected";
   image: string;
+  rejection_reason?: string;
   createdAt: string;
 };
 
@@ -31,6 +32,12 @@ const ManageGuests = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [documentStatuses, setDocumentStatuses] = useState<{
+    [key: number]: {
+      status: "Pending" | "Verified" | "Rejected";
+      reason: string;
+    };
+  }>({});
 
   const guestsPerPage = 8;
 
@@ -80,6 +87,42 @@ const ManageGuests = () => {
   const handleEditGuest = (guest: Guest) => {
     setEditingGuest(guest);
     setIsEditing(true);
+
+    // Initialize document statuses
+    const initialStatuses: any = {};
+    guest.documents.forEach((doc) => {
+      initialStatuses[doc.id] = {
+        status: doc.verification_status,
+        reason: doc.rejection_reason || "",
+      };
+    });
+    setDocumentStatuses(initialStatuses);
+  };
+
+  // ✅ Handle document status change
+  const handleDocumentStatusChange = (
+    docId: number,
+    newStatus: "Pending" | "Verified" | "Rejected",
+  ) => {
+    setDocumentStatuses((prev) => ({
+      ...prev,
+      [docId]: {
+        ...prev[docId],
+        status: newStatus,
+        reason: newStatus !== "Rejected" ? "" : prev[docId]?.reason || "",
+      },
+    }));
+  };
+
+  // ✅ Handle rejection reason change
+  const handleRejectionReasonChange = (docId: number, reason: string) => {
+    setDocumentStatuses((prev) => ({
+      ...prev,
+      [docId]: {
+        ...prev[docId],
+        reason: reason,
+      },
+    }));
   };
 
   // ✅ Save edit
@@ -92,6 +135,7 @@ const ManageGuests = () => {
     }
 
     try {
+      // Update basic guest info
       await updateUser(token, String(editingGuest.id), {
         first_name: editingGuest.first_name,
         last_name: editingGuest.last_name,
@@ -99,15 +143,29 @@ const ManageGuests = () => {
         phone: editingGuest.phone,
       });
 
+      // TODO: Add API call to update document statuses
+      // This would be something like:
+      // for (const [docId, statusData] of Object.entries(documentStatuses)) {
+      //   await updateDocumentStatus(token, docId, statusData);
+      // }
+
+      // Update local state
       setGuests((prev) =>
         prev.map((g) =>
           g.id === editingGuest.id
             ? {
-                ...g, // keep Guest-only fields
+                ...g,
                 first_name: editingGuest.first_name,
                 last_name: editingGuest.last_name,
                 email: editingGuest.email,
                 phone: editingGuest.phone,
+                documents: g.documents.map((doc) => ({
+                  ...doc,
+                  verification_status:
+                    documentStatuses[doc.id]?.status || doc.verification_status,
+                  rejection_reason:
+                    documentStatuses[doc.id]?.reason || doc.rejection_reason,
+                })),
               }
             : g,
         ),
@@ -116,6 +174,7 @@ const ManageGuests = () => {
       toast.success("Guest updated successfully!");
       setIsEditing(false);
       setEditingGuest(null);
+      setDocumentStatuses({});
     } catch (err) {
       console.error(err);
       toast.error("Failed to update guest");
@@ -327,34 +386,44 @@ const ManageGuests = () => {
           <div
             className="guest-edit-overlay"
             onClick={(e) => {
-              if (e.target === e.currentTarget) setIsEditing(false);
+              if (e.target === e.currentTarget) {
+                setIsEditing(false);
+                setDocumentStatuses({});
+              }
             }}
           >
             <div className="guest-edit-box">
               <h2>Edit Guest</h2>
-              <label>First Name</label>
-              <input
-                type="text"
-                value={editingGuest.first_name}
-                onChange={(e) =>
-                  setEditingGuest({
-                    ...editingGuest,
-                    first_name: e.target.value,
-                  })
-                }
-              />
 
-              <label>Last Name</label>
-              <input
-                type="text"
-                value={editingGuest.last_name}
-                onChange={(e) =>
-                  setEditingGuest({
-                    ...editingGuest,
-                    last_name: e.target.value,
-                  })
-                }
-              />
+              <div className="edit-form-row">
+                <div className="edit-form-col">
+                  <label>First Name</label>
+                  <input
+                    type="text"
+                    value={editingGuest.first_name}
+                    onChange={(e) =>
+                      setEditingGuest({
+                        ...editingGuest,
+                        first_name: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="edit-form-col">
+                  <label>Last Name</label>
+                  <input
+                    type="text"
+                    value={editingGuest.last_name}
+                    onChange={(e) =>
+                      setEditingGuest({
+                        ...editingGuest,
+                        last_name: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
 
               <label>Email</label>
               <input
@@ -380,11 +449,100 @@ const ManageGuests = () => {
                 }
               />
 
+              {/* Document Management Section */}
+              {editingGuest.documents.length > 0 && (
+                <div className="document-management-section">
+                  <h3 className="document-section-title">
+                    DOCUMENT MANAGEMENT
+                  </h3>
+
+                  {editingGuest.documents.map((doc) => (
+                    <div key={doc.id} className="document-card">
+                      <div className="document-header">
+                        <div className="document-title-row">
+                          <span className="document-type">
+                            {doc.doc_type.toUpperCase()}
+                          </span>
+                          <span
+                            className={`document-status-badge ${doc.verification_status.toLowerCase()}`}
+                          >
+                            {doc.verification_status.toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="document-body">
+                        {/* Document Preview */}
+                        <div className="document-preview">
+                          <img
+                            src={doc.image}
+                            alt={doc.doc_type}
+                            className="document-image"
+                          />
+                          <button className="download-btn">
+                            <span className="download-icon">⬇</span> Download
+                          </button>
+                        </div>
+
+                        {/* Status Update Section */}
+                        <div className="document-status-section">
+                          <label className="status-label">UPDATE STATUS</label>
+                          <select
+                            className="status-select"
+                            value={
+                              documentStatuses[doc.id]?.status ||
+                              doc.verification_status
+                            }
+                            onChange={(e) =>
+                              handleDocumentStatusChange(
+                                doc.id,
+                                e.target.value as
+                                  | "Pending"
+                                  | "Verified"
+                                  | "Rejected",
+                              )
+                            }
+                          >
+                            <option value="Pending">Pending Review</option>
+                            <option value="Verified">Verified</option>
+                            <option value="Rejected">Rejected</option>
+                          </select>
+
+                          {/* Rejection Reason - Only show if status is Rejected */}
+                          {documentStatuses[doc.id]?.status === "Rejected" && (
+                            <div className="rejection-reason-section">
+                              <label className="status-label">
+                                REJECTION REASON
+                              </label>
+                              <textarea
+                                className="rejection-textarea"
+                                placeholder="Enter the reason for rejection..."
+                                value={documentStatuses[doc.id]?.reason || ""}
+                                onChange={(e) =>
+                                  handleRejectionReasonChange(
+                                    doc.id,
+                                    e.target.value,
+                                  )
+                                }
+                                rows={3}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="guest-edit-buttons">
                 <button onClick={handleSaveEdit}>Save</button>
                 <button
                   className="guest-edit-cancel"
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => {
+                    setIsEditing(false);
+                    setDocumentStatuses({});
+                  }}
                 >
                   Cancel
                 </button>
