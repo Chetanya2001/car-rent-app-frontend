@@ -22,11 +22,19 @@ export interface UploadProfilePicResponse {
 }
 
 export interface BookingEligibilityResponse {
-  eligible: boolean;
-  reason?: "MISSING_DOCUMENTS" | "PENDING_VERIFICATION";
-  missingDocs?: string[];
-  pendingDocs?: string[];
+  isEligible: boolean;
+  user_verified: boolean;
+  documents_count: number;
+  all_documents_verified: boolean;
+  reason?: string;
+  documents: {
+    id: number;
+    doc_type: string;
+    verification_status: string;
+    rejection_reason: string | null;
+  }[];
 }
+
 export interface GetDocumentsResponse {
   user: {
     id: number;

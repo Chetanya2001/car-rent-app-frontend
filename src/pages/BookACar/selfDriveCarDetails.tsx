@@ -91,8 +91,15 @@ const SelfDriveCarDetails: React.FC = () => {
         setCar(carData);
         setFetchedCarLocation(location);
 
-        setIsEligible(eligibility.eligible);
-        setEligibilityReason(eligibility.reason || "");
+        setIsEligible(
+          eligibility.isEligible && eligibility.all_documents_verified,
+        );
+
+        setEligibilityReason(
+          eligibility.all_documents_verified
+            ? ""
+            : "All documents are not verified",
+        );
       } catch (e) {
         console.error(e);
       } finally {
@@ -155,7 +162,7 @@ const SelfDriveCarDetails: React.FC = () => {
       const eligibility = await checkBookingEligibility(
         localStorage.getItem("token") || "",
       );
-      if (!eligibility.eligible) {
+      if (!eligibility.isEligible || !eligibility.all_documents_verified) {
         alert(
           `You are not eligible to book a car. Reason: ${eligibility.reason}`,
         );
