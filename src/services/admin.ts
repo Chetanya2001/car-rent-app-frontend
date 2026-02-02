@@ -15,6 +15,7 @@ export interface User {
 }
 
 const API_URL = `${import.meta.env.VITE_API_URL}/users`;
+const DOCUMENT_API_URL = `${import.meta.env.VITE_API_URL}/user-document`;
 
 export const getAllUsers = async (): Promise<User[]> => {
   const token = localStorage.getItem("token");
@@ -94,7 +95,7 @@ export const updateDocumentStatus = async (
   rejection_reason?: string,
 ) => {
   const response = await axios.patch(
-    `${API_URL}/user-document/admin/update-status/${documentId}`,
+    `${DOCUMENT_API_URL}/admin/update-status/${documentId}`,
     {
       status,
       rejection_reason: status === "Rejected" ? rejection_reason : null,
@@ -119,12 +120,12 @@ export const bulkUpdateDocuments = async (
   }>,
 ) => {
   const response = await axios.post(
-    `${API_URL}/user-document/admin/bulk-update`,
+    `${DOCUMENT_API_URL}/admin/bulk-update`,
     { updates },
     {
       headers: {
         Authorization: `Bearer ${token}`,
-      },
+      }
     },
   );
   return response.data;
@@ -133,7 +134,7 @@ export const bulkUpdateDocuments = async (
 // Get pending documents
 export const getPendingDocuments = async (token: string) => {
   const response = await axios.get(
-    `${API_URL}/user-document/admin/get-pending-documents`,
+    `${API_URL}/admin/get-pending-documents`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
