@@ -4,7 +4,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 function VerifyEmail() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [status, setStatus] = useState("loading"); // loading, success, error
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    "loading",
+  );
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -17,23 +19,42 @@ function VerifyEmail() {
       return;
     }
 
-    // Call backend API to verify email
-    fetch(`${import.meta.env.VITE_API_URL}/users/verify-email?token=${token}`)
-      .then((res) => res.json())
+    // Force HTTP because your backend is only running on HTTP (port 4000)
+    const apiBase = "http://65.2.128.59:4000";
+
+    console.log(
+      "Verifying with URL:",
+      `${apiBase}/api/users/verify-email?token=${token}`,
+    );
+
+    fetch(`${apiBase}/api/users/verify-email?token=${token}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data) => {
         if (data.success) {
           setStatus("success");
-          setMessage("Your email has been verified successfully!");
-          // ✅ Auto redirect after 3 seconds to home with login popup
+          setMessage("✅ Your email has been verified successfully!");
           setTimeout(() => navigate("/?showLogin=true"), 3000);
         } else {
           setStatus("error");
           setMessage(data.message || "Email verification failed.");
         }
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Verification fetch error:", err);
         setStatus("error");
-        setMessage("Something went wrong. Please try again.");
+        setMessage(
+          "Cannot connect to the server. Make sure the backend is running on http://65.2.128.59:4000",
+        );
       });
   }, [location, navigate]);
 
@@ -49,19 +70,21 @@ function VerifyEmail() {
       }}
     >
       {status === "loading" && <p>Verifying your email...</p>}
+
       {(status === "success" || status === "error") && (
         <>
-          <p>{message}</p>
+          <p style={{ fontSize: "16px", lineHeight: "1.5" }}>{message}</p>
           <button
             onClick={() => navigate("/?showLogin=true")}
             style={{
               marginTop: 20,
-              padding: "10px 20px",
+              padding: "12px 24px",
               backgroundColor: "#007bff",
               color: "white",
               border: "none",
               borderRadius: 5,
               cursor: "pointer",
+              fontSize: "16px",
             }}
           >
             Go to Login
